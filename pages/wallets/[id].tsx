@@ -1,12 +1,19 @@
 import type { NextPage } from "next";
-import { useState } from "react"
+import { useState } from "react";
 import { VoteGas } from "../../services/gas";
 import { Footer, Header, Meta } from "../../components/";
 import { WalletSummary } from "../../components/WalletSummary";
 import { WalletDelegation } from "../../components/WalletDelegation";
 import { WalletEventsList } from "../../components/WalletEvents";
 import { fetchWebconfig } from "../../services/webconfig";
-import { CacheTotals, Delegations, Votings, Wallets, WalletEvents, Blocks } from "../../services/api";
+import {
+  CacheTotals,
+  Delegations,
+  Votings,
+  Wallets,
+  WalletEvents,
+  Blocks,
+} from "../../services/api";
 import {
   IDelegation,
   IWallet,
@@ -59,19 +66,32 @@ const WalletDetailsPage: NextPage = (props: any) => {
     <div>
       <Meta webconfig={webconfig} page="wallet" />
       <Header active="./wallets" />
-
-      <main>
-        <h1>API3 DAO WALLET</h1>
-        <WalletSummary wallet={Wallets.from(wallet)} total={total} />
-        <WalletDelegation userIsDelegated={wallet.userIsDelegated} from={delegationsFrom} to={delegationsTo} />
-        <WalletEventsList
-          showGas={gas}
-          wallet={wallet}
-          webconfig={webconfig}
-          votings={votings}
-          list={WalletEvents.fromList(events)}
-        />
-      </main>
+      {wallet ? (
+        <main>
+          <h1>API3 DAO WALLET</h1>
+          <WalletSummary wallet={Wallets.from(wallet)} total={total} />
+          <WalletDelegation
+            userIsDelegated={wallet.userIsDelegated}
+            from={delegationsFrom}
+            to={delegationsTo}
+          />
+          <WalletEventsList
+            showGas={gas}
+            wallet={wallet}
+            webconfig={webconfig}
+            votings={votings}
+            list={WalletEvents.fromList(events)}
+          />
+        </main>
+      ) : (
+        <div>
+          <h1>404 - Wallet Not Found</h1>
+          <meta httpEquiv="refresh" content="2; url=/wallets" />
+          <div className="text-center text-sm darken">
+            Redirecting to the list of wallets...
+          </div>
+        </div>
+      )}
 
       <Footer
         showGas={gas}
