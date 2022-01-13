@@ -50,18 +50,28 @@ const VotingDetailsPage: NextPage = (props: any) => {
       <Meta webconfig={webconfig} page="voting" />
       <Header active="./votings" />
 
-      <main>
-        <h1 className="text-center uppercase">API3 DAO Voting</h1>
-        <VotingSummary {...Votings.from(voting)} />
-        <div className="max-w-screen-lg mx-auto">
-          <VotingEventsList
-            members={members}
-            showGas={gas}
-            list={VotingEvents.fromList(events)}
-            totalStake={voting.totalStaked}
-          />
+      {voting ? (
+        <main>
+          <h1 className="text-center uppercase">API3 DAO Voting</h1>
+          <VotingSummary {...Votings.from(voting)} />
+          <div className="max-w-screen-lg mx-auto">
+            <VotingEventsList
+              members={members}
+              showGas={gas}
+              list={VotingEvents.fromList(events)}
+              totalStake={voting.totalStaked}
+            />
+          </div>
+        </main>
+      ) : (
+        <div>
+          <h1>404 - Voting Not Found</h1>
+          <meta httpEquiv="refresh" content="2; url=/votings" />
+          <div className="text-center text-sm darken">
+            Redirecting to the list of votings...
+          </div>
         </div>
-      </main>
+      )}
 
       <Footer
         showGas={gas}
