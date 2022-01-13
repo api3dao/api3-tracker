@@ -159,6 +159,10 @@ export const Votings = {
       where: { id },
     })) as IVoting | null;
   },
+  // fetch total number of votings by status
+  totalByStatus: async (status: string): Promise<number> => {
+    return await prisma.voting.count({ where: { status }});
+  },
   // fetch total number of votings
   total: async (): Promise<number> => {
     return await prisma.voting.count();
@@ -312,6 +316,12 @@ export const Wallets = {
     });
     if (!out) return new Prisma.Decimal(0.0);
     return out._sum.userShare || new Prisma.Decimal(0.0);
+  },
+  // fetch total number of members
+  totalActive: async (): Promise<number> => {
+    return await prisma.member.count({ where: {
+       userShare: { gt: 0 },
+    }});
   },
   // fetch total number of members
   total: async (): Promise<number> => {

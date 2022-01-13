@@ -17,21 +17,21 @@ export async function getServerSideProps() {
   const results = await Promise.all([
     Epochs.fetchLatest(2, true),
     Supply.fetch(),
-    Wallets.total(),
-    Votings.total(),
+    Wallets.totalActive(),
+    Votings.totalByStatus('executed'),
     Blocks.fetchLast(),
   ]);
   const latest: Array<IEpoch> = results[0];
   const supply: ISupply | null = results[1];
-  const totalWallets: number = results[2];
-  const totalVotings: number = results[3];
+  const totalCurrentWallets: number = results[2];
+  const totalExecutedVotings: number = results[3];
   const lastBlock: IBlockNumber = results[4];
   const current: IEpoch = latest[0];
   return {
     props: {
       webconfig: fetchWebconfig(),
-      totalWallets,
-      totalVotings,
+      totalCurrentWallets,
+      totalExecutedVotings,
       latest: serializable(latest),
       supply: serializable(supply),
       current: serializable(current),
@@ -46,8 +46,8 @@ const HomePage: NextPage = (props: any) => {
     lastBlock,
     current,
     supply,
-    totalWallets,
-    totalVotings,
+    totalCurrentWallets,
+    totalExecutedVotings,
     webconfig,
   } = props;
   const isEmpty: boolean = !current;
@@ -67,10 +67,10 @@ const HomePage: NextPage = (props: any) => {
           ) : (
             <div>
               <p className="mb-8 text-center">
-                API3 DAO currently involves{" "}
-                <a href="./wallets">{totalWallets} members</a> participated in{" "}
+                API3 DAO has {" "}
+                <a href="./wallets">{totalCurrentWallets} current members</a> and {" "}
                 <a href="./votings">
-                  {totalVotings} voting{totalVotings > 1 ? "s" : ""}
+                  {totalExecutedVotings} completed proposal{totalExecutedVotings != 1 ? "s" : ""}
                 </a>
               </p>
               <h2 className="mt-4 mb-0 font-bold text-center text-2xl uppercase">
