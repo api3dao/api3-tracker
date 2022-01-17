@@ -2,7 +2,7 @@ github: https://github.com/api3dao/api3-tracker/
 etherscan: https://etherscan.io
 opengraph:
   siteName: API3 Tracker
-  image: https://enormous.cloud/dao/icons/api3/API3x64-white-iso-c8b5fe8c70937dbb.png
+  image: https://tracker.api3.org/API3x64-white-iso-c8b5fe8c70937dbb.png
   imageWidth: 64
   imageHeight: 64
   title: "API3 DAO Tracker - on-chain analytics: members, staking rewards, API3 token circulating supply"
