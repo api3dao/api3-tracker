@@ -86,6 +86,7 @@ const VotingsPage: NextPage = (props: any) => {
         showGas={gas}
         changeGas={setGas}
         github={webconfig.github}
+        terms={webconfig.terms}
         blockNumber={lastBlock.blockNumber}
       />
 

@@ -4,12 +4,14 @@ import { toCurrency } from "../services/format";
 export interface IFooterProps {
   blockNumber?: number;
   github?: string;
+  terms?: string;
   showGas: boolean;
   changeGas: Function;
 }
 
 export const Footer = (props: IFooterProps) => {
-  const { blockNumber, github } = props;
+  const { blockNumber, github, terms } = props;
+  const year = new Date().getFullYear();
   // const onToggleGas = () => { localStorage.setItem("GAS", showGas ? "HIDDEN" : "VISIBLE"); props.changeGas(!showGas); };
   return (
     <footer>
@@ -17,8 +19,18 @@ export const Footer = (props: IFooterProps) => {
         <div className="text-center my-2 text-sm">
           <span className="text-center block leading-6 md:inline md:text-left">
             {" "}
-            © 2022 <a href="https://api3.org">API3.org</a>
+            © {year} <a href="https://api3.org">API3.org</a>
           </span>
+          {terms ? (
+            <span className="hidden md:inline">&nbsp; | &nbsp;</span>
+          ) : null}
+          {terms ? (
+            <span className="text-center block leading-6 md:inline md:text-left">
+              <a target="_blank" rel="noreferrer noopener" href={terms}>
+                Terms
+              </a>
+            </span>
+          ) : null}
           {github ? (
             <span className="hidden md:inline">&nbsp; | &nbsp;</span>
           ) : null}
