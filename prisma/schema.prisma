@@ -1,0 +1,216 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Epoch {
+  epoch        Int      @id // ID of epoch, PK
+  createdAt    DateTime // date of epoch event
+  blockNumber  Int // Block number of the epoch
+  chainId      Int // Chain ID
+  txHash       Bytes // Transaction hash
+  apr          Decimal // APR during this epoch
+  members      BigInt // Number of members
+  totalStake   BigInt // Total stake
+  totalShares  BigInt // Total shares
+  mintedShares BigInt // # of minted tokens
+  releaseDate  DateTime // Date when minted tokens will be released
+
+  @@map("epochs")
+}
+
+model MemberEpoch {
+  epoch   Int // relation scalar field
+  address Bytes // relation scalar field
+  member  Member @relation(name: "memberEpochs", fields: [address], references: [address])
+
+  userShare       BigInt // number of user shares at the moment of this epoch
+  userStake       BigInt // number of user stake at the moment of this epoch
+  userVotingPower Decimal // user voting power at this epoch
+  userReward      BigInt // user reward for this epoch
+
+  @@id([epoch, address])
+  @@map("member_epochs")
+}
+
+model MemberEvent {
+  id          String   @id // Combined ID of event
+  createdAt   DateTime // Date of Event Transaction (taken from the block)
+  address     Bytes // Address of the member to whom this transaction is related to
+  member      Member   @relation(name: "memberEvents", fields: [address], references: [address])
+  chainId     Int // Chain ID
+  txHash      Bytes // Transaction hash
+  blockNumber Int // Block Number
+  txIndex     Int // Transaction Index inside the block
+  logIndex    Int // Index inside the events logs of this transaction
+  data        Json? // data of the event
+  fee         BigInt? // fee that was taken on this transaction
+  gasPrice    BigInt? // gas price of this transaction
+  gasUsed     BigInt? // gas used for this transaction
+  feeUsd      Decimal? // USD equivalent of the fee
+
+  @@map("member_events")
+}
+
+model MemberDelegation {
+  from       Bytes
+  memberFrom Member   @relation(name: "delegatesTo", fields: [from], references: [address])
+  to         Bytes    @unique
+  memberTo   Member   @relation(name: "delegated", fields: [to], references: [address])
+  updatedAt  DateTime @default(now()) // time of the last delegation update
+  userShares BigInt // number of delegated shares
+
+  @@id([from])
+  @@map("member_delegations")
+}
+
+model Member {
+  address    Bytes    @unique
+  ensName    String // ENS domain name
+  ensUpdated DateTime // END updated
+
+  badges String // comma-separated badges for this member
+
+  userShare        BigInt // number of user shares at the moment of this epoch
+  userStake        BigInt // number of user stake at the moment of this epoch
+  userVotingPower  Decimal // user voting power at this epoch
+  userReward       BigInt // user reqard for this epoch
+  userLockedReward BigInt // how much of the reward is still locked
+  userDeposited    BigInt // total user deposited over the time
+  userWithdrew     BigInt // total user withdrew over the time
+
+  createdAt DateTime @default(now()) // date of the first event with this address
+  updatedAt DateTime @default(now()) // date of the last update with this address
+  tags      String // field for a full text search, indexes can't be defined here for Postgres and should be defined in database directly
+
+  epochs      MemberEpoch[]      @relation("memberEpochs") // relations to epochs
+  events      MemberEvent[]      @relation("memberEvents") // relations to events
+  votings     VotingEvent[]      @relation("votingMember") // relation to votes
+  delegatesTo MemberDelegation?  @relation("delegatesTo") // relation to delegations OF this member
+  delegates   MemberDelegation[] @relation("delegated") // relation to delegations TO this member
+
+  @@map("members")
+}
+
+enum VotingType {
+  PRIMARY
+  SECONDARY
+}
+
+model VotingEvent {
+  id        String   @id // Combined ID of event
+  createdAt DateTime // Date of Event Transaction (taken from the block)
+
+  chainId     Int // Chain ID
+  txHash      Bytes // Transaction hash
+  blockNumber Int // Block Number
+  txIndex     Int // Transaction Index inside the block
+  logIndex    Int // Index inside the events logs of this transaction
+  data        Json? // data of the event
+  fee         BigInt? // fee that was taken on this transaction
+  gasPrice    BigInt? // gas price of this transaction
+  gasUsed     BigInt? // gas used for this transaction
+  feeUsd      Decimal? // USD equivalent of the fee
+
+  address Bytes // Address of the member to whom this transaction is related to
+  member  Member @relation(name: "votingMember", fields: [address], references: [address])
+
+  supports        Int     @default(0) // -1 - against, 1 - supports, 0 - unrelated
+  userShare       BigInt // number of user shares at the moment of this voting
+  userVotingPower Decimal // user voting power at the moment of this voting
+
+  votingId String?
+  voting   Voting? @relation(name: "votingEvents", fields: [votingId], references: [id])
+
+  @@map("voting_event")
+}
+
+model Voting {
+  id        String     @id // ID of the voting
+  vt        VotingType // Voting Type
+  createdAt DateTime // Date of Voting Creation Transaction (taken from the block)
+  name      String // name of the voting
+
+  transferValue BigInt? // in case of transfer - value of the token for transfer
+  transferToken String? // in case of transfer - name of the token for transfer
+
+  totalGasUsed BigInt? // total gas price of this voting
+  totalUsd     Decimal? // total USD estimate for gas
+
+  events VotingEvent[] @relation("votingEvents") // relations to events
+
+  @@map("voting")
+}
+
+model EnsEvent {
+  id          String   @id // Combined ID of event
+  createdAt   DateTime // Date of Event Transaction (taken from the block)
+  address     Bytes? // Address of the member to whom this transaction is related to
+  name        String // ENS name that was set to this address
+  chainId     Int // Chain ID
+  txHash      Bytes // Transaction hash
+  blockNumber Int // Block Number
+  txIndex     Int // Transaction Index inside the block
+  logIndex    Int // Index inside the events logs of this transaction
+  data        Json? // data of the event
+  fee         BigInt? // fee that was taken on this transaction
+  gasPrice    BigInt? // gas price of this transaction
+  gasUsed     BigInt? // gas used for this transaction
+  feeUsd      Decimal? // USD equivalent of the fee
+
+  @@map("ens_event")
+}
+
+model PriceEthereum {
+  ts  DateTime @id
+  usd Decimal
+  eur Decimal
+  rub Decimal
+  cny Decimal
+  cad Decimal
+  jpy Decimal
+  gbp Decimal
+
+  @@map("price_ethereum")
+}
+
+enum TreasuryType {
+  PRIMARY
+  SECONDARY
+  V1
+}
+
+model Treasury {
+  ts       DateTime
+  ttype    TreasuryType
+  value    BigInt
+  decimals Int
+
+  @@id([ts, ttype])
+  @@map("treasuries")
+}
+
+model Api3Supply {
+  ts                DateTime @id
+  blockNumber       BigInt
+  circulatingSupply BigInt
+
+  totalLocked   BigInt
+  totalStaked   BigInt
+  stakingTarget BigInt
+
+  lockedByGovernance BigInt
+  lockedVestings     BigInt
+  lockedRewards      BigInt
+  timeLocked         BigInt
+
+  @@map("api3_supply")
+}
