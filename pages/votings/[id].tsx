@@ -38,6 +38,7 @@ const VotingDetails: NextPage = (props: any) => {
         <meta property="og:description" content={ogDescription} />
       </Head>
 
+
       <main className={styles.main}>
         <div className="inner">
           <h1>API3 DAO WALLET</h1>
