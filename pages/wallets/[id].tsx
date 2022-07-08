@@ -1,6 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import styles from "../../styles/Home.module.css";
+import { Header } from "../components/Header";
 import { Footer } from "../../components/Footer";
 
 const title = "";
@@ -31,6 +32,7 @@ const WalletDetails: NextPage = (props: any) => {
         <meta property="og:title" content={ogTitle} />
         <meta property="og:description" content={ogDescription} />
       </Head>
+      <Header active="./wallets" />
 
       <main className={styles.main}>
         <div className="inner">

@@ -32,16 +32,22 @@ const menuItems: Array<IMenuItem> = [
   },
 ];
 
-export const Menu = () => {
+export const Menu = (props: IMenuProps) => {
   // TODO: base URL
-  // TODO: define active from current route
   return (
     <div className="desktop-menu">
-      {menuItems.map((item) => (
-        <a href={item.href} key={item.href} className="menu-item">
-          {item.title}
-        </a>
-      ))}
+      {menuItems.map((item) => {
+        const classExt = props.active == item.href ? " active" : "";
+        return (
+          <a
+            href={item.href}
+            key={item.href}
+            className={`menu-item${classExt}`}
+          >
+            {item.title}
+          </a>
+        );
+      })}
     </div>
   );
 };

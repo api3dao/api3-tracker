@@ -1,27 +1,22 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import styles from "../../styles/Home.module.css";
+import { Header } from "../components/Header";
 import { Footer } from "../../components/Footer";
 
-const title =
-  "";
-const description =
-  "";
-const ogTitle =
-  "";
-const ogDescription =
-  "";
-
+const title = "";
+const description = "";
+const ogTitle = "";
+const ogDescription = "";
 
 // This gets called on every request
 export async function getServerSideProps() {
   // Fetch data from external API
-  const data = { "test": 1 };
+  const data = { test: 1 };
 
   // Pass data to the page via props
-  return { props: { data } }
+  return { props: { data } };
 }
-
 
 const VotingDetails: NextPage = (props: any) => {
   const { data } = props;
@@ -37,13 +32,12 @@ const VotingDetails: NextPage = (props: any) => {
         <meta property="og:title" content={ogTitle} />
         <meta property="og:description" content={ogDescription} />
       </Head>
-
+      <Header active="./votings" />
 
       <main className={styles.main}>
         <div className="inner">
           <h1>API3 DAO WALLET</h1>
-          <pre>{ JSON.stringify(data, null, 2) }</pre>
-
+          <pre>{JSON.stringify(data, null, 2)}</pre>
         </div>
       </main>
 

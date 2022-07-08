@@ -1,6 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
+import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 
 const title =
@@ -24,6 +25,8 @@ const Home: NextPage = () => {
         <meta property="og:title" content={ogTitle} />
         <meta property="og:description" content={ogDescription} />
       </Head>
+
+      <Header active="/rewards" />
 
       <main className={styles.main}>
         <h1>API3 DAO Rewards</h1>
