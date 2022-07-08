@@ -1,6 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import styles from "../../styles/Home.module.css";
+import { Footer } from "../../components/Footer";
 
 const title =
   "";
@@ -45,7 +46,7 @@ const VotingDetails: NextPage = (props: any) => {
         </div>
       </main>
 
-      <footer className={styles.footer}></footer>
+      <Footer />
     </div>
   );
 };

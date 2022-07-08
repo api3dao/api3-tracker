@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import Image from "next/image";
 import styles from "../styles/Home.module.css";
+import { Footer } from "../components/Footer";
 
 const title = 'API3 DAO Tracker - on-chain analytics: members, staking rewards, API3 token circulating supply';
 const description = 'API3 DAO tracker watches API3 on-chain DAO events, displays history of each participant and staking rewards. No wallet connection is needed';
@@ -463,7 +463,7 @@ const Home: NextPage = () => {
         </div>
       </main>
 
-      <footer className={styles.footer}></footer>
+      <Footer />
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import Image from "next/image";
+import { Footer } from "../components/Footer";
 import styles from "../styles/Home.module.css";
 
 const title =
@@ -32,11 +32,10 @@ const Home: NextPage = () => {
             API3 DAO currently operates 3 treasuries. Balances below are updated
             each hour.
           </p>
-
         </div>
       </main>
 
-      <footer className={styles.footer}></footer>
+      <Footer />
     </div>
   );
 };
