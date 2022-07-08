@@ -6,7 +6,12 @@ build:
 	docker build -t api3tracker .
 
 install:
-	cd .terraform/workspaces/api3tracker-local
-	terraform init
+	cd terraform/workspaces/api3tracker-local && \
+	terraform init && \
 	terraform apply -auto-approve
+
+uninstall:
+	cd terraform/workspaces/api3tracker-local && \
+	terraform destroy -auto-approve
+
 
