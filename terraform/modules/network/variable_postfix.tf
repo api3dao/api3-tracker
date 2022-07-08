@@ -1,0 +1,3 @@
+variable "postfix" {
+    type = string
+}

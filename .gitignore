@@ -41,8 +41,8 @@ package.lock.json
 # terraform rules
 *.tfstate*
 *.lock.hcl
-workspace/*/.terraform
-app/*/.terraform
+terraform/workspaces/*/.terraform
+terraform/app/*/.terraform
 crash.log
 *-debug.log
 **/modules.json
