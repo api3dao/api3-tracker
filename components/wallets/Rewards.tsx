@@ -1,6 +1,6 @@
 import React from "react";
 
-export const Row = () => (
+export const Row = (_props: any) => (
   <tr>
     <td className="c">2,689</td>
     <td className="c">
@@ -29,4 +29,26 @@ export const Row = () => (
     </td>
     <td className="c">2022-07-14 00:15:53</td>
   </tr>
+);
+
+export const History = () => (
+  <div className="desktop-only">
+    <table className="table epochs-table">
+      <thead>
+        <tr>
+          <th className="c">Epoch</th>
+          <th className="c">Block</th>
+          <th className="c">Rewards Date</th>
+          <th className="r">APR</th>
+          <th className="r">Total</th>
+          <th className="r">Minted</th>
+          <th className="r">Reward</th>
+          <th className="r">Shares</th>
+          <th className="r">Received</th>
+          <th className="c">Release Date</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 );
