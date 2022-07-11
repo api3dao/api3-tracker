@@ -50,3 +50,23 @@ export const Row = () => (
     </td>
   </tr>
 );
+
+export const History = () => (
+  <div>
+    <div className="desktop-only">
+      <table className="table events-table">
+        <thead>
+          <tr>
+            <th className="c">#</th>
+            <th className="c">Date</th>
+            <th className="c" style={{ whiteSpace: "nowrap", width: 133 }}>
+              Block #
+            </th>
+            <th className="l">Event</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+);
