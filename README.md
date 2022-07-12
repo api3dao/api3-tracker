@@ -10,9 +10,11 @@ on-chain details of the API3 DAO, including:
 
 ## Local Installation
 
-The only requirements for installation are [https://docs.docker.com/get-docker/](Docker)
-and [https://learn.hashicorp.com/tutorials/terraform/install-cli](Terraform).
-You may also need AWS CLI v2 if you want the backup to be enabled
+The only requirements for installation are [Docker](https://docs.docker.com/get-docker/)
+and (Terraform)[https://learn.hashicorp.com/tutorials/terraform/install-cli].
+You may also need
+(AWS CLI v2)[https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html] 
+if you want the AWS S3 backups to be enabled on your environment
 
 ```sh
 make build install
@@ -23,6 +25,19 @@ docker containers to run the application. You can check running
 components with `docker ps`. Default local environment opens
 port at [http://localhost:7040](http://localhost:7040) with Traefik load balancer.
 
+## VPS Installation
+
+Same to local installation, you will need `docker` and `terraform`. Once installed,
+please go to `terraform/workspaces` folder and create a folder for your environment 
+by copying one of the existings environments. Edit `modules.tf` in your new folder
+to set up domains, certificates and other options. Then run
+
+```sh
+terraform init
+terraform apply
+```
+Please review the components that will be installed and approve.
+
 ## Local Development
 
 ```sh
@@ -30,6 +45,7 @@ port at [http://localhost:7040](http://localhost:7040) with Traefik load balance
 yarn
 # create database (Postgres should not be running before)
 yarn db:init
+yarn prisma migrate:dev
 # start local development server
 yarn dev
 ```
