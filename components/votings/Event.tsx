@@ -57,3 +57,13 @@ export const Row = () => (
     <td className="r darken shares-pct">2.254%</td>
   </tr>
 );
+
+
+export const History = () => (
+  <div className="desktop-only">
+<table className="table table-events">
+<thead><tr><th className="c">#</th><th className="c">Date</th><th className="c">Block Number</th><th className="c">Event</th><th className="l">User</th><th className="l">Cast</th><th className="l">Shares</th><th className="l">%</th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+);
