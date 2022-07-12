@@ -1,6 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import Image from "next/image";
+import { Header } from "../components/Header";
+import { Footer } from "../components/Footer";
 import styles from "../styles/Home.module.css";
 
 const title =
@@ -24,17 +25,16 @@ const Home: NextPage = () => {
         <meta property="og:title" content={ogTitle} />
         <meta property="og:description" content={ogDescription} />
       </Head>
+      <Header active="/wallets" />
 
       <main className={styles.main}>
         <div className="inner">
           <h1>API3 DAO MEMBERS</h1>
-          <p className="centered darken">
-          </p>
-
+          <p className="centered darken"></p>
         </div>
       </main>
 
-      <footer className={styles.footer}></footer>
+      <Footer />
     </div>
   );
 };

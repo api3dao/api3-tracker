@@ -1,12 +1,18 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import Image from "next/image";
 import styles from "../styles/Home.module.css";
+import { Header } from "../components/Header";
+import { Footer } from "../components/Footer";
+import { BorderedPanel } from "../components/BorderedPanel";
 
-const title = 'API3 DAO Tracker - on-chain analytics: members, staking rewards, API3 token circulating supply';
-const description = 'API3 DAO tracker watches API3 on-chain DAO events, displays history of each participant and staking rewards. No wallet connection is needed';
-const ogTitle = 'API3 DAO Tracker - on-chain analytics: members, staking rewards, API3 token circulating supply';
-const ogDescription = 'API3 DAO tracker watches API3 on-chain DAO events, displays history of each participant and staking rewards. No wallet connection is needed';
+const title =
+  "API3 DAO Tracker - on-chain analytics: members, staking rewards, API3 token circulating supply";
+const description =
+  "API3 DAO tracker watches API3 on-chain DAO events, displays history of each participant and staking rewards. No wallet connection is needed";
+const ogTitle =
+  "API3 DAO Tracker - on-chain analytics: members, staking rewards, API3 token circulating supply";
+const ogDescription =
+  "API3 DAO tracker watches API3 on-chain DAO events, displays history of each participant and staking rewards. No wallet connection is needed";
 
 const Home: NextPage = () => {
   // TODO: read meta and og from config
@@ -20,6 +26,7 @@ const Home: NextPage = () => {
         <meta property="og:title" content={ogTitle} />
         <meta property="og:description" content={ogDescription} />
       </Head>
+      <Header active="/" />
 
       <main className={styles.main}>
         <div className="inner">
@@ -33,165 +40,130 @@ const Home: NextPage = () => {
             <h2>API3 Staking Rewards</h2>
             <div className="dash-row">
               <div className="dash-col dash-col-3">
-                <div className="bordered-wrapper">
-                  <div className="bordered-panel">
-                    <div className="bordered-box">
-                      <div className="bordered-left"></div>
-                      <div className="bordered-inner">
-                        <div className="bordered-title big-title">
-                          Current Epoch
-                        </div>
-                        <div className="bordered-content">
-                          <div>
-                            <div className="cell-title">
-                              <span className="darken">Epoch #</span>2,740
-                            </div>
-                            <h2 className="stats-row">
-                              APR: <strong className="big-title">11.75%</strong>
-                            </h2>
-                            <div className="stats-row m20">
-                              <span className="darken cell-title">
-                                Epoch Rewards:{" "}
-                              </span>
-                              <strong className="accent">0.2253%</strong>
-                            </div>
-                            <div className="stats-row">
-                              <span className="darken cell-title">
-                                Staked now:{" "}
-                              </span>
-                              <strong title="55,439,147.532702581409480247">
-                                55,439,147
-                              </strong>
-                            </div>
-                            <div className="stats-row">
-                              <span className="darken cell-title">
-                                Including rewards:{" "}
-                              </span>
-                              <strong title="13,354,235.930377330633241959">
-                                13,354,235
-                              </strong>
-                            </div>
-                            <div className="padded">
-                              <div className="stats-row cell-title">
-                                <strong> ~124,927</strong>
-                                <span className="darken">
-                                  {" "}
-                                  API3 tokens to be minted{" "}
-                                </span>
-                              </div>
-                              <div className="stats-row darken cell-title">
-                                2022-07-07 00:01:42
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                <BorderedPanel title="Current Epoch">
+                  <div>
+                    <div className="cell-title">
+                      <span className="darken">Epoch #</span>2,741
+                    </div>
+                    <h2 className="stats-row">
+                      APR: <strong className="big-title">12.75%</strong>
+                    </h2>
+                    <div className="stats-row m20">
+                      <span className="darken cell-title">Epoch Rewards: </span>
+                      <strong className="accent">0.2445%</strong>
+                    </div>
+                    <div className="stats-row">
+                      <span className="darken cell-title">Staked now: </span>
+                      <strong title="55,264,909.509553249422635937">
+                        55,264,909
+                      </strong>
+                    </div>
+                    <div className="stats-row">
+                      <span className="darken cell-title">
+                        Including rewards:{" "}
+                      </span>
+                      <strong title="13,477,575.482658194494016780">
+                        13,477,575
+                      </strong>
+                    </div>
+                    <div className="padded">
+                      <div className="stats-row cell-title">
+                        <strong> ~135,134</strong>
+                        <span className="darken">
+                          {" "}
+                          API3 tokens to be minted{" "}
+                        </span>
                       </div>
-                      <div className="bordered-right"></div>
+                      <div className="stats-row darken cell-title">
+                        2022-07-14 00:02:28
+                      </div>
                     </div>
                   </div>
-                </div>
+                </BorderedPanel>
               </div>
               <div className="dash-col dash-col-3">
-                <div className="bordered-wrapper">
-                  <div className="bordered-panel">
-                    <div className="bordered-box">
-                      <div className="bordered-left"></div>
-                      <div className="bordered-inner">
-                        <div className="bordered-title big-title">
-                          Previous Epoch
-                        </div>
-                        <div className="bordered-content">
-                          <div>
-                            <div className="cell-title">
-                              <span className="darken">Epoch #</span>2,739
-                            </div>
-                            <h2 className="stats-row">
-                              APR: <strong className="big-title">10.75%</strong>
-                            </h2>
-                            <div className="stats-row m20">
-                              <span className="darken cell-title">
-                                Epoch Rewards:{" "}
-                              </span>
-                              <strong className="accent">0.2062%</strong>
-                            </div>
-                            <div className="stats-row">
-                              <div className="darken cell-title">
-                                Staked at the end of epoch:{" "}
-                              </div>
-                              <strong title="54,633,377.672433017640191880">
-                                54,633,377
-                              </strong>
-                            </div>
-                            <div className="padded">
-                              <div className="stats-row cell-title">
-                                <strong>112,634</strong>
-                                <span className="darken">
-                                  {" "}
-                                  API3 tokens were minted
-                                </span>
-                              </div>
-                              <div className="stats-row darken cell-title">
-                                2022-06-30 00:01:42
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                <BorderedPanel title="Previous Epoch">
+                  <div>
+                    <div className="cell-title">
+                      <span className="darken">Epoch #</span>2,741
+                    </div>
+                    <h2 className="stats-row">
+                      APR: <strong className="big-title">12.75%</strong>
+                    </h2>
+                    <div className="stats-row m20">
+                      <span className="darken cell-title">Epoch Rewards: </span>
+                      <strong className="accent">0.2445%</strong>
+                    </div>
+                    <div className="stats-row">
+                      <span className="darken cell-title">Staked now: </span>
+                      <strong title="55,264,909.509553249422635937">
+                        55,264,909
+                      </strong>
+                    </div>
+                    <div className="stats-row">
+                      <span className="darken cell-title">
+                        Including rewards:{" "}
+                      </span>
+                      <strong title="13,477,575.482658194494016780">
+                        13,477,575
+                      </strong>
+                    </div>
+                    <div className="padded">
+                      <div className="stats-row cell-title">
+                        <strong> ~135,134</strong>
+                        <span className="darken">
+                          {" "}
+                          API3 tokens to be minted{" "}
+                        </span>
                       </div>
-                      <div className="bordered-right"></div>
+                      <div className="stats-row darken cell-title">
+                        2022-07-14 00:02:28
+                      </div>
                     </div>
                   </div>
-                </div>
+                </BorderedPanel>
               </div>
               <div className="dash-col dash-col-3">
-                <div className="bordered-wrapper">
-                  <div className="bordered-panel">
-                    <div className="bordered-box">
-                      <div className="bordered-left"></div>
-                      <div className="bordered-inner">
-                        <div className="bordered-title big-title">
-                          Previous Epoch
-                        </div>
-                        <div className="bordered-content">
-                          <div>
-                            <div className="cell-title">
-                              <span className="darken">Epoch #</span>2,738
-                            </div>
-                            <h2 className="stats-row">
-                              APR: <strong className="big-title">9.75%</strong>
-                            </h2>
-                            <div className="stats-row m20">
-                              <span className="darken cell-title">
-                                Epoch Rewards:{" "}
-                              </span>
-                              <strong className="accent">0.1870%</strong>
-                            </div>
-                            <div className="stats-row">
-                              <div className="darken cell-title">
-                                Staked at the end of epoch:{" "}
-                              </div>
-                              <strong title="54,561,752.803218848496388759">
-                                54,561,752
-                              </strong>
-                            </div>
-                            <div className="padded">
-                              <div className="stats-row cell-title">
-                                <strong>102,023</strong>
-                                <span className="darken">
-                                  {" "}
-                                  API3 tokens were minted
-                                </span>
-                              </div>
-                              <div className="stats-row darken cell-title">
-                                2022-06-23 00:03:38
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                <BorderedPanel title="Previous Epoch">
+                  <div>
+                    <div className="cell-title">
+                      <span className="darken">Epoch #</span>2,741
+                    </div>
+                    <h2 className="stats-row">
+                      APR: <strong className="big-title">12.75%</strong>
+                    </h2>
+                    <div className="stats-row m20">
+                      <span className="darken cell-title">Epoch Rewards: </span>
+                      <strong className="accent">0.2445%</strong>
+                    </div>
+                    <div className="stats-row">
+                      <span className="darken cell-title">Staked now: </span>
+                      <strong title="55,264,909.509553249422635937">
+                        55,264,909
+                      </strong>
+                    </div>
+                    <div className="stats-row">
+                      <span className="darken cell-title">
+                        Including rewards:{" "}
+                      </span>
+                      <strong title="13,477,575.482658194494016780">
+                        13,477,575
+                      </strong>
+                    </div>
+                    <div className="padded">
+                      <div className="stats-row cell-title">
+                        <strong> ~135,134</strong>
+                        <span className="darken">
+                          {" "}
+                          API3 tokens to be minted{" "}
+                        </span>
                       </div>
-                      <div className="bordered-right"></div>
+                      <div className="stats-row darken cell-title">
+                        2022-07-14 00:02:28
+                      </div>
                     </div>
                   </div>
-                </div>
+                </BorderedPanel>
               </div>
             </div>
             <div>
@@ -463,7 +435,7 @@ const Home: NextPage = () => {
         </div>
       </main>
 
-      <footer className={styles.footer}></footer>
+      <Footer />
     </div>
   );
 };
