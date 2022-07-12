@@ -16,4 +16,8 @@ uninstall:
 	cd terraform/workspaces/api3tracker-local && \
 	terraform destroy -auto-approve
 
+validate:
+	cd terraform/workspaces/api3tracker-local && \
+	terraform validate
+
 
