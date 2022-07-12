@@ -1,3 +1,4 @@
-node_mobules/
+node_modules/
+terraform/
 .git/
 .husky/

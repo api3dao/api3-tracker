@@ -37,3 +37,16 @@ yarn-error.log*
 
 # yarn should be used
 package.lock.json
+
+# terraform rules
+*.tfstate*
+*.lock.hcl
+terraform/workspaces/*/.terraform
+terraform/workspaces/*/bin/
+terraform/workspaces/*/cron.d/
+terraform/app/*/.terraform
+crash.log
+*-debug.log
+**/modules.json
+.docker/
+
