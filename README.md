@@ -11,9 +11,9 @@ on-chain details of the API3 DAO, including:
 ## Local Installation
 
 The only requirements for installation are [Docker](https://docs.docker.com/get-docker/)
-and (Terraform)[https://learn.hashicorp.com/tutorials/terraform/install-cli].
+and [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli).
 You may also need
-(AWS CLI v2)[https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html] 
+[AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) 
 if you want the AWS S3 backups to be enabled on your environment
 
 ```sh
