@@ -50,3 +50,6 @@ crash.log
 **/modules.json
 .docker/
 
+
+# storybook
+storybook-static/
