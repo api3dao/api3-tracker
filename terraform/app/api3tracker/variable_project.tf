@@ -1,5 +1,5 @@
 variable "project" {
   type = string
-  default = "karta"
+  default = "api3tracker"
 }
 
