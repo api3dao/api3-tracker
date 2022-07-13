@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 interface IMenuProps {
   active?: string;
@@ -39,13 +40,9 @@ export const Menu = (props: IMenuProps) => {
       {menuItems.map((item) => {
         const classExt = props.active == item.href ? " active" : "";
         return (
-          <a
-            href={item.href}
-            key={item.href}
-            className={`menu-item${classExt}`}
-          >
-            {item.title}
-          </a>
+          <Link href={item.href} key={item.href}>
+            <a className={`menu-item${classExt}`}>{item.title}</a>
+          </Link>
         );
       })}
     </div>
