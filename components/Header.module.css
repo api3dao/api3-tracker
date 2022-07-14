@@ -13,6 +13,10 @@
   }
 }
 
+.middle {
+  flex: 1;
+}
+
 .inner {
   margin: 0px auto;
   @media (min-width: 960px) {
@@ -22,5 +26,32 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+  }
+}
+
+.navBrand {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0px;
+}
+.navBrandlabel {
+    color: var(--color-text);
+    font-size: 1em;
+    font-weight: 900;
+    text-align: center;
+}
+.navBrandSlogan {
+    display: none;
+    color: var(--color-accent);
+}
+
+@media (min-width: 960px) {
+  .navBrandLabel {
+    font-size: 2.5em;
+    text-align: left;
+  }
+  .navBrandSlogan {
+    display: block;
+    text-align: left;
   }
 }

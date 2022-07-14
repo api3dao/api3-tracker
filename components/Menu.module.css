@@ -6,7 +6,7 @@
     display: flex;
     align-items: flex-end;
   }
-  .desktopMenu a {
+  .menuItem {
     text-decoration: none;
     color: var(--color-grey);
     background: transparent;
@@ -16,13 +16,18 @@
     font-weight: bold;
     border-bottom: 3px solid transparent;
   }
-  .desktopMenu a.active {
+  .menuItemActive {
+    text-decoration: none;
+    background: transparent;
+    padding: 0px 14px;
+    margin-left: 5px;
+    line-height: 50px;
+    font-weight: bold;
     color: var(--color-menu-active);
     border-bottom: 3px solid var(--color-menu-active);
   }
-  .desktopMenu a:hover {
+  .menuItem:hover {
     color: var(--color-menu-hover);
     border-bottom: 3px solid var(--color-menu-hover);
   }
 }
-
