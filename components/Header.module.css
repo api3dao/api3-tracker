@@ -1,0 +1,26 @@
+.header {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  z-index: 1;
+  background: var(--color-body);
+  border-bottom: 1px #fff solid;
+  width: 100%;
+
+  @media (min-width: 960px) {
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+}
+
+.inner {
+  margin: 0px auto;
+  @media (min-width: 960px) {
+    max-width: 1024px;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}

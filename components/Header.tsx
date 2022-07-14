@@ -1,5 +1,6 @@
 import React from "react";
 import { Menu } from "./Menu";
+import styles from './Header.module.css';
 
 interface IHeader {
   active: string;
@@ -7,11 +8,10 @@ interface IHeader {
 
 export const Header = (props: IHeader) => {
   return (
-    <header className="">
-      <div className="inner">
+    <header className={styles.header}>
+      <div className={styles.inner}>
         <div className="nav-brand">
           <span className="nav-brand__label">
-            <h1 className="text-3xl font-bold underline"> Hello world! </h1>
             API3 DAO Tracker
           </span>
           <span className="nav-brand__slogan">

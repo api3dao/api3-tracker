@@ -88,27 +88,6 @@ ul {
   color: var(--color-grey) !important;
 }
 
-header {
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  z-index: 1;
-  background: var(--color-body);
-  border-bottom: 1px #fff solid;
-  width: 100%;
-}
-
-header.testnet {
-  box-shadow: 0px 2px 4px red;
-}
-
-@media (min-width: 960px) {
-  header {
-    padding-top: 20px;
-    padding-bottom: 20px;
-  }
-}
-
 .inner {
   margin: 0px auto;
 }
@@ -135,12 +114,6 @@ body > div > div.inner {
 @media (min-width: 960px) {
   .inner {
     max-width: 1024px;
-  }
-  header .inner {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
   }
 }
 
@@ -202,34 +175,6 @@ footer .copyright {
   .nav-brand__slogan {
     display: block;
     text-align: left;
-  }
-}
-
-.desktop-menu {
-  display: none;
-}
-@media (min-width: 960px) {
-  .desktop-menu {
-    display: flex;
-    align-items: flex-end;
-  }
-  .desktop-menu a {
-    text-decoration: none;
-    color: var(--color-grey);
-    background: transparent;
-    padding: 0px 14px;
-    margin-left: 5px;
-    line-height: 50px;
-    font-weight: bold;
-    border-bottom: 3px solid transparent;
-  }
-  .desktop-menu a.active {
-    color: var(--color-menu-active);
-    border-bottom: 3px solid var(--color-menu-active);
-  }
-  .desktop-menu a:hover {
-    color: var(--color-menu-hover);
-    border-bottom: 3px solid var(--color-menu-hover);
   }
 }
 

@@ -11,5 +11,5 @@ indent_style = space
 [*.{html}]
 indent_size = 4
 
-[*.{ts,tsx,js,jsx,json,scss,sass,prisma}]
+[*.{ts,tsx,js,jsx,json,css,scss,sass,prisma}]
 indent_size = 2
