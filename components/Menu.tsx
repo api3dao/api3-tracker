@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import styles from "./Menu.module.css";
 
 interface IMenuProps {
   active?: string;
@@ -36,7 +37,7 @@ const menuItems: Array<IMenuItem> = [
 export const Menu = (props: IMenuProps) => {
   // TODO: base URL
   return (
-    <div className="desktop-menu">
+    <div className={styles.desktopMenu}>
       {menuItems.map((item) => {
         const classExt = props.active == item.href ? " active" : "";
         return (
