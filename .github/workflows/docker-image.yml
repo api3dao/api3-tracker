@@ -16,3 +16,5 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag api3tracker:$(date +%s)
+    - name: Build the Storybook Docker image
+      run: docker build . --file .storybook/Dockerfile --tag api3tracker-storybook:$(date +%s)
