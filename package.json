@@ -52,6 +52,8 @@
     "eslint-plugin-storybook": "^0.6.0",
     "husky": "^8.0.1",
     "postcss": "^8.4.14",
+    "postcss-cli": "^10.0.0",
+    "postcss-loader": "^7.0.1",
     "prettier": "^2.7.1",
     "prettier-plugin-prisma": "^3.14.0",
     "prisma": "^4.0.0",
