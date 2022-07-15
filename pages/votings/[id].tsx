@@ -1,5 +1,4 @@
 import type { NextPage } from "next";
-import styles from "../../styles/Home.module.css";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 import { fetchWebconfig } from "../../services/webconfig";
@@ -23,7 +22,7 @@ const VotingDetailsPage: NextPage = (props: any) => {
       <Meta webconfig={webconfig} page='voting' />
       <Header active="./votings" />
 
-      <main className={styles.main}>
+      <main>
         <div className="inner">
           <h1>API3 DAO WALLET</h1>
         </div>

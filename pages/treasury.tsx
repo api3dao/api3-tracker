@@ -1,5 +1,4 @@
 import type { NextPage } from "next";
-import styles from "../styles/Home.module.css";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { fetchWebconfig } from "../services/webconfig";
@@ -19,11 +18,11 @@ const TreasuryPage: NextPage = (props: any) => {
   const { webconfig } = props;
 
   return (
-    <div className={styles.container}>
+    <div>
       <Meta webconfig={webconfig} page='treasury' />
       <Header active="/treasury" />
 
-      <main className={styles.main}>
+      <main>
         <div className="inner">
           <h1>API3 DAO TREASURY</h1>
           <p className="centered darken">

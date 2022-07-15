@@ -1,5 +1,4 @@
 import type { NextPage } from "next";
-import styles from "../styles/Home.module.css";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { BorderedPanel } from "../components/BorderedPanel";
@@ -19,10 +18,10 @@ const HomePage: NextPage = (props: any) => {
   // TODO: split into components
   const { webconfig } = props;
   return (
-    <div className={styles.container}>
-      <Meta webconfig={webconfig} /> 
+    <div>
+      <Meta webconfig={webconfig} />
       <Header active="/" />
-      <main className={styles.main}>
+      <main>
         <div className="inner">
           <div className="centered">
             <h1>API3 DAO Tracker</h1>

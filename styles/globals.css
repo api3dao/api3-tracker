@@ -85,6 +85,16 @@ ul {
   margin: 0px auto;
 }
 
+
+main {
+  margin-top: 64px;
+}
+@media (min-width: 960px) {
+  main {
+    margin-top: 160px;
+  }
+}
+
 main > div > div.inner,
 body > div > div.inner {
   margin-top: 40px;
