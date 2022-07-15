@@ -2,7 +2,6 @@
   box-sizing: border-box;
 }
 
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -87,7 +86,7 @@ ul {
 
 
 main {
-  margin-top: 64px;
+  margin-top: 6px;
 }
 @media (min-width: 960px) {
   main {
@@ -238,16 +237,17 @@ p.note {
   padding-top: 40px;
 }
 
-.big-title,
-h2.big-title,
-h3.big-title {
+.big-title {
   font-size: 24px;
   line-height: 35px;
   font-weight: 300;
   color: var(--color-text);
 }
-strong.big-title {
-  font-weight: 900;
+
+@media (max-width: 380px) {
+  .big-title {
+    font-size: 20px;
+  }
 }
 
 .cell-title,
