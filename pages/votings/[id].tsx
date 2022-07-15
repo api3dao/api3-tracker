@@ -1,9 +1,9 @@
 import type { NextPage } from "next";
-import Head from "next/head";
 import styles from "../../styles/Home.module.css";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 import { fetchWebconfig } from "../../services/webconfig";
+import { Meta } from "../../components/Meta";
 
 export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
@@ -16,9 +16,11 @@ export async function getServerSideProps() {
 
 const VotingDetailsPage: NextPage = (props: any) => {
   // TODO: split into components
+  const { webconfig } = props;
 
   return (
     <div>
+      <Meta webconfig={webconfig} page='voting' />
       <Header active="./votings" />
 
       <main className={styles.main}>

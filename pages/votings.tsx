@@ -3,6 +3,7 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import styles from "../styles/Home.module.css";
 import { fetchWebconfig } from "../services/webconfig";
+import { Meta } from "../components/Meta";
 
 export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
@@ -13,11 +14,13 @@ export async function getServerSideProps() {
   }
 }
 
-const VotingsPage: NextPage = () => {
+const VotingsPage: NextPage = (props: any) => {
+  const { webconfig } = props;
   // TODO: split into components
 
   return (
     <div className={styles.container}>
+      <Meta webconfig={webconfig} page='votings' />
       <Header active="/votings" />
 
       <main className={styles.main}>

@@ -3,6 +3,7 @@ import styles from "../styles/Home.module.css";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { fetchWebconfig } from "../services/webconfig";
+import { Meta } from "../components/Meta";
 
 export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
@@ -13,11 +14,13 @@ export async function getServerSideProps() {
   }
 }
 
-const TreasuryPage: NextPage = () => {
+const TreasuryPage: NextPage = (props: any) => {
   // TODO: split into components
+  const { webconfig } = props;
 
   return (
     <div className={styles.container}>
+      <Meta webconfig={webconfig} page='treasury' />
       <Header active="/treasury" />
 
       <main className={styles.main}>
