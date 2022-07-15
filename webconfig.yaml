@@ -1,0 +1,58 @@
+github: https://github.com/api3dao/api3-tracker/
+etherscan: https://etherscan.io
+opengraph:
+  siteName: API3 Tracker
+  image: https://enormous.cloud/dao/icons/api3/API3x64-white-iso-c8b5fe8c70937dbb.png
+  imageWidth: 64
+  imageHeight: 64
+  title: "API3 DAO Tracker - on-chain analytics: members, staking rewards, API3 token circulating supply"
+  description: |
+     API3 DAO tracker watches API3 on-chain DAO events, displays history of each participant and 
+     staking rewards. No wallet connection is needed
+
+pages:
+  rewards:
+    title: API3 DAO Staking Rewards History
+    description: Explore API3 DAO staking rewards - [TOKENS_MINTED] API3 tokens minted as rewards for DAO members. No wallet connection needed.
+
+  treasury:
+    title: API3 DAO Treasury - balances under DAO control
+    description: Explore API3 DAO Treasury balances. No wallet connection is needed
+
+  wallets:
+    title: API3 DAO Explore all [MEMBERS] members wallets
+    description: Explore API3 DAO: voting power, shares and full staking rewards history of [MEMBERS] members. No wallet connection is needed
+
+  wallet:
+    title: API3 DAO Member - [MEMBER_NAME] has voting power of [MEMBER_POWER]
+    description:  Explore API3 DAO voting power, shares and full staking history of [MEMBER_NAME]. No wallet connection is needed
+
+  votings:
+    title: API3 DAO Tracker - Full Votings History
+    description: Explore [VOTINGS] votings history of API3 DAO. No wallet connection is needed
+
+  voting:
+    title: API3 DAO Proposal Voting History 
+    description: Explore API3 DAO proposal full voting history. No wallet connection is needed
+
+
+contracts:
+  - title: API3 POOL CONTRACT ADDRESS:
+    address: 0x6dd655f10d4b9e242ae186d9050b68f725c76d76
+  - title: API3 TOKEN CONTRACT ADDRESS:
+    address: 0x0b38210ea11411557c13457d4da7dc6ea731b88a
+  - title: TIME-LOCK MANAGER CONTRACT:
+    address: 0xfaef86994a37f1c8b2a5c73648f07dd4eff02baa
+  - title: PRIMARY VOTING CONTRACT:
+    address: 0xdb6c812e439ce5c740570578681ea7aadba5170b
+  - title: PRIMARY TREASURY AGENT:
+    address: 0xd9f80bdb37e6bad114d747e60ce6d2aaf26704ae
+  - title: SECONDARY VOTING CONTRACT:
+    address: 0x1c8058e72e4902b3431ef057e8d9a58a73f26372
+  - title: SECONDARY TREASURY AGENT:
+    address: 0x556ecbb0311d350491ba0ec7e019c354d7723ce0
+  - title: V1 TREASURY ADDRESS:
+    address: 0xe7af7c5982e073ac6525a34821fe1b3e8e432099
+  - title: CONVENIENCE CONTRACT:
+    address: 0x95087266018b9637aff3d76d4e0cad7e52c19636
+
