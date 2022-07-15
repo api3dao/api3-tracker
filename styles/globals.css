@@ -187,18 +187,6 @@ p.note {
   margin: 0px auto;
   text-align: center;
 }
-.screen-home h2 {
-  font-size: 1.5em;
-  text-transform: uppercase;
-  margin: 0px;
-}
-.screen-home .stats-row {
-  line-height: 1.5em;
-}
-.screen-home .pad50 {
-  padding-top: 50px;
-  padding-bottom: 50px;
-}
 
 .screen-votings .votings-empty {
   text-align: center;
