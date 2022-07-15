@@ -4,6 +4,7 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { BorderedPanel } from "../components/BorderedPanel";
 import { fetchWebconfig } from "../services/webconfig";
+import { Meta } from "../components/Meta";
 
 export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
@@ -14,10 +15,12 @@ export async function getServerSideProps() {
   }
 }
 
-const HomePage: NextPage = (_props: any) => {
+const HomePage: NextPage = (props: any) => {
   // TODO: split into components
+  const { webconfig } = props;
   return (
     <div className={styles.container}>
+      <Meta webconfig={webconfig} /> 
       <Header active="/" />
       <main className={styles.main}>
         <div className="inner">

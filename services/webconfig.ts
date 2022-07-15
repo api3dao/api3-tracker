@@ -8,6 +8,9 @@ export interface IWebPage {
   description?: string
   ogTitle?: string
   ogDescription?: string
+  image?: string
+  imageWidth?: number
+  imageHeight?: number
 }
 
 export interface IWebConfig {
