@@ -1,7 +1,11 @@
 import React from "react";
 
 interface IEthscanProps {
-  txId: string
+  txId: string;
+}
+
+interface IAddress {
+  address: string;
 }
 
 export const TxIcon = (props: IEthscanProps) => (
@@ -42,4 +46,18 @@ export const TxIcon = (props: IEthscanProps) => (
       </g>
     </svg>
   </a>
+);
+
+export const Address = (props: IAddress) => (
+  <div className="eth-address">
+    <a
+      href={`https://etherscan.io/address/${props.address}`}
+      className="icon"
+      title="View on Etherscan"
+      rel="nofollow noopener noreferrer"
+      target="_blank"
+    >
+      {props.address}
+    </a>
+  </div>
 );

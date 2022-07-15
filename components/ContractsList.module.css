@@ -1,0 +1,23 @@
+.ul {
+  margin-top: 0px;
+  padding-top: 0px;
+  padding-inline-start: 0px;
+  margin-block-start: 0px;
+  margin-bottom: 36px;
+}
+.li {
+  list-style: none;
+  text-align: left;
+  margin-bottom: 10px;
+}
+
+.title {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--color-cell-title);
+  font-weight: 500;
+  text-transform: uppercase;
+  display: block !important;
+  text-align: left !important;
+}
+
