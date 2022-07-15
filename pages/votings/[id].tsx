@@ -3,41 +3,27 @@ import Head from "next/head";
 import styles from "../../styles/Home.module.css";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
+import { fetchWebconfig } from "../../services/webconfig";
 
-const title = "";
-const description = "";
-const ogTitle = "";
-const ogDescription = "";
-
-// This gets called on every request
 export async function getServerSideProps() {
-  // Fetch data from external API
-  const data = { test: 1 };
-
-  // Pass data to the page via props
-  return { props: { data } };
+  const webconfig = fetchWebconfig();
+  return {
+    props: {
+      webconfig
+    }, // will be passed to the page component as props
+  }
 }
 
-const VotingDetails: NextPage = (props: any) => {
-  const { data } = props;
-
-  // TODO: read meta and og from config
+const VotingDetailsPage: NextPage = (props: any) => {
   // TODO: split into components
 
   return (
     <div>
-      <Head>
-        <title>{title}</title>
-        <meta name="description" content={description} />
-        <meta property="og:title" content={ogTitle} />
-        <meta property="og:description" content={ogDescription} />
-      </Head>
       <Header active="./votings" />
 
       <main className={styles.main}>
         <div className="inner">
           <h1>API3 DAO WALLET</h1>
-          <pre>{JSON.stringify(data, null, 2)}</pre>
         </div>
       </main>
 
@@ -46,4 +32,4 @@ const VotingDetails: NextPage = (props: any) => {
   );
 };
 
-export default VotingDetails;
+export default VotingDetailsPage;
