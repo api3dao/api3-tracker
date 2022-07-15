@@ -34,7 +34,7 @@ const contracts: Array<IContract> = [
 ];
 
 export default {
-  title: 'Example/ContractsList',
+  title: 'Overview/ContractsList',
   component: ContractsList,
   parameters: {
     layout: 'fullscreen',

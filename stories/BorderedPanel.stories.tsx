@@ -4,7 +4,7 @@ import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { BorderedPanel } from "../components/BorderedPanel";
 
 export default {
-  title: "Example/BorderedPanel",
+  title: "Layout/BorderedPanel",
   component: BorderedPanel,
   parameters: {
     layout: "fullscreen",

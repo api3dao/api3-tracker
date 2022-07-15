@@ -4,7 +4,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { Header } from '../components/Header';
 
 export default {
-  title: 'Example/Header',
+  title: 'Layout/Header',
   component: Header,
   parameters: {
     layout: 'fullscreen',

@@ -4,7 +4,7 @@ import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { StakingTrend } from "../components/StakingTrend";
 
 export default {
-  title: "Example/StakingTrend",
+  title: "Overview/StakingTrend",
   component: StakingTrend,
   parameters: {
     layout: "fullscreen",

@@ -4,7 +4,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { Footer } from '../components/Footer';
 
 export default {
-  title: 'Example/Footer',
+  title: 'Layout/Footer',
   component: Footer,
   parameters: {
     layout: 'fullscreen',

@@ -4,7 +4,7 @@ import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { Epoch } from "../components/Overview";
 
 export default {
-  title: "Example/Overview",
+  title: "Overview/Epoch",
   component: Epoch,
   parameters: {
     layout: "fullscreen",
