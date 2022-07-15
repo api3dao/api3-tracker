@@ -1,0 +1,15 @@
+.asc {
+  color: var(--color-accent);
+  text-align: center;
+  margin: 0px auto;
+}
+.const {
+  color: var(--color-text);
+  text-align: center;
+  margin: 0px auto;
+}
+.desc {
+  color: var(--color-error);
+  text-align: center;
+  margin: 0px auto;
+}

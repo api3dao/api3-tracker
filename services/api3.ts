@@ -26,8 +26,8 @@ export interface ISupply {
 
 export interface IStakingTrendProps {
   apr: number;
-  totalStaked: string;
-  stakingTarget: string;
+  totalStaked: number;
+  stakingTarget: number;
 }
 
 export interface ITreasury {
