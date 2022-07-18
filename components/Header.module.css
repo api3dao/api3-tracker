@@ -4,29 +4,7 @@
   left: 0px;
   z-index: 1;
   background: var(--color-body);
-  border-bottom: 1px #fff solid;
   width: 100%;
-
-  @media (min-width: 960px) {
-    padding-top: 20px;
-    padding-bottom: 20px;
-  }
-}
-
-.middle {
-  flex: 1;
-}
-
-.inner {
-  margin: 0px auto;
-  @media (min-width: 960px) {
-    max-width: 1024px;
-
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
 }
 
 .navBrand {
@@ -34,6 +12,7 @@
   flex-direction: column;
   padding: 10px 0px;
 }
+
 .navBrandlabel {
   color: var(--color-text);
   font-size: 1em;
