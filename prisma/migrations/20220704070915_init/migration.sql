@@ -11,7 +11,7 @@ CREATE TABLE "epochs" (
     "blockNumber" INTEGER NOT NULL,
     "chainId" INTEGER NOT NULL,
     "txHash" BYTEA NOT NULL,
-    "apr" DECIMAL(65,30) NOT NULL,
+    "apr" DECIMAL(10,2) NOT NULL,
     "members" BIGINT NOT NULL,
     "totalStake" BIGINT NOT NULL,
     "totalShares" BIGINT NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE "member_epochs" (
     "address" BYTEA NOT NULL,
     "userShare" BIGINT NOT NULL,
     "userStake" BIGINT NOT NULL,
-    "userVotingPower" DECIMAL(65,30) NOT NULL,
+    "userVotingPower" DECIMAL(10,2) NOT NULL,
     "userReward" BIGINT NOT NULL,
 
     CONSTRAINT "member_epochs_pkey" PRIMARY KEY ("epoch","address")
@@ -47,7 +47,7 @@ CREATE TABLE "member_events" (
     "fee" BIGINT,
     "gasPrice" BIGINT,
     "gasUsed" BIGINT,
-    "feeUsd" DECIMAL(65,30),
+    "feeUsd" DECIMAL(10,2),
 
     CONSTRAINT "member_events_pkey" PRIMARY KEY ("id")
 );
@@ -70,7 +70,7 @@ CREATE TABLE "members" (
     "badges" TEXT NOT NULL,
     "userShare" BIGINT NOT NULL,
     "userStake" BIGINT NOT NULL,
-    "userVotingPower" DECIMAL(65,30) NOT NULL,
+    "userVotingPower" DECIMAL(10,2) NOT NULL,
     "userReward" BIGINT NOT NULL,
     "userLockedReward" BIGINT NOT NULL,
     "userDeposited" BIGINT NOT NULL,
@@ -93,11 +93,11 @@ CREATE TABLE "voting_event" (
     "fee" BIGINT,
     "gasPrice" BIGINT,
     "gasUsed" BIGINT,
-    "feeUsd" DECIMAL(65,30),
+    "feeUsd" DECIMAL(10,2),
     "address" BYTEA NOT NULL,
     "supports" INTEGER NOT NULL DEFAULT 0,
     "userShare" BIGINT NOT NULL,
-    "userVotingPower" DECIMAL(65,30) NOT NULL,
+    "userVotingPower" DECIMAL(10,2) NOT NULL,
     "votingId" TEXT,
 
     CONSTRAINT "voting_event_pkey" PRIMARY KEY ("id")
@@ -112,7 +112,7 @@ CREATE TABLE "voting" (
     "transferValue" BIGINT,
     "transferToken" TEXT,
     "totalGasUsed" BIGINT,
-    "totalUsd" DECIMAL(65,30),
+    "totalUsd" DECIMAL(10,2),
 
     CONSTRAINT "voting_pkey" PRIMARY KEY ("id")
 );
@@ -132,7 +132,7 @@ CREATE TABLE "ens_event" (
     "fee" BIGINT,
     "gasPrice" BIGINT,
     "gasUsed" BIGINT,
-    "feeUsd" DECIMAL(65,30),
+    "feeUsd" DECIMAL(10,2),
 
     CONSTRAINT "ens_event_pkey" PRIMARY KEY ("id")
 );
@@ -140,13 +140,13 @@ CREATE TABLE "ens_event" (
 -- CreateTable
 CREATE TABLE "price_ethereum" (
     "ts" TIMESTAMP(3) NOT NULL,
-    "usd" DECIMAL(65,30) NOT NULL,
-    "eur" DECIMAL(65,30) NOT NULL,
-    "rub" DECIMAL(65,30) NOT NULL,
-    "cny" DECIMAL(65,30) NOT NULL,
-    "cad" DECIMAL(65,30) NOT NULL,
-    "jpy" DECIMAL(65,30) NOT NULL,
-    "gbp" DECIMAL(65,30) NOT NULL,
+    "usd" DECIMAL(10,2) NOT NULL,
+    "eur" DECIMAL(10,2) NOT NULL,
+    "rub" DECIMAL(10,2) NOT NULL,
+    "cny" DECIMAL(10,2) NOT NULL,
+    "cad" DECIMAL(10,2) NOT NULL,
+    "jpy" DECIMAL(10,2) NOT NULL,
+    "gbp" DECIMAL(10,2) NOT NULL,
 
     CONSTRAINT "price_ethereum_pkey" PRIMARY KEY ("ts")
 );

@@ -17,7 +17,7 @@ model Epoch {
   blockNumber  Int // Block number of the epoch
   chainId      Int // Chain ID
   txHash       Bytes // Transaction hash
-  apr          Decimal // APR during this epoch
+  apr          Decimal @db.Decimal(10,2)// APR during this epoch
   members      BigInt // Number of members
   totalStake   BigInt // Total stake
   totalShares  BigInt // Total shares
@@ -34,7 +34,7 @@ model MemberEpoch {
 
   userShare       BigInt // number of user shares at the moment of this epoch
   userStake       BigInt // number of user stake at the moment of this epoch
-  userVotingPower Decimal // user voting power at this epoch
+  userVotingPower Decimal @db.Decimal(10,2) // user voting power at this epoch
   userReward      BigInt // user reward for this epoch
 
   @@id([epoch, address])
@@ -55,7 +55,7 @@ model MemberEvent {
   fee         BigInt? // fee that was taken on this transaction
   gasPrice    BigInt? // gas price of this transaction
   gasUsed     BigInt? // gas used for this transaction
-  feeUsd      Decimal? // USD equivalent of the fee
+  feeUsd      Decimal? @db.Decimal(10,2) // USD equivalent of the fee
 
   @@map("member_events")
 }
@@ -81,7 +81,7 @@ model Member {
 
   userShare        BigInt // number of user shares at the moment of this epoch
   userStake        BigInt // number of user stake at the moment of this epoch
-  userVotingPower  Decimal // user voting power at this epoch
+  userVotingPower  Decimal @db.Decimal(10,2) // user voting power at this epoch
   userReward       BigInt // user reqard for this epoch
   userLockedReward BigInt // how much of the reward is still locked
   userDeposited    BigInt // total user deposited over the time
@@ -118,14 +118,14 @@ model VotingEvent {
   fee         BigInt? // fee that was taken on this transaction
   gasPrice    BigInt? // gas price of this transaction
   gasUsed     BigInt? // gas used for this transaction
-  feeUsd      Decimal? // USD equivalent of the fee
+  feeUsd      Decimal? @db.Decimal(10,2) // USD equivalent of the fee
 
   address Bytes // Address of the member to whom this transaction is related to
   member  Member @relation(name: "votingMember", fields: [address], references: [address])
 
   supports        Int     @default(0) // -1 - against, 1 - supports, 0 - unrelated
   userShare       BigInt // number of user shares at the moment of this voting
-  userVotingPower Decimal // user voting power at the moment of this voting
+  userVotingPower Decimal @db.Decimal(10,2) // user voting power at the moment of this voting
 
   votingId String?
   voting   Voting? @relation(name: "votingEvents", fields: [votingId], references: [id])
@@ -143,7 +143,7 @@ model Voting {
   transferToken String? // in case of transfer - name of the token for transfer
 
   totalGasUsed BigInt? // total gas price of this voting
-  totalUsd     Decimal? // total USD estimate for gas
+  totalUsd     Decimal? @db.Decimal(10,2) // total USD estimate for gas
 
   events VotingEvent[] @relation("votingEvents") // relations to events
 
@@ -164,20 +164,20 @@ model EnsEvent {
   fee         BigInt? // fee that was taken on this transaction
   gasPrice    BigInt? // gas price of this transaction
   gasUsed     BigInt? // gas used for this transaction
-  feeUsd      Decimal? // USD equivalent of the fee
+  feeUsd      Decimal? @db.Decimal(10,2) // USD equivalent of the fee
 
   @@map("ens_event")
 }
 
 model PriceEthereum {
   ts  DateTime @id
-  usd Decimal
-  eur Decimal
-  rub Decimal
-  cny Decimal
-  cad Decimal
-  jpy Decimal
-  gbp Decimal
+  usd Decimal @db.Decimal(10,2)
+  eur Decimal @db.Decimal(10,2)
+  rub Decimal @db.Decimal(10,2)
+  cny Decimal @db.Decimal(10,2)
+  cad Decimal @db.Decimal(10,2)
+  jpy Decimal @db.Decimal(10,2)
+  gbp Decimal @db.Decimal(10,2)
 
   @@map("price_ethereum")
 }
