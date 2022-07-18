@@ -41,3 +41,22 @@ export interface ITreasury {
   valueAPI3: number;
   valueUSDC: number;
 }
+
+export interface IVoting {
+  id: string;
+  vt: string;
+  createdAt: Date;
+  name: string;
+  description?: string;
+  transferValue?: number;
+  transferToken?: string;
+  transferAddress?: string; // can be "invalid"
+  transferStatus?: string; // can be "invalid"
+  totalGasUsed?: number;
+  totalUsd?: number;
+  status: string; // expired, execured, rejected
+  totalFor: number;
+  totalAgainst: number;
+  totalStaked: number;
+  totalRequired: number;
+}
