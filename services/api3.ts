@@ -10,6 +10,9 @@ export interface IEpoch {
   totalShares: number; // Total shares
   mintedShares: number; // # of minted tokens
   releaseDate: Date; // Date when minted tokens will be released
+
+  blockTx?: string;
+  blockNumber?: number;
 }
 
 export interface ISupply {
