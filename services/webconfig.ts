@@ -1,6 +1,12 @@
 import fs from "fs";
 import { load } from "js-yaml";
 
+export interface IContract {
+  name: string
+  title: string
+  address: string
+}
+
 export interface IWebPage {
   slug: string
   siteName?: string
@@ -18,6 +24,7 @@ export interface IWebConfig {
   ethscan?: string
   opengraph: IWebPage
   pages: Map<string, IWebPage>
+  contracts?: Array<IContract>
 }
 
 export const fetchWebconfig = (): IWebConfig => (
