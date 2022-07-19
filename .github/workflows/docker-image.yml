@@ -12,9 +12,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag api3tracker:latest
+      run: docker build . --file Dockerfile --tag api3tracker:latest && docker save --output /tmp/api3tracker.tar api3tracker:latest
     - name: Build the Storybook Docker image
-      run: docker build . --file .storybook/Dockerfile --tag api3tracker-storybook:latest
+      run: docker build . --file .storybook/Dockerfile --tag api3tracker-storybook:latest && docker save --output /tmp/api3tracker-storybook.tar api3tracker-storybook:latest
     - name: Save main image
       uses: actions/upload-artifact@v2
       with:
