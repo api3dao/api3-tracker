@@ -71,8 +71,7 @@ export const Header = (props: IHeader) => {
         </button>
       </div>
       {state.mobileOpen ? (
-        <div className="lg:hidden p-5 border-t border-1px border-solid">
-          Menu: here
+        <div className="lg:hidden lg:p-5 border-t border-1px border-solid">
           <Menu active={props.active} />
         </div>
       ) : (
