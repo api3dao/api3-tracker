@@ -13,6 +13,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Install SSH Key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.SSH_PRIVATE_KEY }} 
     - uses: actions/checkout@v3
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag api3tracker:latest
@@ -26,4 +30,10 @@ jobs:
       env:
          SSH_HOST: ${{ secrets.SSH_HOST }}
       run: docker save api3tracker-storybook | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker load'
-
+    - name: Apply Terraform plan
+      env:
+         SSH_HOST: ${{ secrets.SSH_HOST }}
+         SSH_REMOTE_PATH: ${{ secrets.SSH_REMOTE_PATH }}
+      run: |
+         export REMOTE_CMD="cd $SSH_REMOTE_PATH && terraform init && terraform apply -auto-approve"
+         ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null bash -c '"'$REMOTE_CMD'"'
