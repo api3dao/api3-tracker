@@ -1,6 +1,5 @@
 import React from "react";
 import { Menu } from "./Menu";
-import styles from "./Header.module.css";
 
 interface IHeader {
   active: string;
@@ -52,29 +51,33 @@ export const Header = (props: IHeader) => {
     setState({ ...state, mobileOpen: !state.mobileOpen });
   };
   return (
-    <header className={`pb-20 border-b border-1px border-solid ${styles.header}`}>
-      <div className="hidden lg:flex mx-auto max-w-screen-lg">
-        <div className={styles.navBrand}>
-          <span className={styles.navBrandLabel}>API3 DAO Tracker</span>
-          <span className={styles.navBrandSlogan}>
+    <header className="fixed bk-color-body w-full z-10 top-0 left-0 lg:pb-1 border-b border-1px border-solid">
+      <div className="hidden lg:flex items-center mx-auto max-w-screen-lg">
+        <div className="flex flex-col py-2">
+          <span className="text-color-menu-active text-5xl py-2 text-center font-bold">
+            API3 DAO Tracker
+          </span>
+          <span className="text-color-accent text-sm text-left">
             on-chain analytics: members, staking rewards, API3 token supply
           </span>
         </div>
-        <div className="flex-1"></div>
+        <div className="flex-1">&nbsp;</div>
         <Menu active={props.active} />
       </div>
       <div className="lg:hidden flex p-3">
-        <div className="flex-1">
-          API3 DAO Tracker
-        </div>
-        <button onClick={toggle} className="">
+        <div className="flex-1">API3 DAO Tracker</div>
+        <button onClick={toggle}>
           {state.mobileOpen ? iconClose : iconMenu}
         </button>
       </div>
-      <div className="lg:hidden p-5 border-b border-t border-1px border-solid">
-        <span className="text-color-accent">Menu is almost here</span>
-        <Menu active={props.active} />
-      </div>
+      {state.mobileOpen ? (
+        <div className="lg:hidden p-5 border-t border-1px border-solid">
+          Menu: here
+          <Menu active={props.active} />
+        </div>
+      ) : (
+        false
+      )}
     </header>
   );
 };
