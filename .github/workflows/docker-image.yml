@@ -4,24 +4,27 @@ on:
   push:
     branches: [ "main", "i/**", "f/**" ]
   pull_request:
-    branches: [ "main", "i/**", "f/**", "dependabot/**" ]
+    branches: [ "dependabot/**" ]
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - name: Install SSH Key
-      uses: shimataro/ssh-key-action@v2
-      with:
-        key: ${{ secrets.SSH_PRIVATE_KEY }} 
     - uses: actions/checkout@v3
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag api3tracker:latest
     - name: Build the Storybook Docker image
       run: docker build . --file .storybook/Dockerfile --tag api3tracker-storybook:latest
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - name: Install SSH Key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.SSH_PRIVATE_KEY }} 
+        known_hosts: /dev/null
     - name: Push main Docker image
       env:
          SSH_HOST: ${{ secrets.SSH_HOST }}
