@@ -18,12 +18,12 @@ jobs:
     - name: Save main image
       uses: actions/upload-artifact@v2
       with:
-        name: api3tracker:latest
+        name: api3tracker
         path: /tmp/api3tracker.tar
     - name: Save storybook image
       uses: actions/upload-artifact@v2
       with:
-        name: api3tracker-storybook:latest
+        name: api3tracker-storybook
         path: /tmp/api3tracker-storybook.tar
   deploy:
     runs-on: ubuntu-latest
@@ -38,7 +38,7 @@ jobs:
     - name: Check SSH access
       env:
          SSH_HOST: ${{ secrets.SSH_HOST }}
-      run: ls -All /tmp && ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker image ls'
+      run: ls -All /tmp/ && ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker image ls'
     - name: Download artifacts (Docker images) from build workflow
       uses: actions/download-artifact@v2
     - name: Push main Docker image
