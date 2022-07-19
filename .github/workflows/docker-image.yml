@@ -38,17 +38,17 @@ jobs:
     - name: Check SSH access
       env:
          SSH_HOST: ${{ secrets.SSH_HOST }}
-      run: docker image ls && ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker image ls'
+      run: ls -All /tmp && ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker image ls'
     - name: Download artifacts (Docker images) from build workflow
       uses: actions/download-artifact@v2
     - name: Push main Docker image
       env:
          SSH_HOST: ${{ secrets.SSH_HOST }}
-      run: docker save api3tracker:latest | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker load'
+      run: cat /tmp/api3tracker.tar | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker load'
     - name: Push storybook Docker image
       env:
          SSH_HOST: ${{ secrets.SSH_HOST }}
-      run: docker save api3tracker-storybook:latest | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker load'
+      run: cat /tmp/api3tracker-storybook.tar | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker load'
     - name: Apply Terraform plan
       env:
          SSH_HOST: ${{ secrets.SSH_HOST }}
