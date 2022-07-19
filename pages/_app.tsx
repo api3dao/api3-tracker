@@ -12,14 +12,6 @@ function Layout({ Component, pageProps }: AppProps) {
         />
         <meta property="og:locale" content="en_US" />
         <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="API3" />
-        <meta
-          property="og:image"
-          content="https://enormous.cloud/dao/icons/api3/API3x64-white-iso-c8b5fe8c70937dbb.png"
-        />
-        <meta property="og:image:width" content="64" />
-        <meta property="og:image:height" content="64" />
-
         <link rel="icon" href="/favicon.ico" />
         <link rel="icon" href="/API3x16-white-iso.png" />
         <link rel="icon" href="/API3x32-white-iso.png" />
