@@ -29,17 +29,17 @@ jobs:
       with:
         key: ${{ secrets.SSH_PRIVATE_KEY }} 
         known_hosts: /dev/null
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag api3tracker:latest
+    - name: Build the Storybook Docker image
+      run: docker build . --file .storybook/Dockerfile --tag api3tracker-storybook:latest
+    - name: Push main Docker image
+      run: docker save api3tracker:latest | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker load'
+    - name: Push storybook Docker image
+      run: docker save api3tracker-storybook:latest | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker load'
     - name: Apply Terraform plan
       run: |
          export REMOTE_CMD="cd $SSH_REMOTE_PATH && terraform init && terraform apply -auto-approve"
          ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST bash -c '"'$REMOTE_CMD'"'
-    - uses: actions/checkout@v3
-    # - name: Build the Docker image
-    #   run: docker build . --file Dockerfile --tag api3tracker:latest
-    - name: Build the Storybook Docker image
-      run: docker build . --file .storybook/Dockerfile --tag api3tracker-storybook:latest
-    # - name: Push main Docker image
-    #   run: docker save api3tracker:latest | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker load'
-    - name: Push storybook Docker image
-      run: docker save api3tracker-storybook:latest | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker load'
     
