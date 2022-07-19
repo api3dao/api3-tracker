@@ -20,5 +20,14 @@ resource "docker_container" "api3tracker" {
           value = labels.value.value
       }
   }
+  
+  dynamic upload {
+      for_each = local.upload
+      content {
+          file = upload.value.file
+          content = upload.value.content
+          executable = false
+      }
+  }
 }
 

@@ -62,7 +62,13 @@ locals {
             value = local.shortname
         }]
     )
+    
     env = [
     //todo: POSTGRES connection
     ]
+
+    upload = length(var.webconfig) > 0 ? [ {
+       file = "/app/webconfig.yaml",
+       content = var.webconfig
+    } ] : []
 }
