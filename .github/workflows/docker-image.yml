@@ -40,4 +40,4 @@ jobs:
     - name: Apply Terraform plan
       run: |
          export REMOTE_CMD="cd $SSH_REMOTE_PATH && terraform init && terraform apply -auto-approve"
-         ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null '"'$REMOTE_CMD'"'
+         ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST '"'$REMOTE_CMD'"'
