@@ -8,9 +8,9 @@ export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
   return {
     props: {
-      webconfig
+      webconfig,
     }, // will be passed to the page component as props
-  }
+  };
 }
 
 const WalletDetailsPage: NextPage = (props: any) => {
@@ -19,7 +19,7 @@ const WalletDetailsPage: NextPage = (props: any) => {
 
   return (
     <div>
-      <Meta webconfig={webconfig} page='wallet' />
+      <Meta webconfig={webconfig} page="wallet" />
       <Header active="./wallets" />
 
       <main>

@@ -27,19 +27,19 @@ export const WalletEventsListTr = (row: IWalletEvent) => (
     <td className="text-center">{toCurrency(row.blockNumber)} </td>
     <td className="text-left">
       <div className="px-5">
-          <strong>Staked </strong>
-          <span> amount: </span>
-          <strong>1,250,000</strong>
-          <span> minted_shares: </span>
-          <strong>1,250,000</strong>
-          <span> user_unstaked: </span>
-          <strong>0</strong>
-          <span> user_shares: </span>
-          <strong> 1,250,000</strong>
-          <span> total_shares: </span>
-          <strong>2,580,367</strong>
-          <span> total_stake: </span>
-          <strong>2,580,367</strong>
+        <strong>Staked </strong>
+        <span> amount: </span>
+        <strong>1,250,000</strong>
+        <span> minted_shares: </span>
+        <strong>1,250,000</strong>
+        <span> user_unstaked: </span>
+        <strong>0</strong>
+        <span> user_shares: </span>
+        <strong> 1,250,000</strong>
+        <span> total_shares: </span>
+        <strong>2,580,367</strong>
+        <span> total_stake: </span>
+        <strong>2,580,367</strong>
       </div>
     </td>
   </tr>

@@ -13,7 +13,7 @@ on-chain details of the API3 DAO, including:
 The only requirements for installation are [Docker](https://docs.docker.com/get-docker/)
 and [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli).
 You may also need
-[AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) 
+[AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 if you want the AWS S3 backups to be enabled on your environment
 
 ```sh
@@ -28,7 +28,7 @@ port at [http://localhost:7040](http://localhost:7040) with Traefik load balance
 ## VPS Installation
 
 Same to local installation, you will need `docker` and `terraform`. Once installed,
-please go to `terraform/workspaces` folder and create a folder for your environment 
+please go to `terraform/workspaces` folder and create a folder for your environment
 by copying one of the existings environments. Edit `modules.tf` in your new folder
 to set up domains, certificates and other options. Then run
 
@@ -36,6 +36,7 @@ to set up domains, certificates and other options. Then run
 terraform init
 terraform apply
 ```
+
 Please review the components that will be installed and approve.
 
 ## Local Development
@@ -54,4 +55,5 @@ Open [http://localhost:3000](http://localhost:3000)
 with your browser to see the result.
 
 ## License
+
 MIT

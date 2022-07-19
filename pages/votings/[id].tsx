@@ -8,9 +8,9 @@ export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
   return {
     props: {
-      webconfig
+      webconfig,
     }, // will be passed to the page component as props
-  }
+  };
 }
 
 const VotingDetailsPage: NextPage = (props: any) => {
@@ -19,7 +19,7 @@ const VotingDetailsPage: NextPage = (props: any) => {
 
   return (
     <div>
-      <Meta webconfig={webconfig} page='voting' />
+      <Meta webconfig={webconfig} page="voting" />
       <Header active="./votings" />
 
       <main>

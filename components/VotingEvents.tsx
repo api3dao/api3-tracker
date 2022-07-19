@@ -42,7 +42,9 @@ export const VotingEventsListTr = (row: IVotingEvent) => (
               ]
             : null}
           <div className="accent">{row.address}</div>
-          <div className="darken">Gas Used: 473402, Gas Price: 33 GWei, Est $39.7</div>
+          <div className="darken">
+            Gas Used: 473402, Gas Price: 33 GWei, Est $39.7
+          </div>
         </div>
       </Link>
     </td>

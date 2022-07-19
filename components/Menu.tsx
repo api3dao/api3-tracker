@@ -39,7 +39,8 @@ export const Menu = (props: IMenuProps) => {
   return (
     <div className={styles.desktopMenu}>
       {menuItems.map((item) => {
-        const classExt = props.active == item.href ? styles.menuItemActive : styles.menuItem;
+        const classExt =
+          props.active == item.href ? styles.menuItemActive : styles.menuItem;
         return (
           <Link href={item.href} key={item.href}>
             <a className={classExt}>{item.title}</a>

@@ -35,14 +35,14 @@
   padding: 10px 0px;
 }
 .navBrandlabel {
-    color: var(--color-text);
-    font-size: 1em;
-    font-weight: 900;
-    text-align: center;
+  color: var(--color-text);
+  font-size: 1em;
+  font-weight: 900;
+  text-align: center;
 }
 .navBrandSlogan {
-    display: none;
-    color: var(--color-accent);
+  display: none;
+  color: var(--color-accent);
 }
 
 @media (min-width: 960px) {

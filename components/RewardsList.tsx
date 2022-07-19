@@ -35,18 +35,14 @@ export const RewardsListTr = (epoch: IEpoch) => (
     <td className="text-right darken">{epoch.apr}%</td>
     <td className="text-center accent">{epoch.rewardsPct}%</td>
     <td className="text-right darken">{toCurrency(epoch.members)}</td>
-    <td className="text-right darken">
-      {toCurrency(epoch.totalStake)}
-    </td>
-    <td className="text-right accent">
-      {toCurrency(epoch.mintedShares)}
-    </td>
+    <td className="text-right darken">{toCurrency(epoch.totalStake)}</td>
+    <td className="text-right accent">{toCurrency(epoch.mintedShares)}</td>
     <td className="text-center">{epoch.releaseDate.toISOString()}</td>
   </tr>
 );
 
 export interface IRewardsListProps {
-  list: Array<IEpoch>
+  list: Array<IEpoch>;
 }
 
 export const RewardsList = (props: IRewardsListProps) => {

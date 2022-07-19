@@ -11,7 +11,9 @@ export default {
 } as ComponentMeta<typeof Treasury>;
 
 const Template: ComponentStory<typeof Treasury> = (args) => (
-   <div className="max-w-sm mx-auto"><Treasury {...args} /></div>
+  <div className="max-w-sm mx-auto">
+    <Treasury {...args} />
+  </div>
 );
 
 export const Default = Template.bind({});
@@ -21,5 +23,3 @@ Default.args = {
   valueAPI3: 7021201,
   valueUSDC: 17664560,
 };
-
-

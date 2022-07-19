@@ -8,9 +8,9 @@ export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
   return {
     props: {
-      webconfig
+      webconfig,
     }, // will be passed to the page component as props
-  }
+  };
 }
 
 const TreasuryPage: NextPage = (props: any) => {
@@ -19,7 +19,7 @@ const TreasuryPage: NextPage = (props: any) => {
 
   return (
     <div>
-      <Meta webconfig={webconfig} page='treasury' />
+      <Meta webconfig={webconfig} page="treasury" />
       <Header active="/treasury" />
 
       <main>
@@ -29,7 +29,6 @@ const TreasuryPage: NextPage = (props: any) => {
             API3 DAO currently operates 3 treasuries. Balances below are updated
             each hour.
           </p>
-
         </div>
       </main>
 

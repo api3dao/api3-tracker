@@ -12,7 +12,7 @@ export default {
 } as ComponentMeta<typeof BorderedPanel>;
 
 const Template: ComponentStory<typeof BorderedPanel> = (args) => (
-  <div style={{ maxWidth: 300, margin: '0px auto' }}>
+  <div style={{ maxWidth: 300, margin: "0px auto" }}>
     <BorderedPanel {...args} />
   </div>
 );

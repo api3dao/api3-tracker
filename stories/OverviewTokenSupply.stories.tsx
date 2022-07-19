@@ -11,7 +11,9 @@ export default {
   },
 } as ComponentMeta<typeof TokenSupply>;
 
-const Template: ComponentStory<typeof TokenSupply> = (args) => ( <TokenSupply {...args} />);
+const Template: ComponentStory<typeof TokenSupply> = (args) => (
+  <TokenSupply {...args} />
+);
 
 export const Default = Template.bind({});
 Default.args = {
@@ -27,5 +29,3 @@ Default.args = {
   lockedRewards: 13171971,
   timeLocked: 32890393,
 };
-
-

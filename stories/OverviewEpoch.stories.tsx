@@ -46,4 +46,3 @@ PreviousEpoch.args = {
   mintedShares: 156944,
   releaseDate: new Date(),
 };
-

@@ -62,7 +62,6 @@ ul {
   }
 }
 
-
 .accent {
   color: var(--color-accent) !important;
 }
@@ -83,7 +82,6 @@ ul {
 .inner {
   margin: 0px auto;
 }
-
 
 main {
   margin-top: 6px;
@@ -120,7 +118,6 @@ body > div > div.inner {
   margin: 0px auto;
   padding: 0px 20px;
 }
-
 
 h1,
 h2 {

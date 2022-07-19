@@ -11,9 +11,7 @@ export const Footer = () => {
           <span></span>
           <span className={styles.mdiv}>
             {" "}
-            © 2022
-            {" "}
-            <a href="https://api3.org">API3.org</a>
+            © 2022 <a href="https://api3.org">API3.org</a>
           </span>
           <span className="desktop-only"> | </span>
           <span className={styles.mdiv}>

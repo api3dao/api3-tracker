@@ -8,7 +8,9 @@ export const TokenCirculating = (props: ISupply) => {
   return (
     <BorderedPanel big={true} title="API3 Circulating Supply">
       <div className="text-center">
-        <div className={styles.bigTitle}>{toCurrency(props.circulatingSupply)}</div>
+        <div className={styles.bigTitle}>
+          {toCurrency(props.circulatingSupply)}
+        </div>
         <div className={styles.title}>Total Locked</div>
         <strong>
           {toCurrency(props.totalLocked)}

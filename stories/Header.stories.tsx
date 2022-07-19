@@ -1,13 +1,13 @@
-import React from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import React from "react";
+import { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { Header } from '../components/Header';
+import { Header } from "../components/Header";
 
 export default {
-  title: 'Layout/Header',
+  title: "Layout/Header",
   component: Header,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
   },
 } as ComponentMeta<typeof Header>;
 
@@ -20,7 +20,7 @@ Overview.args = {
 
 export const Rewards = Template.bind({});
 Rewards.args = {
-  active: "/rewards"
+  active: "/rewards",
 };
 
 export const Wallets = Template.bind({});
@@ -37,4 +37,3 @@ export const Treasury = Template.bind({});
 Treasury.args = {
   active: "/treasury",
 };
-

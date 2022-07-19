@@ -13,7 +13,9 @@ export const BorderedPanel = (props: IBorderedPanelProps) => (
       <div className={styles.box}>
         <div className={styles.left}></div>
         <div className={styles.inner}>
-          <div className={styles.title + (props.big ? ' big-title':'')}>{props.title}</div>
+          <div className={styles.title + (props.big ? " big-title" : "")}>
+            {props.title}
+          </div>
           <div className={styles.content}>{props.children}</div>
         </div>
         <div className={styles.right}></div>
