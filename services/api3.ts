@@ -60,3 +60,19 @@ export interface IVoting {
   totalStaked: number;
   totalRequired: number;
 }
+
+export interface IWallet {
+  address: string;
+  ensName: string; // ENS domain name
+  ensUpdated: Date;
+  badges: string;
+  userShare: number;
+  userStake: number; // number of user stake at the moment of this epoch
+  userVotingPower: number; // user voting power at this epoch
+  userReward: number; // user reqard for this epoch
+  userLockedReward: number; // how much of the reward is still locked
+  userDeposited: number;
+  userWithdrew: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
