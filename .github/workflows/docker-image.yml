@@ -15,6 +15,15 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag api3tracker:$(date +%s)
+      run: docker build . --file Dockerfile --tag api3tracker:latest
     - name: Build the Storybook Docker image
-      run: docker build . --file .storybook/Dockerfile --tag api3tracker-storybook:$(date +%s)
+      run: docker build . --file .storybook/Dockerfile --tag api3tracker-storybook:latest
+    - name: Push main Docker image
+      env:
+         SSH_HOST: ${{ secrets.SSH_HOST }}
+      run: docker save api3tracker | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker load'
+    - name: Push storybook Docker image
+      env:
+         SSH_HOST: ${{ secrets.SSH_HOST }}
+      run: docker save api3tracker-storybook | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker load'
+
