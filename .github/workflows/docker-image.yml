@@ -25,14 +25,16 @@ jobs:
       with:
         key: ${{ secrets.SSH_PRIVATE_KEY }} 
         known_hosts: /dev/null
+    - name: Check SSH access
+      run: docker image ls && ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker image ls'
     - name: Push main Docker image
       env:
          SSH_HOST: ${{ secrets.SSH_HOST }}
-      run: docker save api3tracker | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker load'
+      run: docker save api3tracker:latest | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker load'
     - name: Push storybook Docker image
       env:
          SSH_HOST: ${{ secrets.SSH_HOST }}
-      run: docker save api3tracker-storybook | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker load'
+      run: docker save api3tracker-storybook:latest | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker load'
     - name: Apply Terraform plan
       env:
          SSH_HOST: ${{ secrets.SSH_HOST }}
