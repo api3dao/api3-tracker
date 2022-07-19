@@ -7,52 +7,36 @@ on:
     branches: [ "dependabot/**" ]
 
 jobs:
-  build:
+  only_build:
     runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main'
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag api3tracker:latest && docker save --output /tmp/api3tracker.tar api3tracker:latest
+      run: docker build . --file Dockerfile --tag api3tracker:latest
     - name: Build the Storybook Docker image
-      run: docker build . --file .storybook/Dockerfile --tag api3tracker-storybook:latest && docker save --output /tmp/api3tracker-storybook.tar api3tracker-storybook:latest
-    - name: Save main image
-      uses: actions/upload-artifact@v2
-      with:
-        name: api3tracker
-        path: /tmp/api3tracker.tar
-    - name: Save storybook image
-      uses: actions/upload-artifact@v2
-      with:
-        name: api3tracker-storybook
-        path: /tmp/api3tracker-storybook.tar
-  deploy:
+      run: docker build . --file .storybook/Dockerfile --tag api3tracker-storybook:latest
+  build_deploy:
     runs-on: ubuntu-latest
-    needs: build
     if: github.ref == 'refs/heads/main'
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_REMOTE_PATH: ${{ secrets.SSH_REMOTE_PATH }}
     steps:
     - name: Install SSH Key
       uses: shimataro/ssh-key-action@v2
       with:
         key: ${{ secrets.SSH_PRIVATE_KEY }} 
         known_hosts: /dev/null
-    - name: Check SSH access
-      env:
-         SSH_HOST: ${{ secrets.SSH_HOST }}
-      run: ls -All /tmp/ && ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker image ls'
-    - name: Download artifacts (Docker images) from build workflow
-      uses: actions/download-artifact@v2
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag api3tracker:latest
+    - name: Build the Storybook Docker image
+      run: docker build . --file .storybook/Dockerfile --tag api3tracker-storybook:latest
     - name: Push main Docker image
-      env:
-         SSH_HOST: ${{ secrets.SSH_HOST }}
-      run: cat /tmp/api3tracker.tar | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker load'
+      run: docker save api3tracker:latest| ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker load'
     - name: Push storybook Docker image
-      env:
-         SSH_HOST: ${{ secrets.SSH_HOST }}
-      run: cat /tmp/api3tracker-storybook.tar | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker load'
+      run: docker save api3tracker-storybook:latest | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'docker load'
     - name: Apply Terraform plan
-      env:
-         SSH_HOST: ${{ secrets.SSH_HOST }}
-         SSH_REMOTE_PATH: ${{ secrets.SSH_REMOTE_PATH }}
       run: |
          export REMOTE_CMD="cd $SSH_REMOTE_PATH && terraform init && terraform apply -auto-approve"
          ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null bash -c '"'$REMOTE_CMD'"'
