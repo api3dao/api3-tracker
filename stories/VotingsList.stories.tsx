@@ -3,7 +3,7 @@ import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { VotingsList } from "../components/VotingsList";
 
 export default {
-  title: "Votings/VotingsList",
+  title: "Votings/List",
   component: VotingsList,
   parameters: {
     layout: "fullscreen",

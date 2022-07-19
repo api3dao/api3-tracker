@@ -76,3 +76,39 @@ export interface IWallet {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface IWalletEvent {
+  id: string;
+  createdAt: Date;
+  txHash: string;
+  blockNumber: number;
+  txIndex?: number;
+  logIndex?: number;
+  data: string;
+  eventName: string;
+  fee?: number;
+  gasPrice?: number;
+  gasUsed?: number;
+  feeUsd?: number;
+}
+
+export interface IVotingEvent {
+  id: string;
+  createdAt: Date;
+  txHash: string;
+  blockNumber: number;
+  txIndex?: number;
+  logIndex?: number;
+  data: string;
+  eventName: string;
+  fee?: number;
+  gasPrice?: number;
+  gasUsed?: number;
+  feeUsd?: number;
+
+  address?: string;
+  ensName?: string;
+  supports?: number;
+  userShare?: number;
+  userVotingPower?: number;
+}
