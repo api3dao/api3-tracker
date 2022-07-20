@@ -1,5 +1,4 @@
 import React from "react";
-// import styles from "./RewardsList.module.css";
 import { IEpoch } from "./../services/api3";
 import { toCurrency } from "./../services/format";
 

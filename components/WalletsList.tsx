@@ -1,5 +1,4 @@
 import React from "react";
-// import styles from "./WalletsList.module.css";
 import { IWallet } from "./../services/api3";
 import Link from "next/link";
 import { toCurrency } from "./../services/format";
