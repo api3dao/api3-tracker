@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./BorderedPanel.module.css";
 
 interface IBorderedPanelProps {
   title: string;
@@ -7,19 +6,22 @@ interface IBorderedPanelProps {
   children?: React.ReactNode;
 }
 
-export const BorderedPanel = (props: IBorderedPanelProps) => (
-  <div className={styles.wrapper}>
-    <div className={styles.panel}>
-      <div className={styles.box}>
-        <div className={styles.left}></div>
-        <div className={styles.inner}>
-          <div className={styles.title + (props.big ? " big-title" : "")}>
-            {props.title}
-          </div>
-          <div className={styles.content}>{props.children}</div>
+export const BorderedPanel = (props: IBorderedPanelProps) => {
+  const classTitle =
+    "px-5 -translate-y-1/2 " +
+    "flex items-center justify-center " +
+    "text-color-panel-title whitespace-nowrap " +
+    (props.big ? "text-2xl " : "text-lg");
+  return (
+    <div className="my-8">
+      <div className="flex w-full my-0">
+        <div className="w-8 min-w-16px border border-solid border-color-panel-border border-r-0">&nbsp;</div>
+        <div className="flex flex-col">
+          <div className={classTitle}>{props.title}</div>
+          <div>{props.children}</div>
         </div>
-        <div className={styles.right}></div>
+        <div className="w-8 min-w-16px border border-solid border-color-panel-border border-l-0"></div>
       </div>
     </div>
-  </div>
-);
+  );
+};

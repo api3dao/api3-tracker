@@ -14,6 +14,9 @@ module.exports = {
       xl: "1280px",
     },
     extend: {
+      minWidth: {
+        "16px": "16px"
+      },
       colors: {
         "color-bk": "var(--color-bk)",
         "color-bk-highlight": "var(--color-bk-highlight)",
