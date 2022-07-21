@@ -17,6 +17,9 @@ CREATE TABLE "epochs" (
     "totalShares" BIGINT NOT NULL,
     "mintedShares" BIGINT NOT NULL,
     "releaseDate" TIMESTAMP(3) NOT NULL,
+    "isCurrent" INTEGER NOT NULL,
+    "rewardsPct" DECIMAL(10,4) NOT NULL,
+    "stakedRewards" BIGINT NOT NULL,
 
     CONSTRAINT "epochs_pkey" PRIMARY KEY ("epoch")
 );
