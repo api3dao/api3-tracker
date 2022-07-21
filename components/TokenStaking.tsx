@@ -1,24 +1,26 @@
 import React from "react";
-import styles from "./TokenCirculating.module.css";
 import { ISupply } from "../services/api3";
 import { toCurrency } from "../services/format";
 
 export const TokenStaking = (props: ISupply) => {
+  const classTitle = "text-sm text-center font-bold text-color-cell-title uppercase";
+  const classCell = "text-sm text-center py-4 lg:min-h-96px border-t border-solid border-color-cell-border";
+  const classValue = "font-bold";
   return (
     <div className="sm:grid grid-cols-2">
-      <div className={styles.cell}>
-        <div className={styles.title}>Total Staked</div>
-        <strong>
+      <div className={classCell}>
+        <div className={classTitle}>Total Staked</div>
+        <span className={classValue}>
           {toCurrency(props.totalStaked)}
           <span className="md"> tokens</span>
-        </strong>
+        </span>
       </div>
-      <div className={styles.cell}>
-        <div className={styles.title}>Staking Target</div>
-        <strong>
+      <div className={classCell}>
+        <div className={classTitle}>Staking Target</div>
+        <span className={classValue}>
           {toCurrency(props.stakingTarget)}
           <span className="md"> tokens</span>
-        </strong>
+        </span>
       </div>
     </div>
   );

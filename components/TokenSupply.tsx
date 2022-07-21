@@ -3,7 +3,7 @@ import { ISupply } from "../services/api3";
 import { toCurrency } from "../services/format";
 
 export const TokenSupply = (props: ISupply) => {
-  const classTitle = "text-sm text-center font-bold font-color-cell-title uppercase";
+  const classTitle = "text-sm text-center font-bold text-color-cell-title uppercase";
   const classCell = "text-sm text-center py-4 lg:min-h-96px border-t border-solid border-color-cell-border";
   return (
     <div className="md:grid grid-cols-4">

@@ -44,12 +44,6 @@ a {
   text-decoration: none;
 }
 
-ul {
-  margin-block-start: 0;
-  margin-block-end: 0;
-  padding-inline-start: 16px;
-}
-
 @media (max-width: 800px) {
   .desktop-only {
     display: none !important;
@@ -117,18 +111,6 @@ body > div > div.inner {
   max-width: 1024px;
   margin: 0px auto;
   padding: 0px 20px;
-}
-
-h1,
-h2 {
-  color: #f3f3f3;
-}
-
-h3,
-h4,
-h5,
-h6 {
-  color: #666;
 }
 
 h1 {
