@@ -14,6 +14,9 @@ module.exports = {
       xl: "1280px",
     },
     extend: {
+      minHeight: {
+        "96px": "96px"
+      },
       minWidth: {
         "16px": "16px"
       },
