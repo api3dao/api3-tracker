@@ -1,7 +1,7 @@
 import React from "react";
 import { BorderedPanel } from "./BorderedPanel";
 import { IEpoch } from "./../services/api3";
-import { toCurrency } from "../services/format";
+import { niceDate, toCurrency } from "../services/format";
 
 export const Epoch = (props: IEpoch) => {
   const title = props.isCurrent ? "Current Epoch" : "Previous Epoch";
@@ -15,11 +15,11 @@ export const Epoch = (props: IEpoch) => {
           {props.epoch}
         </div>
         <div className="text-3xl uppercase m-0">
-          APR: <strong className="font-bold">{props.apr}%</strong>
+          APR: <strong className="font-bold">{props.apr+'%'}</strong>
         </div>
         <div className="mb-8 leading-6">
           <span className={darkenTitle}>Epoch Rewards: </span>
-          <strong className="accent">{props.rewardsPct}%</strong>
+          <strong className="accent">{props.rewardsPct+'%'}</strong>
         </div>
         <div className="leading-6">
           {props.isCurrent ? (
@@ -49,7 +49,7 @@ export const Epoch = (props: IEpoch) => {
           ) : null}
           <div className="leading-6">
             <div className={darkenTitle}>
-              {props.createdAt.toISOString()}
+              {niceDate(props.createdAt)}
             </div>
           </div>
         </div>

@@ -18,17 +18,17 @@ export interface IEpoch {
 }
 
 export interface ISupply {
-  blockNumber: number;
-  circulatingSupply: number;
+  blockNumber: BigInt;
+  circulatingSupply: Prisma.Decimal;
 
-  totalLocked: number;
-  totalStaked: number;
-  stakingTarget: number;
+  totalLocked: Prisma.Decimal;
+  totalStaked: Prisma.Decimal;
+  stakingTarget: Prisma.Decimal;
 
-  lockedByGovernance: number;
-  lockedVestings: number;
-  lockedRewards: number;
-  timeLocked: number;
+  lockedByGovernance: Prisma.Decimal;
+  lockedVestings: Prisma.Decimal;
+  lockedRewards: Prisma.Decimal;
+  timeLocked: Prisma.Decimal;
 }
 
 export interface IStakingTrendProps {

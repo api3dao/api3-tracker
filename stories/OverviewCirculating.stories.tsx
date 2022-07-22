@@ -1,6 +1,6 @@
 import React from "react";
+import { Prisma } from "@prisma/client";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-
 import { TokenCirculating } from "../components/TokenCirculating";
 
 export default {
@@ -17,15 +17,15 @@ const Template: ComponentStory<typeof TokenCirculating> = (args) => (
 
 export const Default = Template.bind({});
 Default.args = {
-  blockNumber: 5212755,
-  circulatingSupply: 58906004,
+  blockNumber: BigInt(5212755),
+  circulatingSupply: new Prisma.Decimal(58906004),
 
-  totalLocked: 54850522,
-  totalStaked: 54958126,
-  stakingTarget: 56878263,
+  totalLocked: new Prisma.Decimal(54850522),
+  totalStaked: new Prisma.Decimal(54958126),
+  stakingTarget: new Prisma.Decimal(56878263),
 
-  lockedByGovernance: 21960129,
-  lockedVestings: 19718422,
-  lockedRewards: 13171971,
-  timeLocked: 32890393,
+  lockedByGovernance: new Prisma.Decimal(21960129),
+  lockedVestings: new Prisma.Decimal(19718422),
+  lockedRewards: new Prisma.Decimal(13171971),
+  timeLocked: new Prisma.Decimal(32890393),
 };
