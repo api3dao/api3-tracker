@@ -204,16 +204,16 @@ model Treasury {
 model Api3Supply {
   ts                DateTime @id
   blockNumber       BigInt
-  circulatingSupply BigInt
+  circulatingSupply Decimal @db.Decimal(60, 16)
 
-  totalLocked   BigInt
-  totalStaked   BigInt
-  stakingTarget BigInt
+  totalLocked   Decimal @db.Decimal(60, 16)
+  totalStaked   Decimal @db.Decimal(60, 16)
+  stakingTarget Decimal @db.Decimal(60, 16)
 
-  lockedByGovernance BigInt
-  lockedVestings     BigInt
-  lockedRewards      BigInt
-  timeLocked         BigInt
+  lockedByGovernance Decimal @db.Decimal(60, 16)
+  lockedVestings     Decimal @db.Decimal(60, 16)
+  lockedRewards      Decimal @db.Decimal(60, 16)
+  timeLocked         Decimal @db.Decimal(60, 16)
 
   @@map("api3_supply")
 }

@@ -1,3 +1,27 @@
+INSERT INTO api3_supply (
+  "ts",
+  "blockNumber",
+  "circulatingSupply",
+  "totalLocked",
+  "totalStaked",
+  "stakingTarget",
+  "lockedByGovernance",
+  "lockedVestings",
+  "lockedRewards",
+  "timeLocked"
+) VALUES(
+  Now(),
+  2709,
+  60905966,
+  53350182,
+  55475770,
+  57128074,
+  21960129,
+  18825415,
+  12564638,
+  31390053
+);
+
 INSERT INTO "epochs" (
     "epoch",
     "createdAt",

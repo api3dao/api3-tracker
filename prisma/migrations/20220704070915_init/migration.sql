@@ -168,14 +168,14 @@ CREATE TABLE "treasuries" (
 CREATE TABLE "api3_supply" (
     "ts" TIMESTAMP(3) NOT NULL,
     "blockNumber" BIGINT NOT NULL,
-    "circulatingSupply" BIGINT NOT NULL,
-    "totalLocked" BIGINT NOT NULL,
-    "totalStaked" BIGINT NOT NULL,
-    "stakingTarget" BIGINT NOT NULL,
-    "lockedByGovernance" BIGINT NOT NULL,
-    "lockedVestings" BIGINT NOT NULL,
-    "lockedRewards" BIGINT NOT NULL,
-    "timeLocked" BIGINT NOT NULL,
+    "circulatingSupply" DECIMAL(60,16) NOT NULL,
+    "totalLocked" DECIMAL(60,16) NOT NULL,
+    "totalStaked" DECIMAL(60,16) NOT NULL,
+    "stakingTarget" DECIMAL(60,16) NOT NULL,
+    "lockedByGovernance" DECIMAL(60,16) NOT NULL,
+    "lockedVestings" DECIMAL(60,16) NOT NULL,
+    "lockedRewards" DECIMAL(60,16) NOT NULL,
+    "timeLocked" DECIMAL(60,16) NOT NULL,
 
     CONSTRAINT "api3_supply_pkey" PRIMARY KEY ("ts")
 );
