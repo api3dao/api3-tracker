@@ -3,8 +3,9 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { fetchWebconfig } from "../services/webconfig";
 import { Meta } from "../components/Meta";
+import { RewardsList } from "../components/RewardsList";
 import { Epochs } from "../services/epochs";
-import superjson from 'superjson';
+import superjson from "superjson";
 
 export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
@@ -12,7 +13,7 @@ export async function getServerSideProps() {
   return {
     props: {
       webconfig,
-      latest: JSON.stringify(JSON.parse(superjson.stringify(latest)).json,null,2),
+      latest: JSON.parse(superjson.stringify(latest)).json,
     }, // will be passed to the page component as props
   };
 }
@@ -26,7 +27,7 @@ const RewardsPage: NextPage = (props: any) => {
 
       <main>
         <h1>API3 DAO Rewards</h1>
-        <pre>{latest}</pre>
+        <RewardsList list={latest} />
       </main>
 
       <Footer />

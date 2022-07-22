@@ -30,13 +30,13 @@ export const RewardsListTr = (epoch: IEpoch) => (
         {toCurrency(epoch.blockNumber)}
       </a>
     </td>
-    <td className="text-center">{epoch.createdAt.toISOString()}</td>
+    <td className="text-center">{epoch.createdAt}</td>
     <td className="text-right darken">{epoch.apr}%</td>
     <td className="text-center accent">{epoch.rewardsPct}%</td>
     <td className="text-right darken">{toCurrency(epoch.members)}</td>
     <td className="text-right darken">{toCurrency(epoch.totalStake)}</td>
     <td className="text-right accent">{toCurrency(epoch.mintedShares)}</td>
-    <td className="text-center">{epoch.releaseDate.toISOString()}</td>
+    <td className="text-center">{epoch.releaseDate}</td>
   </tr>
 );
 

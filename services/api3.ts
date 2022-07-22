@@ -1,15 +1,17 @@
+import { Prisma } from '@prisma/client'
+
 export interface IEpoch {
-  isCurrent: boolean;
+  isCurrent: number;
   epoch: number; // id of epoch
-  createdAt: Date; // date of epoch event
-  apr: number; // APR during this epoch
-  rewardsPct: number;
+  createdAt: string; // date of epoch event
+  apr: Prisma.Decimal; // APR during this epoch
+  rewardsPct: Prisma.Decimal;
   members: number; // Number of members
   totalStake: number; // Total stake
   stakedRewards: number;
   totalShares: number; // Total shares
   mintedShares: number; // # of minted tokens
-  releaseDate: Date; // Date when minted tokens will be released
+  releaseDate: string; // Date when minted tokens will be released
 
   blockTx?: string;
   blockNumber?: number;
