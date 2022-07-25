@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { IEpoch, ISupply } from "./../services/api3";
 import { niceDate, toCurrency, toPct } from "./../services/format";
 import { StakingTrend } from "../components/StakingTrend";
+import { BorderedPanel } from "../components/BorderedPanel";
 
 export interface IRewardsSummaryProps {
   supply: ISupply;
@@ -39,6 +40,60 @@ export const RewardsSummary = (props: IRewardsSummaryProps) => (
       totalStaked={props.supply.totalStaked}
       stakingTarget={props.supply.stakingTarget}
     />
+  </div>
+);
+
+export const RewardsListSmScreen = (epoch: IEpoch) => (
+  <div className="px-3">
+    <BorderedPanel title={`Epoch ${toCurrency(epoch.epoch)}`}>
+      <div className="text-center">
+        Block#{" "}
+        <a
+          href={`https://etherscan.io/tx/${epoch.blockTx}#eventlog`}
+          rel="nofollow noopener noreferrer"
+          target="_blank"
+        >
+          {toCurrency(epoch.blockNumber)}
+        </a>
+      </div>
+      <div className="text-center darken">{niceDate(epoch.createdAt)}</div>
+      <div className="text-center darken">
+        APR:{" "}
+        <span className="text-bold text-2xl text-color-panel-title">
+          {epoch.apr + "%"}
+        </span>
+      </div>
+      <div className="text-center darken">
+        Rewards:{" "}
+        <span className="text-bold text-color-panel-title">
+          {epoch.rewardsPct + "%"}
+        </span>
+      </div>
+      <div className="text-center darken">
+        Members:{" "}
+        <span className="text-bold text-color-panel-title">
+          {toCurrency(epoch.members)}
+        </span>
+      </div>
+      <div className="text-center darken">
+        Total Staked:{" "}
+        <span className="text-bold text-color-panel-title">
+          {toCurrency(epoch.totalStake)}
+        </span>
+      </div>
+      <div className="text-center darken">
+        Minted:{" "}
+        <span className="text-bold text-color-panel-title">
+          {toCurrency(epoch.mintedShares)}
+        </span>
+      </div>
+      <div className="text-center darken mb-5">
+        Release Date:{" "}
+        <span className="text-bold text-color-panel-title">
+          {niceDate(epoch.releaseDate)}
+        </span>
+      </div>
+    </BorderedPanel>
   </div>
 );
 
@@ -86,15 +141,22 @@ export interface IRewardsListProps {
 
 export const RewardsList = (props: IRewardsListProps) => {
   return (
-    <div className="max-w-screen-lg mx-auto">
-      <table className="table invisible lg:visible">
-        <RewardsListThead />
-        <tbody>
-          {props.list.map((e) => (
-            <RewardsListTr key={e.epoch} {...e} />
-          ))}
-        </tbody>
-      </table>
+    <div>
+      <div className="lg:hidden">
+        {props.list.map((e) => (
+          <RewardsListSmScreen key={e.epoch} {...e} />
+        ))}
+      </div>
+      <div className="max-w-screen-lg mx-auto hidden lg:block">
+        <table className="table">
+          <RewardsListThead />
+          <tbody>
+            {props.list.map((e) => (
+              <RewardsListTr key={e.epoch} {...e} />
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
