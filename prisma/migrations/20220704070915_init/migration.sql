@@ -12,14 +12,14 @@ CREATE TABLE "epochs" (
     "chainId" INTEGER NOT NULL,
     "txHash" BYTEA NOT NULL,
     "apr" DECIMAL(10,2) NOT NULL,
-    "members" BIGINT NOT NULL,
-    "totalStake" BIGINT NOT NULL,
-    "totalShares" BIGINT NOT NULL,
-    "mintedShares" BIGINT NOT NULL,
+    "members" INTEGER NOT NULL,
+    "totalStake" DECIMAL(60,16) NOT NULL,
+    "totalShares" DECIMAL(60,16) NOT NULL,
+    "mintedShares" DECIMAL(60,16) NOT NULL,
     "releaseDate" TIMESTAMP(3) NOT NULL,
     "isCurrent" INTEGER NOT NULL,
     "rewardsPct" DECIMAL(10,4) NOT NULL,
-    "stakedRewards" BIGINT NOT NULL,
+    "stakedRewards" DECIMAL(60,16) NOT NULL,
 
     CONSTRAINT "epochs_pkey" PRIMARY KEY ("epoch")
 );

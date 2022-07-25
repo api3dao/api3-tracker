@@ -7,10 +7,10 @@ export interface IEpoch {
   apr: Prisma.Decimal; // APR during this epoch
   rewardsPct: Prisma.Decimal;
   members: number; // Number of members
-  totalStake: number; // Total stake
-  stakedRewards: number;
-  totalShares: number; // Total shares
-  mintedShares: number; // # of minted tokens
+  totalStake: Prisma.Decimal; // Total stake
+  stakedRewards: Prisma.Decimal;
+  totalShares: Prisma.Decimal; // Total shares
+  mintedShares: Prisma.Decimal; // # of minted tokens
   releaseDate: string; // Date when minted tokens will be released
 
   blockTx?: string;

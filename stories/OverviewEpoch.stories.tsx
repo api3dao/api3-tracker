@@ -25,10 +25,10 @@ CurrrentEpoch.args = {
   apr: new Prisma.Decimal(14.75),
   rewardsPct: new Prisma.Decimal(0.2829),
   members: 8000,
-  totalStake: 55481434,
-  stakedRewards: 13756546,
-  totalShares: 58903799,
-  mintedShares: 156944,
+  totalStake: new Prisma.Decimal(55481434),
+  stakedRewards: new Prisma.Decimal(13756546),
+  totalShares: new Prisma.Decimal(58903799),
+  mintedShares: new Prisma.Decimal(156944),
   releaseDate: new Date().toISOString(),
 };
 
@@ -40,9 +40,9 @@ PreviousEpoch.args = {
   apr: new Prisma.Decimal(14.75),
   rewardsPct: new Prisma.Decimal(0.2829),
   members: 8000,
-  totalStake: 55481434,
-  stakedRewards: 13756546,
-  totalShares: 58903799,
-  mintedShares: 156944,
+  totalStake: new Prisma.Decimal(55481434),
+  stakedRewards: new Prisma.Decimal(13756546),
+  totalShares: new Prisma.Decimal(58903799),
+  mintedShares: new Prisma.Decimal(156944),
   releaseDate: new Date().toISOString(),
 };

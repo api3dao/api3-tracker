@@ -18,14 +18,14 @@ model Epoch {
   chainId       Int // Chain ID
   txHash        Bytes // Transaction hash
   apr           Decimal  @db.Decimal(10, 2) // APR during this epoch
-  members       BigInt // Number of members
-  totalStake    BigInt // Total stake
-  totalShares   BigInt // Total shares
-  mintedShares  BigInt // # of minted tokens
+  members       Int // Number of members
+  totalStake    Decimal  @db.Decimal(60, 16) // Total stake
+  totalShares   Decimal  @db.Decimal(60, 16) // Total shares
+  mintedShares  Decimal  @db.Decimal(60, 16) // # of minted tokens
   releaseDate   DateTime // Date when minted tokens will be released
   isCurrent     Int // whether this epoch is current
   rewardsPct    Decimal  @db.Decimal(10, 4) // real epoch rewards (calculated from APR)
-  stakedRewards BigInt // total staked rewards at the moment of the epoch
+  stakedRewards Decimal  @db.Decimal(60, 16) // total staked rewards at the moment of the epoch
 
   @@map("epochs")
 }

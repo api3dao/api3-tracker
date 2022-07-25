@@ -10,11 +10,17 @@ import { Epochs } from "../services/epochs";
 import { Supply } from "../services/supply";
 import superjson from "superjson";
 
+const sum = (x: Prisma.Decimal, y: Prisma.Decimal): Prisma.Decimal => {
+   return new Prisma.Decimal(0);
+};
+
 export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
   const latest: Array<IEpoch> = await Epochs.fetchLatest(3);
-  // const totalMinted = latest.map((x: IEpoch) => x.mintedShares).reduce(Prisma.Decimal.add, new Prisma.Decimal(0));
-  const totalMinted = new Prisma.Decimal(0);
+  let totalMinted = new Prisma.Decimal(0);
+  for (const epoch of latest) {
+     totalMinted = totalMinted.add(epoch.mintedShares);
+  }
   const supply = await Supply.fetch();
   return {
     props: {
