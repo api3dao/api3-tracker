@@ -15,7 +15,8 @@ export const toCurrency = (x: any): string => {
 
 export const toPct = (x: any): string => {
   if (typeof x === "undefined" || toCurrency(x) === "") return "";
-  if (typeof x === "object") return x.toString() + '%';
+  if (typeof x === "object" || typeof x === "string") return x.toString() + '%';
+  if (typeof x === "number" && x < 1) return x.toString() + '%';
   return `${toCurrency(x).replace(/0*$/g, "").replace(/\.$/, "")}%`;
 };
 

@@ -50,35 +50,40 @@ export const Header = (props: IHeader) => {
   const toggle = () => {
     setState({ ...state, mobileOpen: !state.mobileOpen });
   };
-  return [(
-    <header key={0} className="fixed bg-color-body w-full z-10 top-0 left-0 lg:pb-1 border-b border-1px border-solid">
-      <div className="hidden lg:flex items-center mx-auto max-w-screen-lg">
-        <div className="flex flex-col py-2">
-          <span className="text-color-menu-active text-5xl py-2 text-center font-bold">
-            API3 DAO Tracker
-          </span>
-          <span className="text-color-accent text-sm text-left">
-            on-chain analytics: members, staking rewards, API3 token supply
-          </span>
-        </div>
-        <div className="flex-1">&nbsp;</div>
-        <Menu active={props.active} />
-      </div>
-      <div className="lg:hidden flex p-3">
-        <div className="flex-1">&nbsp;</div>
-        <button onClick={toggle}>
-          {state.mobileOpen ? iconClose : iconMenu}
-        </button>
-      </div>
-      {state.mobileOpen ? (
-        <div className="lg:hidden lg:p-5 border-t border-1px border-solid">
+  return (
+    <div>
+      <header
+        className="fixed bg-color-body w-full z-10 top-0 left-0 lg:pb-1 border-b border-1px border-solid"
+      >
+        <div className="hidden lg:flex items-center mx-auto max-w-screen-lg">
+          <div className="flex flex-col py-2">
+            <span className="text-color-menu-active text-5xl py-2 text-center font-bold">
+              API3 DAO Tracker
+            </span>
+            <span className="text-color-accent text-sm text-left">
+              on-chain analytics: members, staking rewards, API3 token supply
+            </span>
+          </div>
+          <div className="flex-1">&nbsp;</div>
           <Menu active={props.active} />
         </div>
-      ) : (
-        false
-      )}
-    </header>
-  ), (
-    <div key={1} className="my-4 lg:hidden">&nbsp;</div>
-  )];
+        <div className="lg:hidden flex p-3">
+          <div className="flex-1">&nbsp;</div>
+          <button onClick={toggle}>
+            {state.mobileOpen ? iconClose : iconMenu}
+          </button>
+        </div>
+        {state.mobileOpen ? (
+          <div className="lg:hidden lg:p-5 border-t border-1px border-solid">
+            <Menu active={props.active} />
+          </div>
+        ) : (
+          false
+        )}
+      </header>
+      <div className="my-4 lg:hidden">
+        &nbsp;
+      </div>
+    </div>
+  );
 };
