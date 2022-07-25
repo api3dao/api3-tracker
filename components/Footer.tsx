@@ -8,8 +8,8 @@ export const Footer = () => {
   const githubLink = "https://github.com/api3dao/api3-tracker";
   const lastBlock = 15125158;
   return (
-    <footer className="bg-color-body text-color-text">
-      <div className="md:fixed md:bottom-0 md:left-0 md:z-20 w-full">
+    <footer>
+      <div className="bg-color-body text-color-text md:fixed md:bottom-0 md:left-0 md:z-20 w-full">
         <div className="text-center my-2 text-sm">
           <span className="text-center block leading-6 md:inline md:text-left">
             {" "}
