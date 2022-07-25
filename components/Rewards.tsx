@@ -1,6 +1,46 @@
 import React from "react";
-import { IEpoch } from "./../services/api3";
-import { niceDate, toCurrency } from "./../services/format";
+import { Prisma } from "@prisma/client";
+import { IEpoch, ISupply } from "./../services/api3";
+import { niceDate, toCurrency, toPct } from "./../services/format";
+import { StakingTrend } from "../components/StakingTrend";
+
+export interface IRewardsSummaryProps {
+  supply: ISupply;
+  latest: IEpoch;
+  totalMinted: Prisma.Decimal;
+}
+
+export const RewardsSummary = (props: IRewardsSummaryProps) => (
+  <div className="my-6 mx-5 lg:mx-0">
+    <p className="text-center text-color-grey">
+      API3 DAO minted{" "}
+      <span className="text-bold text-color-panel-title">
+        {toCurrency(props.totalMinted)}
+      </span>{" "}
+      API3 tokens as staking rewards for its members.
+    </p>
+    <p className="text-center text-color-grey my-2">
+      Current Epoch is{" "}
+      <span className="text-bold text-color-panel-title">
+        {toCurrency(props.latest.epoch)}
+      </span>{" "}
+      with APR{" "}
+      <span className="text-bold text-color-panel-title">
+        {toPct(props.latest.apr)}
+      </span>{" "}
+      which means the next reward will be{" "}
+      <span className="text-bold text-color-panel-title">
+        {toPct(props.latest.rewardsPct)}
+      </span>{" "}
+      to your current stake and your locked rewards.
+    </p>
+    <StakingTrend
+      apr={props.latest.apr}
+      totalStaked={props.supply.totalStaked}
+      stakingTarget={props.supply.stakingTarget}
+    />
+  </div>
+);
 
 export const RewardsListThead = () => (
   <thead>
@@ -31,8 +71,8 @@ export const RewardsListTr = (epoch: IEpoch) => (
       </a>
     </td>
     <td className="text-center">{niceDate(epoch.createdAt)}</td>
-    <td className="text-center darken">{epoch.apr+'%'}</td>
-    <td className="text-center accent">{epoch.rewardsPct+'%'}</td>
+    <td className="text-center darken">{epoch.apr + "%"}</td>
+    <td className="text-center accent">{epoch.rewardsPct + "%"}</td>
     <td className="text-right darken">{toCurrency(epoch.members)}</td>
     <td className="text-right darken">{toCurrency(epoch.totalStake)}</td>
     <td className="text-right accent">{toCurrency(epoch.mintedShares)}</td>

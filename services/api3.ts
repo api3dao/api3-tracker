@@ -32,9 +32,9 @@ export interface ISupply {
 }
 
 export interface IStakingTrendProps {
-  apr: number;
-  totalStaked: number;
-  stakingTarget: number;
+  apr: Prisma.Decimal;
+  totalStaked: Prisma.Decimal;
+  stakingTarget: Prisma.Decimal;
 }
 
 export interface ITreasury {

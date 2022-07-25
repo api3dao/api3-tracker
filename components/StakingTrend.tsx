@@ -1,9 +1,10 @@
 import React from "react";
+import { Prisma } from "@prisma/client";
 import { IStakingTrendProps } from "../services/api3";
 
 export const StakingTrend = (props: IStakingTrendProps) => {
-  const isMin = props.apr <= 0.025;
-  const isMax = props.apr >= 0.75;
+  const isMin = props.apr <= new Prisma.Decimal(0.025);
+  const isMax = props.apr >= new Prisma.Decimal(0.75);
   const goingDown = props.totalStaked > props.stakingTarget;
   const dir = "text-center p-3 text-sm " + (
     isMax || isMin ? "text-color-text" : goingDown ? "text-color-error" : "text-color-accent"

@@ -1,7 +1,7 @@
 import React from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { Prisma } from "@prisma/client";
-import { RewardsList } from "../components/RewardsList";
+import { RewardsList } from "../components/Rewards";
 
 export default {
   title: "Rewards/List",

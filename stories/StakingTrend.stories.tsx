@@ -1,6 +1,6 @@
 import React from "react";
+import { Prisma } from "@prisma/client";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-
 import { StakingTrend } from "../components/StakingTrend";
 
 export default {
@@ -17,28 +17,28 @@ const Template: ComponentStory<typeof StakingTrend> = (args) => (
 
 export const Min = Template.bind({});
 Min.args = {
-  apr: 0.00003,
-  totalStaked: 1,
-  stakingTarget: 100,
+  apr: new Prisma.Decimal(0.00003),
+  totalStaked: new Prisma.Decimal(1),
+  stakingTarget: new Prisma.Decimal(100),
 };
 
 export const Downtrend = Template.bind({});
 Downtrend.args = {
-  apr: 0.5,
-  totalStaked: 200,
-  stakingTarget: 100,
+  apr: new Prisma.Decimal(0.5),
+  totalStaked: new Prisma.Decimal(200),
+  stakingTarget: new Prisma.Decimal(100),
 };
 
 export const Uptrend = Template.bind({});
 Uptrend.args = {
-  apr: 0.5,
-  totalStaked: 100,
-  stakingTarget: 200,
+  apr: new Prisma.Decimal(0.5),
+  totalStaked: new Prisma.Decimal(100),
+  stakingTarget: new Prisma.Decimal(200),
 };
 
 export const Max = Template.bind({});
 Max.args = {
-  apr: 0.75,
-  totalStaked: 100,
-  stakingTarget: 200,
+  apr: new Prisma.Decimal(0.75),
+  totalStaked: new Prisma.Decimal(100),
+  stakingTarget: new Prisma.Decimal(200),
 };
