@@ -60,13 +60,13 @@ export const RewardsListSmScreen = (epoch: IEpoch) => (
       <div className="text-center darken">
         APR:{" "}
         <span className="text-bold text-2xl text-color-panel-title">
-          {epoch.apr + "%"}
+          {toPct(epoch.apr)}
         </span>
       </div>
       <div className="text-center darken">
         Rewards:{" "}
         <span className="text-bold text-color-panel-title">
-          {epoch.rewardsPct + "%"}
+          {toPct(epoch.rewardsPct)}
         </span>
       </div>
       <div className="text-center darken">
@@ -126,8 +126,8 @@ export const RewardsListTr = (epoch: IEpoch) => (
       </a>
     </td>
     <td className="text-center">{niceDate(epoch.createdAt)}</td>
-    <td className="text-center darken">{epoch.apr + "%"}</td>
-    <td className="text-center accent">{epoch.rewardsPct + "%"}</td>
+    <td className="text-center darken">{toPct(epoch.apr)}</td>
+    <td className="text-center accent">{toPct(epoch.rewardsPct)}</td>
     <td className="text-right darken">{toCurrency(epoch.members)}</td>
     <td className="text-right darken">{toCurrency(epoch.totalStake)}</td>
     <td className="text-right accent">{toCurrency(epoch.mintedShares)}</td>

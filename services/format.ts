@@ -1,3 +1,5 @@
+import { Prisma } from "@prisma/client";
+
 export const shorten = (x: string, num: number): string => {
   return x.substring(0, num + 2) + ".." + x.substring(x.length - num, x.length);
 };
@@ -13,6 +15,7 @@ export const toCurrency = (x: any): string => {
 
 export const toPct = (x: any): string => {
   if (typeof x === "undefined" || toCurrency(x) === "") return "";
+  if (typeof x === "object") return x.toString() + '%;
   return `${toCurrency(x).replace(/0*$/g, "").replace(/\.$/, "")}%`;
 };
 
