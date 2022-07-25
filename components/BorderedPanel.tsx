@@ -14,7 +14,7 @@ export const BorderedPanel = (props: IBorderedPanelProps) => {
     (props.big ? "text-2xl " : "text-lg");
   return (
     <div className="my-8">
-      <div className="flex w-full my-0">
+      <div className="flex justify-center my-0">
         <div className="w-8 min-w-16px border border-solid border-color-panel-border border-r-0">&nbsp;</div>
         <div className="flex flex-col">
           <div className={classTitle}>{props.title}</div>
