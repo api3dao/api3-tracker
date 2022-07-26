@@ -9,5 +9,5 @@ COPY . .
 COPY --from=dependencies /app/node_modules ./node_modules
 RUN yarn build-storybook
 
-FROM nginx as runner
+FROM nginx:alpine
 COPY --from=builder /app/storybook-static /usr/share/nginx/html
