@@ -81,7 +81,7 @@ export const Header = (props: IHeader) => {
           false
         )}
       </header>
-      <div className="my-4 lg:hidden">
+      <div className="my-4 lg:my-14">
         &nbsp;
       </div>
     </div>
