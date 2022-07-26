@@ -1,7 +1,6 @@
 import type { NextPage } from "next";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
-import styles from "../styles/Home.module.css";
 import { fetchWebconfig } from "../services/webconfig";
 import { Meta } from "../components/Meta";
 
@@ -9,9 +8,9 @@ export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
   return {
     props: {
-      webconfig
+      webconfig,
     }, // will be passed to the page component as props
-  }
+  };
 }
 
 const VotingsPage: NextPage = (props: any) => {
@@ -19,11 +18,11 @@ const VotingsPage: NextPage = (props: any) => {
   // TODO: split into components
 
   return (
-    <div className={styles.container}>
-      <Meta webconfig={webconfig} page='votings' />
+    <div>
+      <Meta webconfig={webconfig} page="votings" />
       <Header active="/votings" />
 
-      <main className={styles.main}>
+      <main>
         <div className="inner">
           <h1>API3 DAO TREASURY</h1>
           <p className="centered darken">

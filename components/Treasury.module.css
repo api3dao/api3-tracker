@@ -1,0 +1,17 @@
+.title {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--color-cell-title);
+  font-weight: 500;
+  text-transform: uppercase;
+}
+.bigTitle {
+  font-weight: 900;
+  font-size: 1.5rem;
+  line-height: 35px;
+}
+
+.cell {
+  border-top: 1px solid var(--color-cell-border);
+  box-sizing: border-box;
+}

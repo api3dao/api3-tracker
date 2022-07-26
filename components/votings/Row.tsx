@@ -15,7 +15,10 @@ export const Row = () => (
       </div>
       <small className="vote-script">
         Transfer{" "}
-        <strong style={{ color: "var(--color-panel-title)" }} title="111,363.670000">
+        <strong
+          style={{ color: "var(--color-panel-title)" }}
+          title="111,363.670000"
+        >
           111,363
         </strong>{" "}
         USDC to{" "}
