@@ -16,6 +16,7 @@
     "format:check": "prettier --check \"./**/*.{ts,tsx,js,jsx,css,scss,md,json,prisma}\" --loglevel debug",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
+    "rm-dev": "cat package.json | grep -v story | grep -v prettier > package.backup.json && mv package.backup.json package.json",
     "prepare": "husky install"
   },
   "dependencies": {

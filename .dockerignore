@@ -3,3 +3,4 @@ terraform/
 .git/
 .husky/
 .next/
+storybook-static/
