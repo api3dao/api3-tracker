@@ -3,20 +3,29 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { BorderedPanel } from "../components/BorderedPanel";
 import { fetchWebconfig } from "../services/webconfig";
+import { ISupply, IEpoch } from "../services/api3";
+import { Epochs } from "../services/epochs";
+import { Supply } from "../services/supply";
 import { Meta } from "../components/Meta";
+import superjson from "superjson";
 
 export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
+  const latest: Array<IEpoch> = await Epochs.fetchLatest(3);
+  const current: IEpoch = latest[0];
+  const supply = await Supply.fetch();
   return {
     props: {
       webconfig,
+      latest: JSON.parse(superjson.stringify(latest)).json,
+      supply: JSON.parse(superjson.stringify(supply)).json,
+      current: JSON.parse(superjson.stringify(current)).json,
     }, // will be passed to the page component as props
   };
 }
 
 const HomePage: NextPage = (props: any) => {
-  // TODO: split into components
-  const { webconfig } = props;
+  const { latest, current, webconfig } = props;
   return (
     <div>
       <Meta webconfig={webconfig} />
@@ -24,13 +33,13 @@ const HomePage: NextPage = (props: any) => {
       <main>
         <div className="inner">
           <div className="centered">
-            <h1>API3 DAO Tracker</h1>
+            <h1 className="uppercase">API3 DAO Tracker</h1>
             <p className="m20">
-              API3 DAO currently involves <a href="./wallets">5,223 members</a>{" "}
-              participated in <a href="./votings">37 votings</a>
+              API3 DAO currently involves{" "}
+              <a href="./wallets">{current.members} members</a>{" "}
             </p>
             <div className="spacer"></div>
-            <h2>API3 Staking Rewards</h2>
+            <h2 className="my-2 font-bold text-2xl uppercase">API3 Staking Rewards</h2>
             <div className="dash-row">
               <div className="dash-col dash-col-3">
                 <BorderedPanel title="Current Epoch">
@@ -160,7 +169,7 @@ const HomePage: NextPage = (props: any) => {
               </div>
             </div>
             <div>
-              <h2 className="m20">API3 Token Supply</h2>
+              <h2 className="uppercase text-bold">API3 Token Supply</h2>
               <div className="dash-row" id="api3-locked-tokens">
                 <div className="dash-col dash-col-4 cell-t">
                   <h3 className="cell-title">Locked by governance</h3>
