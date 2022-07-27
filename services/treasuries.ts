@@ -16,10 +16,12 @@ export const Treasuries = {
   },
   // fetch the latest values of the given treasury
   fetch: async (ttype: TreasuryType): Promise<Array<any>> => {
-    return (await prisma.treasury.findMany({
-      where: { ttype, current: 1 },
-      orderBy: { ts: "desc" },
-      take: 1,
-    })).map((x: any) => ({ ...x }));
+    return (
+      await prisma.treasury.findMany({
+        where: { ttype, current: 1 },
+        orderBy: { ts: "desc" },
+        take: 1,
+      })
+    ).map((x: any) => ({ ...x }));
   },
 };
