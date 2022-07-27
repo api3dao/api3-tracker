@@ -17,28 +17,28 @@ const Template: ComponentStory<typeof StakingTrend> = (args) => (
 
 export const Min = Template.bind({});
 Min.args = {
-  apr: new Prisma.Decimal(0.00003),
+  apr: new Prisma.Decimal(2.5),
   totalStaked: new Prisma.Decimal(1),
   stakingTarget: new Prisma.Decimal(100),
 };
 
 export const Downtrend = Template.bind({});
 Downtrend.args = {
-  apr: new Prisma.Decimal(0.5),
+  apr: new Prisma.Decimal(50),
   totalStaked: new Prisma.Decimal(200),
   stakingTarget: new Prisma.Decimal(100),
 };
 
 export const Uptrend = Template.bind({});
 Uptrend.args = {
-  apr: new Prisma.Decimal(0.5),
+  apr: new Prisma.Decimal(5),
   totalStaked: new Prisma.Decimal(100),
   stakingTarget: new Prisma.Decimal(200),
 };
 
 export const Max = Template.bind({});
 Max.args = {
-  apr: new Prisma.Decimal(0.75),
+  apr: new Prisma.Decimal(75),
   totalStaked: new Prisma.Decimal(100),
   stakingTarget: new Prisma.Decimal(200),
 };

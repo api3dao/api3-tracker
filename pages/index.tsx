@@ -65,7 +65,11 @@ const HomePage: NextPage = (props: any) => {
               <div className="lg:flex-1">
                 <TokenCirculating {...supply} />
                 <TokenStaking {...supply} />
-                <StakingTrend {...supply} />
+                <StakingTrend
+                  apr={current.apr}
+                  stakingTarget={supply.stakingTarget}
+                  totalStaked={supply.totalStaked}
+                />
               </div>
             </div>
           </div>
