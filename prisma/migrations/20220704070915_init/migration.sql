@@ -162,6 +162,7 @@ CREATE TABLE "treasuries" (
     "token" TEXT NOT NULL,
     "tokenAddress" BYTEA  NOT NULL,
     "value" DECIMAL(60, 18)  NOT NULL,
+    "current" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "treasuries_pkey" PRIMARY KEY ("ts","ttype","token")
 );

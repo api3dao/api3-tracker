@@ -198,6 +198,7 @@ model Treasury {
   token        String
   tokenAddress Bytes
   value        Decimal      @db.Decimal(60, 18)
+  current      Int          @default(0)
 
   @@id([ts, ttype, token])
   @@map("treasuries")
