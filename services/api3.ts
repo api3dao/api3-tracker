@@ -42,8 +42,8 @@ export interface ITreasury {
   title: string;
   // address of the treasury
   address: string;
-  valueAPI3: Prisma.Decimal;
-  valueUSDC: Prisma.Decimal;
+  valueAPI3?: Prisma.Decimal;
+  valueUSDC?: Prisma.Decimal;
 }
 
 export interface IVoting {

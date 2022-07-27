@@ -87,8 +87,8 @@ INSERT INTO "epochs" (
 INSERT INTO "treasuries" (
   "ts",
   "ttype",
-  "token",
   "address",
+  "token",
   "tokenAddress",
   "value",
   "current"
