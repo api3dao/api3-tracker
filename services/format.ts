@@ -27,9 +27,9 @@ export const toPct = (x: any): string => {
 
 export const toHex = (x: any): string => {
   if (Buffer.isBuffer(x)) {
-    return '0x' + x.toString('hex');
+    return "0x" + x.toString("hex");
   }
-  return '' + x;
+  return "" + x;
 };
 
 export const months = [

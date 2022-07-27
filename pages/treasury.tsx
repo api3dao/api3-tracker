@@ -15,8 +15,14 @@ export async function getServerSideProps() {
   const list = await Promise.all(
     names.map(async (ttype: ITreasuryType): Promise<ITreasury> => {
       const tokens = await Treasuries.fetch(ttype);
-      const valueAPI3 = tokens.filter((x: any) => x.token === "API3").map((x: any) => x.value)[0] || 0;
-      const valueUSDC = tokens.filter((x: any) => x.token === "USDC").map((x: any) => x.value)[0] || 0;
+      const valueAPI3 =
+        tokens
+          .filter((x: any) => x.token === "API3")
+          .map((x: any) => x.value)[0] || 0;
+      const valueUSDC =
+        tokens
+          .filter((x: any) => x.token === "USDC")
+          .map((x: any) => x.value)[0] || 0;
       return {
         title: ttype.charAt(0).toUpperCase() + ttype.slice(1).toLowerCase(),
         address: toHex(tokens[0].address),
@@ -45,8 +51,8 @@ const TreasuryPage: NextPage = (props: any) => {
         <div className="inner">
           <h1>API3 DAO TREASURIES</h1>
           <p className="centered darken">
-            API3 DAO currently operates {list.length} treasuries.
-            Balances below are updated each hour.
+            API3 DAO currently operates {list.length} treasuries. Balances below
+            are updated each hour.
           </p>
         </div>
         <div className="max-w-screen-lg lg:flex justify-center my-0 mx-auto">
