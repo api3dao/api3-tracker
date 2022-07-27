@@ -40,8 +40,8 @@ export interface IStakingTrendProps {
 export interface ITreasury {
   title: string;
   address: string;
-  valueAPI3: number;
-  valueUSDC: number;
+  valueAPI3: Prisma.Decimal;
+  valueUSDC: Prisma.Decimal;
 }
 
 export interface IVoting {

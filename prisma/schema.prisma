@@ -194,10 +194,11 @@ enum TreasuryType {
 model Treasury {
   ts       DateTime
   ttype    TreasuryType
+  token    String
   value    BigInt
   decimals Int
 
-  @@id([ts, ttype])
+  @@id([ts, ttype, token])
   @@map("treasuries")
 }
 
