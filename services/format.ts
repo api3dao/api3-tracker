@@ -20,6 +20,13 @@ export const toPct = (x: any): string => {
   return `${toCurrency(x).replace(/0*$/g, "").replace(/\.$/, "")}%`;
 };
 
+export const toHex = (x: any): string => {
+  if (Buffer.isBuffer(x)) {
+    return '0x' + x.toString('hex');
+  }
+  return '' + x;
+};
+
 export const months = [
   "Jan",
   "Feb",
