@@ -13,13 +13,13 @@ CREATE TABLE "epochs" (
     "txHash" BYTEA NOT NULL,
     "apr" DECIMAL(10,2) NOT NULL,
     "members" INTEGER NOT NULL,
-    "totalStake" DECIMAL(60,16) NOT NULL,
-    "totalShares" DECIMAL(60,16) NOT NULL,
-    "mintedShares" DECIMAL(60,16) NOT NULL,
+    "totalStake" DECIMAL(60, 18) NOT NULL,
+    "totalShares" DECIMAL(60, 18) NOT NULL,
+    "mintedShares" DECIMAL(60, 18) NOT NULL,
     "releaseDate" TIMESTAMP(3) NOT NULL,
     "isCurrent" INTEGER NOT NULL,
     "rewardsPct" DECIMAL(10,4) NOT NULL,
-    "stakedRewards" DECIMAL(60,16) NOT NULL,
+    "stakedRewards" DECIMAL(60, 18) NOT NULL,
 
     CONSTRAINT "epochs_pkey" PRIMARY KEY ("epoch")
 );
@@ -161,7 +161,7 @@ CREATE TABLE "treasuries" (
     "address" BYTEA NOT NULL,
     "token" TEXT NOT NULL,
     "tokenAddress" BYTEA  NOT NULL,
-    "value" DECIMAL(60, 16)  NOT NULL,
+    "value" DECIMAL(60, 18)  NOT NULL,
 
     CONSTRAINT "treasuries_pkey" PRIMARY KEY ("ts","ttype","token")
 );
@@ -170,14 +170,14 @@ CREATE TABLE "treasuries" (
 CREATE TABLE "api3_supply" (
     "ts" TIMESTAMP(3) NOT NULL,
     "blockNumber" BIGINT NOT NULL,
-    "circulatingSupply" DECIMAL(60,16) NOT NULL,
-    "totalLocked" DECIMAL(60,16) NOT NULL,
-    "totalStaked" DECIMAL(60,16) NOT NULL,
-    "stakingTarget" DECIMAL(60,16) NOT NULL,
-    "lockedByGovernance" DECIMAL(60,16) NOT NULL,
-    "lockedVestings" DECIMAL(60,16) NOT NULL,
-    "lockedRewards" DECIMAL(60,16) NOT NULL,
-    "timeLocked" DECIMAL(60,16) NOT NULL,
+    "circulatingSupply" DECIMAL(60, 18) NOT NULL,
+    "totalLocked" DECIMAL(60, 18) NOT NULL,
+    "totalStaked" DECIMAL(60, 18) NOT NULL,
+    "stakingTarget" DECIMAL(60, 18) NOT NULL,
+    "lockedByGovernance" DECIMAL(60, 18) NOT NULL,
+    "lockedVestings" DECIMAL(60, 18) NOT NULL,
+    "lockedRewards" DECIMAL(60, 18) NOT NULL,
+    "timeLocked" DECIMAL(60, 18) NOT NULL,
 
     CONSTRAINT "api3_supply_pkey" PRIMARY KEY ("ts")
 );

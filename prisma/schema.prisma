@@ -19,13 +19,13 @@ model Epoch {
   txHash        Bytes // Transaction hash
   apr           Decimal  @db.Decimal(10, 2) // APR during this epoch
   members       Int // Number of members
-  totalStake    Decimal  @db.Decimal(60, 16) // Total stake
-  totalShares   Decimal  @db.Decimal(60, 16) // Total shares
-  mintedShares  Decimal  @db.Decimal(60, 16) // # of minted tokens
+  totalStake    Decimal  @db.Decimal(60, 18) // Total stake
+  totalShares   Decimal  @db.Decimal(60, 18) // Total shares
+  mintedShares  Decimal  @db.Decimal(60, 18) // # of minted tokens
   releaseDate   DateTime // Date when minted tokens will be released
   isCurrent     Int // whether this epoch is current
   rewardsPct    Decimal  @db.Decimal(10, 4) // real epoch rewards (calculated from APR)
-  stakedRewards Decimal  @db.Decimal(60, 16) // total staked rewards at the moment of the epoch
+  stakedRewards Decimal  @db.Decimal(60, 18) // total staked rewards at the moment of the epoch
 
   @@map("epochs")
 }
@@ -197,7 +197,7 @@ model Treasury {
   address  Bytes
   token    String
   tokenAddress Bytes
-  value    Decimal @db.Decimal(60, 16)
+  value    Decimal @db.Decimal(60, 18)
 
   @@id([ts, ttype, token])
   @@map("treasuries")
@@ -206,16 +206,16 @@ model Treasury {
 model Api3Supply {
   ts                DateTime @id
   blockNumber       BigInt
-  circulatingSupply Decimal  @db.Decimal(60, 16)
+  circulatingSupply Decimal  @db.Decimal(60, 18)
 
-  totalLocked   Decimal @db.Decimal(60, 16)
-  totalStaked   Decimal @db.Decimal(60, 16)
-  stakingTarget Decimal @db.Decimal(60, 16)
+  totalLocked   Decimal @db.Decimal(60, 18)
+  totalStaked   Decimal @db.Decimal(60, 18)
+  stakingTarget Decimal @db.Decimal(60, 18)
 
-  lockedByGovernance Decimal @db.Decimal(60, 16)
-  lockedVestings     Decimal @db.Decimal(60, 16)
-  lockedRewards      Decimal @db.Decimal(60, 16)
-  timeLocked         Decimal @db.Decimal(60, 16)
+  lockedByGovernance Decimal @db.Decimal(60, 18)
+  lockedVestings     Decimal @db.Decimal(60, 18)
+  lockedRewards      Decimal @db.Decimal(60, 18)
+  timeLocked         Decimal @db.Decimal(60, 18)
 
   @@map("api3_supply")
 }
