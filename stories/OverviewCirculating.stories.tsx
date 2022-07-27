@@ -12,7 +12,9 @@ export default {
 } as ComponentMeta<typeof TokenCirculating>;
 
 const Template: ComponentStory<typeof TokenCirculating> = (args) => (
-  <div className="mx-auto max-w-sm"><TokenCirculating {...args} /></div>
+  <div className="mx-auto max-w-sm">
+    <TokenCirculating {...args} />
+  </div>
 );
 
 export const Default = Template.bind({});

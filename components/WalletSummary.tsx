@@ -43,9 +43,7 @@ export const WalletSummary = (props: IWallet) => {
           <div className="lg:mt-6 lg:flex border-t border-b border-solid border-color-panel-border">
             <div className="flex-1">
               <div className={classTitle}>Withdrawn</div>
-              <div className={classValue}>
-                {toCurrency(props.userWithdrew)}
-              </div>
+              <div className={classValue}>{toCurrency(props.userWithdrew)}</div>
             </div>
             <div className="flex-1">
               <div className={classTitle}>Locked Rewards</div>

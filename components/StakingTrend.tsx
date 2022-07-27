@@ -7,10 +7,16 @@ export const StakingTrend = (props: IStakingTrendProps) => {
   const isMin = aprPct <= new Prisma.Decimal(0.025);
   const isMax = aprPct >= new Prisma.Decimal(0.75);
 
-  const goingUp = new Prisma.Decimal(props.totalStaked) < new Prisma.Decimal(props.stakingTarget);
-  const dir = "text-center p-3 text-sm " + (
-    (isMin || !goingUp) ? "text-color-error" : (!isMax ? "text-color-accent": "")
-  );
+  const goingUp =
+    new Prisma.Decimal(props.totalStaked) <
+    new Prisma.Decimal(props.stakingTarget);
+  const dir =
+    "text-center p-3 text-sm " +
+    (isMin || !goingUp
+      ? "text-color-error"
+      : !isMax
+      ? "text-color-accent"
+      : "");
 
   let note = "";
   if (isMin)

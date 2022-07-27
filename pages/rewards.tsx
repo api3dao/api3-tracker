@@ -15,7 +15,7 @@ export async function getServerSideProps() {
   const latest: Array<IEpoch> = await Epochs.fetchLatest(3);
   let totalMinted = new Prisma.Decimal(0);
   for (const epoch of latest) {
-     totalMinted = totalMinted.add(epoch.mintedShares);
+    totalMinted = totalMinted.add(epoch.mintedShares);
   }
   const supply = await Supply.fetch();
   return {
@@ -37,7 +37,11 @@ const RewardsPage: NextPage = (props: any) => {
 
       <main>
         <h1>API3 DAO Rewards</h1>
-        <RewardsSummary totalMinted={props.totalMinted} latest={latest[0]} supply={supply} />
+        <RewardsSummary
+          totalMinted={props.totalMinted}
+          latest={latest[0]}
+          supply={supply}
+        />
         <RewardsList list={latest} />
       </main>
 

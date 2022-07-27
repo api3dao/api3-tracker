@@ -5,10 +5,17 @@ import { IVoting } from "../services/api3";
 
 export const VotingSummary = (props: IVoting) => {
   const title = `API3 DAO ${props.status} Proposal Voting`;
-  let statusClass = "text-4xl py-6 my-10 text-align uppercase border border-solid border-color-border";
-  let statusText = ""
-  if (props.status == "Executed") { statusClass+=" text-color-accent"; statusText = "Accepted and Executed"; };
-  if (props.status == "Accepted") { statusClass+=" text-color-accent"; statusText = "Passing, not executed"; };
+  let statusClass =
+    "text-4xl py-6 my-10 text-align uppercase border border-solid border-color-border";
+  let statusText = "";
+  if (props.status == "Executed") {
+    statusClass += " text-color-accent";
+    statusText = "Accepted and Executed";
+  }
+  if (props.status == "Accepted") {
+    statusClass += " text-color-accent";
+    statusText = "Passing, not executed";
+  }
 
   return (
     <div className="text-center my-10">
@@ -33,7 +40,7 @@ export const VotingSummary = (props: IVoting) => {
           </span>
         </div>
       ) : null}
-      {statusText ? <div className={statusClass}>{statusText}</div>: null }
+      {statusText ? <div className={statusClass}>{statusText}</div> : null}
       <div className="my-8 min-w-full lg:grid lg:grid-cols-2 lg:justify-center">
         <div className="mx-auto lg:ml-auto lg:mr-5">
           <BorderedPanel title="For" big={true}>

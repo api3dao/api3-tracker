@@ -52,9 +52,7 @@ export const Header = (props: IHeader) => {
   };
   return (
     <div>
-      <header
-        className="fixed bg-color-body w-full z-10 top-0 left-0 lg:pb-1 border-b border-1px border-solid"
-      >
+      <header className="fixed bg-color-body w-full z-10 top-0 left-0 lg:pb-1 border-b border-1px border-solid">
         <div className="hidden lg:flex items-center mx-auto max-w-screen-lg">
           <div className="flex flex-col py-2">
             <span className="text-color-menu-active text-5xl py-2 text-center font-bold">
@@ -81,9 +79,7 @@ export const Header = (props: IHeader) => {
           false
         )}
       </header>
-      <div className="my-4 lg:my-14">
-        &nbsp;
-      </div>
+      <div className="my-4 lg:my-14">&nbsp;</div>
     </div>
   );
 };

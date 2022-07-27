@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 declare module globalThis {
-   var prisma: PrismaClient;
+  var prisma: PrismaClient;
 }
-

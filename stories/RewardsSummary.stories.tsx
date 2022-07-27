@@ -21,7 +21,6 @@ const TemplateSummary: ComponentStory<typeof RewardsSummary> = (args) => (
   <RewardsSummary {...args} />
 );
 
-
 export const Template = TemplateSummary.bind({});
 Template.args = {
   totalMinted: new Prisma.Decimal(1000000),
@@ -53,5 +52,3 @@ Template.args = {
       "0xd29d9e55df72365e1e9b096b8850a6b0f612819d47d1175055c380721dcc8d18",
   },
 };
-
-

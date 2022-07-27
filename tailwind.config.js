@@ -15,15 +15,15 @@ module.exports = {
     },
     extend: {
       minHeight: {
-        "96px": "96px"
+        "96px": "96px",
       },
       minWidth: {
         "16px": "16px",
-          "220px": "220px"
+        "220px": "220px",
       },
       maxWidth: {
         "220px": "220px",
-        "300px": "300px"
+        "300px": "300px",
       },
       colors: {
         "color-bk": "var(--color-bk)",
