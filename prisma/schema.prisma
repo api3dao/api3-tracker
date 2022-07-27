@@ -194,9 +194,10 @@ enum TreasuryType {
 model Treasury {
   ts       DateTime
   ttype    TreasuryType
+  address  Bytes
   token    String
-  value    BigInt
-  decimals Int
+  tokenAddress Bytes
+  value    Decimal @db.Decimal(60, 16)
 
   @@id([ts, ttype, token])
   @@map("treasuries")
@@ -205,7 +206,7 @@ model Treasury {
 model Api3Supply {
   ts                DateTime @id
   blockNumber       BigInt
-  circulatingSupply Decimal @db.Decimal(60, 16)
+  circulatingSupply Decimal  @db.Decimal(60, 16)
 
   totalLocked   Decimal @db.Decimal(60, 16)
   totalStaked   Decimal @db.Decimal(60, 16)

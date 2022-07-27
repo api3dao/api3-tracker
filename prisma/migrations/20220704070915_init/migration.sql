@@ -158,9 +158,10 @@ CREATE TABLE "price_ethereum" (
 CREATE TABLE "treasuries" (
     "ts" TIMESTAMP(3) NOT NULL,
     "ttype" "TreasuryType" NOT NULL,
+    "address" BYTEA NOT NULL,
     "token" TEXT NOT NULL,
-    "value" BIGINT NOT NULL,
-    "decimals" INTEGER NOT NULL,
+    "tokenAddress" BYTEA  NOT NULL,
+    "value" DECIMAL(60, 16)  NOT NULL,
 
     CONSTRAINT "treasuries_pkey" PRIMARY KEY ("ts","ttype","token")
 );

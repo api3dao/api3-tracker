@@ -85,3 +85,32 @@ INSERT INTO "epochs" (
 
 );
 
+INSERT INTO "treasuries" (
+  "ts",
+  "ttype",
+  "token",
+  "address",
+  "tokenAddress",
+  "value"
+) VALUES (
+  Now(),
+  'PRIMARY',
+  E'\\xd9f80bdb37e6bad114d747e60ce6d2aaf26704ae',
+  'API3',
+  E'\\x0b38210ea11411557c13457d4da7dc6ea731b88a',
+  7021201.00
+), (
+  Now(),
+  'SECONDARY',
+  E'\\x556ecbb0311d350491ba0ec7e019c354d7723ce0',
+  'USDC',
+  E'\\xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+  17270419.133974
+), (
+  Now(),
+  'V1',
+  E'\\xe7af7c5982e073ac6525a34821fe1b3e8e432099',
+  'API3',
+  E'\\x0b38210ea11411557c13457d4da7dc6ea731b88a',
+  14938928.2398374956310094
+);
