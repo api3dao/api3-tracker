@@ -4,7 +4,7 @@ import { BorderedPanel } from "../components/BorderedPanel";
 import { toCurrency } from "../services/format";
 
 export const TokenCirculating = (props: ISupply) => {
-  const classTitle = "text-sm text-center font-bold leading-8 font-color-cell-title uppercase";
+  const classTitle = "text-sm text-center leading-8 text-color-cell-title uppercase";
   const classValue = "font-bold";
   return (
     <BorderedPanel big={true} title="API3 Circulating Supply">
