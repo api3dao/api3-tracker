@@ -15,6 +15,6 @@ export const Epochs = {
   fetch: async (epoch: number) => {
     return await prisma.epoch.findUnique({
       where: { epoch },
-    })
+    });
   },
 };

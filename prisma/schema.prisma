@@ -192,12 +192,12 @@ enum TreasuryType {
 }
 
 model Treasury {
-  ts       DateTime
-  ttype    TreasuryType
-  address  Bytes
-  token    String
+  ts           DateTime
+  ttype        TreasuryType
+  address      Bytes
+  token        String
   tokenAddress Bytes
-  value    Decimal @db.Decimal(60, 18)
+  value        Decimal      @db.Decimal(60, 18)
 
   @@id([ts, ttype, token])
   @@map("treasuries")

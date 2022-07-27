@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client'
+import { Prisma } from "@prisma/client";
 
 export interface IEpoch {
   isCurrent: number;
@@ -38,7 +38,9 @@ export interface IStakingTrendProps {
 }
 
 export interface ITreasury {
+  // title of the treasury
   title: string;
+  // address of the treasury
   address: string;
   valueAPI3: Prisma.Decimal;
   valueUSDC: Prisma.Decimal;
