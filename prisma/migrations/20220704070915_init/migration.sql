@@ -112,6 +112,7 @@ CREATE TABLE "voting" (
     "vt" "VotingType" NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL,
     "name" TEXT NOT NULL,
+    "status" TEXT NOT NULL,
     "transferValue" DECIMAL(60,18),
     "transferAddress" BYTEA,
     "transferToken" TEXT,

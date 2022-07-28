@@ -1,6 +1,5 @@
 import { prisma } from "./db";
 import { TreasuryType } from ".prisma/client";
-import { ITreasury } from "./../services/api3";
 
 export type ITreasuryType = TreasuryType;
 
