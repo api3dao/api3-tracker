@@ -52,17 +52,17 @@ export interface IVoting {
   createdAt: Date;
   name: string;
   description?: string;
-  transferValue?: number;
+  transferValue?: Prisma.Decimal;
   transferToken?: string;
   transferAddress?: string; // can be "invalid"
   transferStatus?: string; // can be "invalid"
   totalGasUsed?: number;
   totalUsd?: number;
-  status: string; // expired, execured, rejected
-  totalFor: number;
-  totalAgainst: number;
-  totalStaked: number;
-  totalRequired: number;
+  status: string; // expired, executed, rejected
+  totalFor: Prisma.Decimal;
+  totalAgainst: Prisma.Decimal;
+  totalStaked: Prisma.Decimal;
+  totalRequired: Prisma.Decimal;
 }
 
 export interface IWallet {
@@ -70,13 +70,13 @@ export interface IWallet {
   ensName: string; // ENS domain name
   ensUpdated: Date;
   badges: string;
-  userShare: number;
-  userStake: number; // number of user stake at the moment of this epoch
-  userVotingPower: number; // user voting power at this epoch
-  userReward: number; // user reqard for this epoch
-  userLockedReward: number; // how much of the reward is still locked
-  userDeposited: number;
-  userWithdrew: number;
+  userShare: Prisma.Decimal;
+  userStake: Prisma.Decimal; // number of user stake at the moment of this epoch
+  userVotingPower: Prisma.Decimal; // user voting power at this epoch
+  userReward: Prisma.Decimal; // user reqard for this epoch
+  userLockedReward: Prisma.Decimal; // how much of the reward is still locked
+  userDeposited: Prisma.Decimal;
+  userWithdrew: Prisma.Decimal;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -113,6 +113,6 @@ export interface IVotingEvent {
   address?: string;
   ensName?: string;
   supports?: number;
-  userShare?: number;
-  userVotingPower?: number;
+  userShare?: Prisma.Decimal;
+  userVotingPower?: Prisma.Decimal;
 }

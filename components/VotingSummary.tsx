@@ -44,7 +44,7 @@ export const VotingSummary = (props: IVoting) => {
       <div className="my-8 min-w-full lg:grid lg:grid-cols-2 lg:justify-center">
         <div className="mx-auto lg:ml-auto lg:mr-5">
           <BorderedPanel title="For" big={true}>
-            {props.totalFor > 0 ? (
+            {props.totalFor.toNumber() > 0 ? (
               <div className="my-10 mt-3">
                 {" "}
                 <div className="font-bold text-4xl">
@@ -54,7 +54,7 @@ export const VotingSummary = (props: IVoting) => {
                   votes supported this proposal
                 </div>
                 <div className="font-bold text-sm">
-                  {(props.totalFor / props.totalStaked).toFixed(4)}%
+                  {props.totalFor.div(props.totalStaked).toFixed(4)}%
                 </div>
               </div>
             ) : (
@@ -66,7 +66,7 @@ export const VotingSummary = (props: IVoting) => {
         </div>
         <div className="lg:max-w-300px">
           <BorderedPanel title="Against" big={true}>
-            {props.totalAgainst > 0 ? (
+            {props.totalAgainst.toNumber() > 0 ? (
               <div className="my-10 mt-3">
                 <div className="font-bold text-4xl">
                   {toCurrency(props.totalAgainst)}
@@ -75,7 +75,7 @@ export const VotingSummary = (props: IVoting) => {
                   votes against this proposal
                 </div>
                 <div className="font-bold text-sm">
-                  {(props.totalAgainst / props.totalStaked).toFixed(4)}%
+                  {props.totalAgainst.div(props.totalStaked).toFixed(4)}%
                 </div>
               </div>
             ) : (

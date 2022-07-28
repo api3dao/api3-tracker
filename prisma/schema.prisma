@@ -35,10 +35,10 @@ model MemberEpoch {
   address Bytes // relation scalar field
   member  Member @relation(name: "memberEpochs", fields: [address], references: [address])
 
-  userShare       BigInt // number of user shares at the moment of this epoch
-  userStake       BigInt // number of user stake at the moment of this epoch
+  userShare       Decimal @db.Decimal(60, 18) // number of user shares at the moment of this epoch
+  userStake       Decimal @db.Decimal(60, 18) // number of user stake at the moment of this epoch
   userVotingPower Decimal @db.Decimal(10, 2) // user voting power at this epoch
-  userReward      BigInt // user reward for this epoch
+  userReward      Decimal @db.Decimal(60, 18) // user reward for this epoch
 
   @@id([epoch, address])
   @@map("member_epochs")
@@ -69,7 +69,7 @@ model MemberDelegation {
   to         Bytes    @unique
   memberTo   Member   @relation(name: "delegated", fields: [to], references: [address])
   updatedAt  DateTime @default(now()) // time of the last delegation update
-  userShares BigInt // number of delegated shares
+  userShares Decimal  @db.Decimal(60, 18) // number of delegated shares
 
   @@id([from])
   @@map("member_delegations")
@@ -82,13 +82,13 @@ model Member {
 
   badges String // comma-separated badges for this member
 
-  userShare        BigInt // number of user shares at the moment of this epoch
-  userStake        BigInt // number of user stake at the moment of this epoch
+  userShare        Decimal @db.Decimal(60, 18) // number of user shares at the moment of this epoch
+  userStake        Decimal @db.Decimal(60, 18) // number of user stake at the moment of this epoch
   userVotingPower  Decimal @db.Decimal(10, 2) // user voting power at this epoch
-  userReward       BigInt // user reqard for this epoch
-  userLockedReward BigInt // how much of the reward is still locked
-  userDeposited    BigInt // total user deposited over the time
-  userWithdrew     BigInt // total user withdrew over the time
+  userReward       Decimal @db.Decimal(60, 18) // user reqard for this epoch
+  userLockedReward Decimal @db.Decimal(60, 18) // how much of the reward is still locked
+  userDeposited    Decimal @db.Decimal(60, 18) // total user deposited over the time
+  userWithdrew     Decimal @db.Decimal(60, 18) // total user withdrew over the time
 
   createdAt DateTime @default(now()) // date of the first event with this address
   updatedAt DateTime @default(now()) // date of the last update with this address
@@ -127,7 +127,7 @@ model VotingEvent {
   member  Member @relation(name: "votingMember", fields: [address], references: [address])
 
   supports        Int     @default(0) // -1 - against, 1 - supports, 0 - unrelated
-  userShare       BigInt // number of user shares at the moment of this voting
+  userShare       Decimal @db.Decimal(60, 18) // number of user shares at the moment of this voting
   userVotingPower Decimal @db.Decimal(10, 2) // user voting power at the moment of this voting
 
   votingId String?
@@ -142,7 +142,7 @@ model Voting {
   createdAt DateTime // Date of Voting Creation Transaction (taken from the block)
   name      String // name of the voting
 
-  transferValue BigInt? // in case of transfer - value of the token for transfer
+  transferValue Decimal? @db.Decimal(60, 18) // in case of transfer - value of the token for transfer
   transferToken String? // in case of transfer - name of the token for transfer
 
   totalGasUsed BigInt? // total gas price of this voting

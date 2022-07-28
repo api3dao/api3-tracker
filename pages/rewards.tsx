@@ -36,7 +36,7 @@ const RewardsPage: NextPage = (props: any) => {
       <Header active="/rewards" />
 
       <main>
-        <h1>API3 DAO Rewards</h1>
+        <h1 className="uppercase">API3 DAO Rewards</h1>
         <RewardsSummary
           totalMinted={props.totalMinted}
           latest={latest[0]}

@@ -1,8 +1,7 @@
 import React from "react";
 import { IVoting } from "./../services/api3";
 import Link from "next/link";
-
-// import { toCurrency } from "./../services/format";
+import { toPct } from "./../services/format";
 
 export interface IVotingListProps {
   list: Array<IVoting>;
@@ -41,13 +40,13 @@ export const VotingsListTr = (row: IVoting) => (
       </Link>
     </td>
     <td className="text-right accent">
-      {row.totalAgainst > 0 ? (
-        <span>{row.totalFor / row.totalStaked}%</span>
+      {row.totalFor.toNumber() > 0 ? (
+        <span>{toPct(row.totalFor.div(row.totalStaked))}</span>
       ) : null}
     </td>
     <td className="text-right danger">
-      {row.totalAgainst > 0 ? (
-        <span>{row.totalAgainst / row.totalStaked}%</span>
+      {row.totalAgainst.toNumber() > 0 ? (
+        <span>{toPct(row.totalAgainst.div(row.totalStaked))}</span>
       ) : null}
     </td>
     <td className="text-right">

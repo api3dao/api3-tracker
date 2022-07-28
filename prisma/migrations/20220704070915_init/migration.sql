@@ -28,10 +28,10 @@ CREATE TABLE "epochs" (
 CREATE TABLE "member_epochs" (
     "epoch" INTEGER NOT NULL,
     "address" BYTEA NOT NULL,
-    "userShare" BIGINT NOT NULL,
-    "userStake" BIGINT NOT NULL,
+    "userShare" DECIMAL(60,18) NOT NULL,
+    "userStake" DECIMAL(60,18) NOT NULL,
     "userVotingPower" DECIMAL(10,2) NOT NULL,
-    "userReward" BIGINT NOT NULL,
+    "userReward" DECIMAL(60,18) NOT NULL,
 
     CONSTRAINT "member_epochs_pkey" PRIMARY KEY ("epoch","address")
 );
@@ -60,7 +60,7 @@ CREATE TABLE "member_delegations" (
     "from" BYTEA NOT NULL,
     "to" BYTEA NOT NULL,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "userShares" BIGINT NOT NULL,
+    "userShares" DECIMAL(60,18) NOT NULL,
 
     CONSTRAINT "member_delegations_pkey" PRIMARY KEY ("from")
 );
@@ -71,13 +71,13 @@ CREATE TABLE "members" (
     "ensName" TEXT NOT NULL,
     "ensUpdated" TIMESTAMP(3) NOT NULL,
     "badges" TEXT NOT NULL,
-    "userShare" BIGINT NOT NULL,
-    "userStake" BIGINT NOT NULL,
+    "userShare" DECIMAL(60,18) NOT NULL,
+    "userStake" DECIMAL(60,18) NOT NULL,
     "userVotingPower" DECIMAL(10,2) NOT NULL,
-    "userReward" BIGINT NOT NULL,
-    "userLockedReward" BIGINT NOT NULL,
-    "userDeposited" BIGINT NOT NULL,
-    "userWithdrew" BIGINT NOT NULL,
+    "userReward" DECIMAL(60,18) NOT NULL,
+    "userLockedReward" DECIMAL(60,18) NOT NULL,
+    "userDeposited" DECIMAL(60,18) NOT NULL,
+    "userWithdrew" DECIMAL(60,18) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "tags" TEXT NOT NULL
@@ -99,7 +99,7 @@ CREATE TABLE "voting_event" (
     "feeUsd" DECIMAL(10,2),
     "address" BYTEA NOT NULL,
     "supports" INTEGER NOT NULL DEFAULT 0,
-    "userShare" BIGINT NOT NULL,
+    "userShare" DECIMAL(60,18) NOT NULL,
     "userVotingPower" DECIMAL(10,2) NOT NULL,
     "votingId" TEXT,
 
@@ -112,7 +112,7 @@ CREATE TABLE "voting" (
     "vt" "VotingType" NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL,
     "name" TEXT NOT NULL,
-    "transferValue" BIGINT,
+    "transferValue" DECIMAL(60,18),
     "transferToken" TEXT,
     "totalGasUsed" BIGINT,
     "totalUsd" DECIMAL(10,2),

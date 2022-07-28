@@ -24,11 +24,7 @@ const VotingsPage: NextPage = (props: any) => {
 
       <main>
         <div className="inner">
-          <h1>API3 DAO TREASURY</h1>
-          <p className="centered darken">
-            API3 DAO currently operates 3 treasuries. Balances below are updated
-            each hour.
-          </p>
+          <h1 className="uppercase">API3 DAO Votings</h1>
         </div>
       </main>
 

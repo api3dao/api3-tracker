@@ -1,6 +1,6 @@
 import React from "react";
 import { BorderedPanel } from "./BorderedPanel";
-import { toCurrency } from "../services/format";
+import { toPct, toCurrency } from "../services/format";
 import { IWallet } from "../services/api3";
 import { TxIcon } from "../components/Ethscan";
 import { MemberClassification } from "../components/MemberClassification";
@@ -28,7 +28,7 @@ export const WalletSummary = (props: IWallet) => {
           </div>
           <div className="text-4xl">
             <span className="text-color-panel-title">
-              {props.userVotingPower}%
+              {toPct(props.userVotingPower)}
             </span>
           </div>
           <div className="text-color-grey my-8 mt-4">
