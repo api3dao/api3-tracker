@@ -54,7 +54,7 @@ export interface IVoting {
   description?: string;
   transferValue?: Prisma.Decimal;
   transferToken?: string;
-  transferAddress?: string; // can be "invalid"
+  transferAddress?: string;
   transferStatus?: string; // can be "invalid"
   totalGasUsed?: number;
   totalUsd?: number;

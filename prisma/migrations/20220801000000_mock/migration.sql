@@ -117,3 +117,51 @@ INSERT INTO "treasuries" (
   14938928.2398374956310094,
   1
 );
+
+INSERT INTO "voting" (
+  "id",
+  "vt",
+  "createdAt",
+  "name",
+  "transferValue",
+  "transferToken",
+  "totalGasUsed",
+  "totalUsd",
+  "totalFor",
+  "totalAgainst",
+  "totalStaked",
+  "totalRequired"
+) VALUES (
+  'vt-1',
+  'SECONDARY',
+  Now(),
+  'BUSINESS DEVELOPMENT TEAM, AUGUST-OCTOBER 2022',
+  26738,
+  'USDC',
+  0.0261812,
+  38.76,
+  117138,
+  0,
+  42420299,
+  6363044
+);
+
+-- INSERT INTO "voting_event" (
+--  "id",
+--  "createdAt",
+--  "chainId",
+--  "txHash",
+--  "blockNumber",
+--  "txIndex",
+--  "logIndex",
+--  "data",
+--  "fee",
+--  "gasPrice",
+--  "gasUsed",
+--  "feeUsd",
+--  "address",
+--  "supports",
+--  "userShare",
+--  "userVotingPower",
+--  "votingId"
+-- ) VALUES ();

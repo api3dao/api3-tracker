@@ -113,9 +113,14 @@ CREATE TABLE "voting" (
     "createdAt" TIMESTAMP(3) NOT NULL,
     "name" TEXT NOT NULL,
     "transferValue" DECIMAL(60,18),
+    "transferAddress" BYTEA,
     "transferToken" TEXT,
     "totalGasUsed" BIGINT,
     "totalUsd" DECIMAL(10,2),
+    "totalFor" DECIMAL(60,18) NOT NULL,
+    "totalAgainst" DECIMAL(60,18) NOT NULL,
+    "totalStaked" DECIMAL(60,18) NOT NULL,
+    "totalRequired" DECIMAL(60,18) NOT NULL,
 
     CONSTRAINT "voting_pkey" PRIMARY KEY ("id")
 );

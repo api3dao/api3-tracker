@@ -142,11 +142,17 @@ model Voting {
   createdAt DateTime // Date of Voting Creation Transaction (taken from the block)
   name      String // name of the voting
 
-  transferValue Decimal? @db.Decimal(60, 18) // in case of transfer - value of the token for transfer
-  transferToken String? // in case of transfer - name of the token for transfer
+  transferValue   Decimal? @db.Decimal(60, 18) // in case of transfer - value of the token for transfer
+  transferToken   String? // in case of transfer - name of the token for transfer
+  transferAddress Bytes? // in case of transfer - address of the destination
 
   totalGasUsed BigInt? // total gas price of this voting
   totalUsd     Decimal? @db.Decimal(10, 2) // total USD estimate for gas
+
+  totalFor      Decimal @db.Decimal(60, 18)
+  totalAgainst  Decimal @db.Decimal(60, 18)
+  totalStaked   Decimal @db.Decimal(60, 18)
+  totalRequired Decimal @db.Decimal(60, 18)
 
   events VotingEvent[] @relation("votingEvents") // relations to events
 
