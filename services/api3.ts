@@ -49,7 +49,7 @@ export interface ITreasury {
 export interface IVoting {
   id: string;
   vt: string;
-  createdAt: Date;
+  createdAt: string;
   name: string;
   description?: string;
   transferValue?: Prisma.Decimal;

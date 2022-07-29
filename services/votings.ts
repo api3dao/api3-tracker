@@ -1,6 +1,10 @@
-import { prisma } from "./db";
+import prisma from "./db";
+import { Prisma } from "@prisma/client";
 import { VotingType } from ".prisma/client";
+import { IVoting } from "./api3";
+import superjson from "superjson";
 
+const Decimal = Prisma.Decimal;
 export type IVotingType = VotingType;
 
 export const Votings = {
@@ -12,5 +16,16 @@ export const Votings = {
         orderBy: { createdAt: "asc" },
       })
     ).map((x: any) => ({...x}));
+  },
+  // object mapper
+  from: (input: any): IVoting => {
+    const totalFor = new Decimal(input.totalFor);
+    const totalAgainst= new Decimal(input.totalAgainst);
+    const totalRequired = new Decimal(input.totalRequired);
+    const totalStaked = new Decimal(input.totalStaked);
+    return {...input, totalFor, totalAgainst, totalRequired, totalStaked };
+  },
+  fromList: (src: Array<any>): Array<IVoting> => {
+    return src.map(Votings.from);
   }
 };

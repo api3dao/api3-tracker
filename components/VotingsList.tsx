@@ -24,7 +24,7 @@ export const VotingsListThead = () => (
 export const VotingsListTr = (row: IVoting) => (
   <tr>
     <td className="text-center">{row.id}.</td>
-    <td className="text-center">{row.createdAt.toISOString()}</td>
+    <td className="text-center">{row.createdAt}</td>
     <td className="text-center">
       <span
         className={

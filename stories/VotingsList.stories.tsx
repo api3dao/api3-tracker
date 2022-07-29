@@ -21,7 +21,7 @@ Example.args = {
     {
       id: "1",
       vt: "Primary",
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
       name: "API3 DAO BD-API Team Proposal",
       transferValue: new Prisma.Decimal(111363),
       transferToken: "USDC",
@@ -38,7 +38,7 @@ Example.args = {
     {
       id: "2",
       vt: "Secondary",
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
       name: "Yet another Team Proposal",
       transferValue: new Prisma.Decimal(111363),
       transferToken: "USDC",

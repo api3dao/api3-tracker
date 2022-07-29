@@ -1,4 +1,4 @@
-import { prisma } from "./db";
+import prisma from "./db";
 import { IEpoch } from "./../services/api3";
 
 export const Epochs = {
