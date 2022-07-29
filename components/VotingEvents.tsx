@@ -55,6 +55,7 @@ export const VotingEventsListTr = (row: IVotingEvent) => (
 );
 
 export const VotingEventsList = (props: IVotingEventsListProps) => {
+  if (!props.list.length) return null;
   return (
     <div>
       <table className="table invisible lg:visible">

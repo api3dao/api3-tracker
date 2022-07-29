@@ -1,10 +1,30 @@
 import prisma from "./db";
 import { Prisma } from "@prisma/client";
 import { VotingType } from ".prisma/client";
-import { IVoting } from "./api3";
+import { IVoting, IVotingEvent } from "./api3";
 
 const Decimal = Prisma.Decimal;
 export type IVotingType = VotingType;
+
+export const VotingEvents = {
+  // fetch a list of votings for the certain status
+  fetchList: async (votingId: string): Promise<Array<any>> => {
+    return (
+      await prisma.votingEvent.findMany({
+        where: { votingId },
+        orderBy: { createdAt: "asc" },
+      })
+    ).map((x: any) => ({ ...x }));
+  },
+  // object mapper
+  from: (input: any): IVotingEvent => {
+    return { ...input };
+  },
+  // list mapper
+  fromList: (src: Array<any>): Array<IVotingEvent> => {
+    return src.map(VotingEvents.from);
+  },
+};
 
 export const Votings = {
   // fetch a list of votings for the certain status
@@ -36,6 +56,7 @@ export const Votings = {
     const totalStaked = new Decimal(input.totalStaked);
     return { ...input, totalFor, totalAgainst, totalRequired, totalStaked };
   },
+  // list mapper
   fromList: (src: Array<any>): Array<IVoting> => {
     return src.map(Votings.from);
   },
