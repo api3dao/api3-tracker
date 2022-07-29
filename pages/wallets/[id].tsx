@@ -4,11 +4,13 @@ import { Footer } from "../../components/Footer";
 import { fetchWebconfig } from "../../services/webconfig";
 import { Meta } from "../../components/Meta";
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context: any) {
+  const id = context.params.id;
   const webconfig = fetchWebconfig();
   return {
     props: {
       webconfig,
+      id,
     }, // will be passed to the page component as props
   };
 }
