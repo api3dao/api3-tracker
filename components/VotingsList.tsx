@@ -1,7 +1,7 @@
 import React from "react";
 import { IVoting } from "./../services/api3";
 import Link from "next/link";
-import { toPct } from "./../services/format";
+import { niceDateTime, toPct } from "./../services/format";
 
 export interface IVotingListProps {
   list: Array<IVoting>;
@@ -24,7 +24,7 @@ export const VotingsListThead = () => (
 export const VotingsListTr = (row: IVoting) => (
   <tr>
     <td className="text-center">{row.id}.</td>
-    <td className="text-center">{row.createdAt}</td>
+    <td className="text-center">{niceDateTime(row.createdAt)}</td>
     <td className="text-center">
       <span
         className={
