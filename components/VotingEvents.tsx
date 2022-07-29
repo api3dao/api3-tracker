@@ -1,7 +1,7 @@
 import React from "react";
 import { IVotingEvent } from "./../services/api3";
 import Link from "next/link";
-import { toCurrency } from "./../services/format";
+import { niceDate, toCurrency } from "./../services/format";
 
 export interface IVotingEventsListProps {
   list: Array<IVotingEvent>;
@@ -25,9 +25,7 @@ export const VotingEventsListThead = () => (
 export const VotingEventsListTr = (row: IVotingEvent) => (
   <tr>
     <td className="text-center">{row.id}.</td>
-    <td className="text-center">
-      {row.createdAt.toISOString().replace("T", " ")}
-    </td>
+    <td className="text-center"> {niceDate(row.createdAt)} </td>
     <td className="text-center">{toCurrency(row.blockNumber)} </td>
     <td className="text-center">{row.eventName} </td>
     <td className="text-left">

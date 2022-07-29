@@ -1,4 +1,5 @@
 import React from "react";
+import { Prisma } from "@prisma/client";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { WalletEventsList } from "../components/WalletEvents";
 
@@ -19,14 +20,14 @@ Example.args = {
   list: [
     {
       id: "1",
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
       txHash: "",
       blockNumber: 12942126,
       data: "",
       eventName: "CastVote",
       gasPrice: 33,
       gasUsed: 473402,
-      feeUsd: 39.7,
+      feeUsd: new Prisma.Decimal(39.7),
     },
   ],
 };

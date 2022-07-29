@@ -18,7 +18,10 @@ export const VotingEvents = {
   },
   // object mapper
   from: (input: any): IVotingEvent => {
-    return { ...input };
+    const feeUsd = new Decimal(input.feeUsd);
+    const userShare = new Decimal(input.userShare);
+    const userVotingPower = new Decimal(input.userVotingPower);
+    return { ...input, feeUsd, userShare, userVotingPower };
   },
   // list mapper
   fromList: (src: Array<any>): Array<IVotingEvent> => {

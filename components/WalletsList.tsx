@@ -1,7 +1,7 @@
 import React from "react";
 import { IWallet } from "./../services/api3";
 import Link from "next/link";
-import { toCurrency } from "./../services/format";
+import { niceDateTime, toCurrency } from "./../services/format";
 
 export interface IWalletsListProps {
   list: Array<IWallet>;
@@ -26,13 +26,13 @@ export const WalletsListTr = (row: IWallet) => (
   <tr>
     <td className="text-center">1.</td>
     <td className="text-center max-w-3">
-      {row.createdAt.toISOString().replace("T", " ")}
+      {niceDateTime(row.createdAt)}
     </td>
     <td className="text-center max-w-3">
-      {row.updatedAt.toISOString().replace("T", " ")}
+      {niceDateTime(row.updatedAt)}
     </td>
     <td className="text-left">
-      <Link href={`wallets/${row.address}`} className="text-bold">
+      <Link href={`/wallets/${row.address}`} className="text-bold">
         <div>
           <span className="font-bold">{row.ensName}</span>
           <br />

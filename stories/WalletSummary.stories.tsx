@@ -21,7 +21,7 @@ export const Burak = Template.bind({});
 Burak.args = {
   address: "0x5846711b4b7485392c1f0feaec203aa889071717",
   ensName: "bbenligiray.eth",
-  ensUpdated: new Date(),
+  ensUpdated: new Date().toISOString(),
   badges: "withdrawn,vested",
   userShare: new Prisma.Decimal(6702059),
   userStake: new Prisma.Decimal(6999029), // number of user stake at the moment of this epoch
@@ -30,6 +30,6 @@ Burak.args = {
   userLockedReward: new Prisma.Decimal(70000), // how much of the reward is still locked
   userDeposited: new Prisma.Decimal(0),
   userWithdrew: new Prisma.Decimal(19999),
-  createdAt: new Date(),
-  updatedAt: new Date(),
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
 };

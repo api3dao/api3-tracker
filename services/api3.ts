@@ -68,7 +68,7 @@ export interface IVoting {
 export interface IWallet {
   address: string;
   ensName: string; // ENS domain name
-  ensUpdated: Date;
+  ensUpdated: string;
   badges: string;
   userShare: Prisma.Decimal;
   userStake: Prisma.Decimal; // number of user stake at the moment of this epoch
@@ -77,13 +77,13 @@ export interface IWallet {
   userLockedReward: Prisma.Decimal; // how much of the reward is still locked
   userDeposited: Prisma.Decimal;
   userWithdrew: Prisma.Decimal;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface IWalletEvent {
   id: string;
-  createdAt: Date;
+  createdAt: string;
   txHash: string;
   blockNumber: number;
   txIndex?: number;
@@ -93,12 +93,12 @@ export interface IWalletEvent {
   fee?: number;
   gasPrice?: number;
   gasUsed?: number;
-  feeUsd?: number;
+  feeUsd?: Prisma.Decimal;
 }
 
 export interface IVotingEvent {
   id: string;
-  createdAt: Date;
+  createdAt: string;
   txHash: string;
   blockNumber: number;
   txIndex?: number;
@@ -108,7 +108,7 @@ export interface IVotingEvent {
   fee?: number;
   gasPrice?: number;
   gasUsed?: number;
-  feeUsd?: number;
+  feeUsd?: Prisma.Decimal;
 
   address?: string;
   ensName?: string;
