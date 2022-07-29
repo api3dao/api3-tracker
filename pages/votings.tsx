@@ -5,16 +5,15 @@ import { VotingsList } from "../components/VotingsList";
 import { fetchWebconfig } from "../services/webconfig";
 import { Votings } from "../services/votings";
 import { Meta } from "../components/Meta";
-import superjson from "superjson";
+import { serializable } from "../services/format";
 
 export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
   const pending = await Votings.fetchList("pending");
-
   return {
     props: {
       webconfig,
-      pending: JSON.parse(superjson.stringify(pending)).json,
+      pending: serializable(pending),
     }, // will be passed to the page component as props
   };
 }
@@ -29,8 +28,8 @@ const VotingsPage: NextPage = (props: any) => {
 
       <main>
         <h1 className="uppercase">API3 DAO Votings</h1>
-        <section className="max-width-screen-lg mx-auto">
-          <div className="text-center">{pending.length} Pending Proposals</div>
+        <section className="max-w-screen-lg mx-auto">
+          <div className="text-center text-xl">{pending.length} Pending Proposals</div>
           <VotingsList list={Votings.fromList(pending)} />
         </section>
       </main>

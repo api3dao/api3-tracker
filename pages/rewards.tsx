@@ -8,7 +8,7 @@ import { RewardsList, RewardsSummary } from "../components/Rewards";
 import { IEpoch } from "../services/api3";
 import { Epochs } from "../services/epochs";
 import { Supply } from "../services/supply";
-import superjson from "superjson";
+import { serializable } from "../services/format";
 
 export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
@@ -21,9 +21,9 @@ export async function getServerSideProps() {
   return {
     props: {
       webconfig,
-      totalMinted: JSON.parse(superjson.stringify(totalMinted)).json,
-      supply: JSON.parse(superjson.stringify(supply)).json,
-      latest: JSON.parse(superjson.stringify(latest)).json,
+      totalMinted: serializable(totalMinted),
+      supply: serializable(supply),
+      latest: serializable(latest),
     }, // will be passed to the page component as props
   };
 }

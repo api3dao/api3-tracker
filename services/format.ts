@@ -1,4 +1,11 @@
-import { Prisma } from "@prisma/client";
+import superjson from "superjson";
+
+// NextJS requires only serializable properties
+// to be passed as server parameters
+// This way dates, bigint and decimals need to be handled manually after that
+export const serializable = (x: any): any => (
+  JSON.parse(superjson.stringify(x)).json
+);
 
 export const shorten = (x: string, num: number): string => {
   return x.substring(0, num + 2) + ".." + x.substring(x.length - num, x.length);

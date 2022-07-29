@@ -3,6 +3,7 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { fetchWebconfig } from "../services/webconfig";
 import { Meta } from "../components/Meta";
+import { serializable } from "../services/format";
 
 export async function getServerSideProps() {
   const webconfig = fetchWebconfig();

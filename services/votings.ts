@@ -2,7 +2,6 @@ import prisma from "./db";
 import { Prisma } from "@prisma/client";
 import { VotingType } from ".prisma/client";
 import { IVoting } from "./api3";
-import superjson from "superjson";
 
 const Decimal = Prisma.Decimal;
 export type IVotingType = VotingType;

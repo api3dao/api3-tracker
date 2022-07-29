@@ -12,7 +12,7 @@ import { ISupply, IEpoch } from "../services/api3";
 import { Epochs } from "../services/epochs";
 import { Supply } from "../services/supply";
 import { Meta } from "../components/Meta";
-import superjson from "superjson";
+import { serializable } from "../services/format";
 
 export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
@@ -22,9 +22,9 @@ export async function getServerSideProps() {
   return {
     props: {
       webconfig,
-      latest: JSON.parse(superjson.stringify(latest)).json,
-      supply: JSON.parse(superjson.stringify(supply)).json,
-      current: JSON.parse(superjson.stringify(current)).json,
+      latest: serializable(latest),
+      supply: serializable(supply),
+      current: serializable(current),
     }, // will be passed to the page component as props
   };
 }

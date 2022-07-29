@@ -7,7 +7,7 @@ import { toHex } from "../services/format";
 import { Meta } from "../components/Meta";
 import { Treasury } from "../components/Treasury";
 import { ITreasuryType, Treasuries } from "../services/treasuries";
-import superjson from "superjson";
+import { serializable } from "../services/format";
 
 export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
@@ -34,7 +34,7 @@ export async function getServerSideProps() {
   return {
     props: {
       webconfig,
-      list: JSON.parse(superjson.stringify(list)).json,
+      list: serializable(list),
     }, // will be passed to the page component as props
   };
 }
