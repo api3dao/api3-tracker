@@ -21,51 +21,67 @@ export const VotingsListThead = () => (
   </thead>
 );
 
-export const VotingsListTr = (row: IVoting) => (
-  <tr>
-    <td className="text-center">{row.id}.</td>
-    <td className="text-center">{niceDateTime(row.createdAt)}</td>
-    <td className="text-center">
-      <span
-        className={
-          row.vt == "Primary" ? "badge badge-primary" : "badge badge-secondary"
-        }
-      >
-        {row.vt}
-      </span>
-    </td>
-    <td className="text-left">
-      <Link href={`votings/${row.id}`} className="text-bold">
-        {row.name}
-      </Link>
-    </td>
-    <td className="text-right accent">
-      {row.totalFor.toNumber() > 0 ? (
-        <span>{toPct(row.totalFor.div(row.totalStaked))}</span>
-      ) : null}
-    </td>
-    <td className="text-right danger">
-      {row.totalAgainst.toNumber() > 0 ? (
-        <span>{toPct(row.totalAgainst.div(row.totalStaked))}</span>
-      ) : null}
-    </td>
-    <td className="text-right">
-      <span className="badge"> {row.status}</span>
-    </td>
-  </tr>
-);
+interface IVotingItem {
+  index: number;
+  item: IVoting;
+}
+
+export const VotingsListTr = (props: IVotingItem) => {
+  const { index, item } = props;
+  return (
+    <tr>
+      <td className="text-center">{1 + index}.</td>
+      <td className="text-center">{niceDateTime(item.createdAt)}</td>
+      <td className="text-center">
+        <span
+          className={
+            item.vt == "Primary"
+              ? "badge badge-primary"
+              : "badge badge-secondary"
+          }
+        >
+          {item.vt}
+        </span>
+      </td>
+      <td className="text-left">
+        <Link href={`/votings/${item.id}`} className="text-bold">
+          {item.name}
+        </Link>
+      </td>
+      <td className="text-right accent">
+        {item.totalFor.toNumber() > 0 ? (
+          <span>
+            {toPct(item.totalFor.mul(100).div(item.totalStaked).round())}
+          </span>
+        ) : null}
+      </td>
+      <td className="text-right danger">
+        {item.totalAgainst.toNumber() > 0 ? (
+          <span>
+            {toPct(item.totalAgainst.mul(100).div(item.totalStaked).round())}
+          </span>
+        ) : null}
+      </td>
+      <td className="text-right">
+        <span className="badge"> {item.status}</span>
+      </td>
+    </tr>
+  );
+};
 
 export const VotingsList = (props: IVotingListProps) => {
   return (
     <div>
-      <table className="table invisible lg:visible">
-        <VotingsListThead />
-        <tbody>
-          {props.list.map((row) => (
-            <VotingsListTr key={row.id} {...row} />
-          ))}
-        </tbody>
-      </table>
+      <div className="max-w-screen-lg mx-auto hidden lg:block">
+        <table className="table invisible lg:visible">
+          <VotingsListThead />
+          <tbody>
+            {props.list.map((item, index) => (
+              <VotingsListTr key={item.id} item={item} index={index} />
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

@@ -24,7 +24,7 @@ const VotingDetailsPage: NextPage = (props: any) => {
 
       <main>
         <div className="inner">
-          <h1>API3 DAO WALLET</h1>
+          <h1 className="text-center uppercase">API3 DAO Voting</h1>
         </div>
       </main>
 
