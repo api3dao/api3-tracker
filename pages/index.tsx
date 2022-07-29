@@ -11,6 +11,7 @@ import { fetchWebconfig } from "../services/webconfig";
 import { ISupply, IEpoch } from "../services/api3";
 import { Epochs } from "../services/epochs";
 import { Supply } from "../services/supply";
+import { Votings } from "../services/votings";
 import { Meta } from "../components/Meta";
 import { serializable } from "../services/format";
 
@@ -19,9 +20,11 @@ export async function getServerSideProps() {
   const latest: Array<IEpoch> = await Epochs.fetchLatest(3);
   const current: IEpoch = latest[0];
   const supply: ISupply | null = await Supply.fetch();
+  const totalVotings = await Votings.total();
   return {
     props: {
       webconfig,
+      totalVotings,
       latest: serializable(latest),
       supply: serializable(supply),
       current: serializable(current),
@@ -30,7 +33,7 @@ export async function getServerSideProps() {
 }
 
 const HomePage: NextPage = (props: any) => {
-  const { latest, current, supply, webconfig } = props;
+  const { latest, current, supply, totalVotings, webconfig } = props;
   return (
     <div>
       <Meta webconfig={webconfig} />
@@ -40,7 +43,10 @@ const HomePage: NextPage = (props: any) => {
           <h1 className="uppercase">API3 DAO Tracker</h1>
           <p className="mb-8 text-center">
             API3 DAO currently involves{" "}
-            <a href="./wallets">{current.members} members</a>{" "}
+            <a href="./wallets">{current.members} members</a> participated in{" "}
+            <a href="./votings">
+              {totalVotings} voting{totalVotings > 1 ? "s" : ""}
+            </a>
           </p>
           <h2 className="mt-4 mb-0 font-bold text-center text-2xl uppercase">
             API3 Staking Rewards

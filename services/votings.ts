@@ -24,6 +24,10 @@ export const Votings = {
       })
     ) as IVoting | null;
   },
+  // fetch total number of votings
+  total: async (): Promise<number> => {
+    return await prisma.voting.count();
+  },
   // object mapper
   from: (input: any): IVoting => {
     const totalFor = new Decimal(input.totalFor);
