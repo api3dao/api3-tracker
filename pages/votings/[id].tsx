@@ -1,6 +1,7 @@
 import type { NextPage } from "next";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
+import { VotingSummary } from "../../components/VotingSummary";
 import { fetchWebconfig } from "../../services/webconfig";
 import { Votings } from "../../services/votings";
 import { serializable } from "../../services/format";
@@ -20,7 +21,6 @@ export async function getServerSideProps(context: any) {
 }
 
 const VotingDetailsPage: NextPage = (props: any) => {
-  // TODO: split into components
   const { voting, webconfig } = props;
 
   return (
@@ -29,10 +29,9 @@ const VotingDetailsPage: NextPage = (props: any) => {
       <Header active="./votings" />
 
       <main>
-        <div className="inner">
-          <h1 className="text-center uppercase">API3 DAO Voting</h1>
-        </div>
-        <pre>{JSON.stringify(voting, null, 2)}</pre>
+        <h1 className="text-center uppercase">API3 DAO Voting</h1>
+        <VotingSummary {...Votings.from(voting)} />
+
       </main>
 
       <Footer />
