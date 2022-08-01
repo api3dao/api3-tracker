@@ -148,22 +148,74 @@ INSERT INTO "voting" (
   6363044
 );
 
--- INSERT INTO "voting_event" (
---  "id",
---  "createdAt",
---  "chainId",
---  "txHash",
---  "blockNumber",
---  "txIndex",
---  "logIndex",
---  "data",
---  "fee",
---  "gasPrice",
---  "gasUsed",
---  "feeUsd",
---  "address",
---  "supports",
---  "userShare",
---  "userVotingPower",
---  "votingId"
--- ) VALUES ();
+INSERT INTO "members" (
+    "address",
+    "ensName",
+    "ensUpdated",
+    "badges",
+
+    "userShare",
+    "userStake",
+    "userVotingPower",
+    "userReward",
+    "userLockedReward",
+    "userDeposited",
+    "userWithdrew",
+    "tags"
+) VALUES (
+    E'\\x3146f17d9bef9dadd00e61c87cabe6f9bef79b2a',
+    '',
+    Now(),
+    'supports',
+
+    12002100.00,
+    12002100.00,
+    2100.00,
+    0.00,
+    0.00,
+    0.00,
+    0.00,
+    ''
+);
+
+INSERT INTO "voting_event" (
+  "id",
+  "createdAt",
+  "chainId",
+  "txHash",
+  "blockNumber",
+  "txIndex",
+  "logIndex",
+  "eventName",
+  "data",
+  "fee",
+  "gasPrice",
+  "gasUsed",
+  "feeUsd",
+  "address",
+  "supports",
+  "userShare",
+  "userVotingPower",
+  "votingId"
+) VALUES (
+  '20220101',
+  Now(),
+  0,
+  E'\\x2227ed6a09017d459c7cb1debcade9f1900f0d4598c9f6cfb441afc117c4b268',
+  12942126,
+  1,
+  1,
+  'CastVote',
+  '{}',
+  55,
+  33,
+  473402,
+  39.7,
+  E'\\x3146f17d9bef9dadd00e61c87cabe6f9bef79b2a',
+  1,
+  1000000,
+  0.02005,
+  'vt-1'
+);
+
+

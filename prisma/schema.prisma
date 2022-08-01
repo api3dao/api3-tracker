@@ -54,6 +54,7 @@ model MemberEvent {
   blockNumber Int // Block Number
   txIndex     Int // Transaction Index inside the block
   logIndex    Int // Index inside the events logs of this transaction
+  eventName   String // name of the event (based on the signature)
   data        Json? // data of the event
   fee         BigInt? // fee that was taken on this transaction
   gasPrice    BigInt? // gas price of this transaction
@@ -117,6 +118,7 @@ model VotingEvent {
   blockNumber Int // Block Number
   txIndex     Int // Transaction Index inside the block
   logIndex    Int // Index inside the events logs of this transaction
+  eventName   String // name of the event (based on the signature)
   data        Json? // data of the event
   fee         BigInt? // fee that was taken on this transaction
   gasPrice    BigInt? // gas price of this transaction
