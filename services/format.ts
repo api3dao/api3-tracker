@@ -3,9 +3,8 @@ import superjson from "superjson";
 // NextJS requires only serializable properties
 // to be passed as server parameters
 // This way dates, bigint and decimals need to be handled manually after that
-export const serializable = (x: any): any => (
-  JSON.parse(superjson.stringify(x)).json
-);
+export const serializable = (x: any): any =>
+  JSON.parse(superjson.stringify(x)).json;
 
 export const shorten = (x: string, num: number): string => {
   return x.substring(0, num + 2) + ".." + x.substring(x.length - num, x.length);
@@ -35,6 +34,14 @@ export const toPct = (x: any): string => {
 export const toHex = (x: any): string => {
   if (Buffer.isBuffer(x)) {
     return "0x" + x.toString("hex");
+  }
+  if (Array.isArray(x)) {
+    return (
+      "0x" +
+      Array.from(x, (byte: any) => {
+        return ("0" + (byte & 0xff).toString(16)).slice(-2);
+      }).join("")
+    );
   }
   return "" + x;
 };
@@ -78,7 +85,6 @@ export const niceDate = (strIso: string) => {
   return out + _month + " " + pad2(_day);
 };
 
-
 export const niceDateTime = (strIso: string) => {
   if (typeof strIso === "undefined" || strIso === null) {
     return "";
@@ -89,5 +95,11 @@ export const niceDateTime = (strIso: string) => {
       : new Date(
           strIso.replace(/\-/g, "/").replace("T", " ").replace(/\..+$/, "")
         );
-  return niceDate(strIso) + ' ' + pad2(date.getHours()) + ':' + pad2(date.getMinutes())
-}
+  return (
+    niceDate(strIso) +
+    " " +
+    pad2(date.getHours()) +
+    ":" +
+    pad2(date.getMinutes())
+  );
+};
