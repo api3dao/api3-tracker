@@ -126,6 +126,7 @@ INSERT INTO "voting" (
   "status",
   "transferValue",
   "transferToken",
+  "transferAddress",
   "totalGasUsed",
   "totalUsd",
   "totalFor",
@@ -140,6 +141,7 @@ INSERT INTO "voting" (
   'pending',
   26738,
   'USDC',
+  E'\\x3146f17d9bef9dadd00e61c87cabe6f9bef79b2a',
   0.0261812,
   38.76,
   117138,
@@ -176,6 +178,38 @@ INSERT INTO "members" (
     0.00,
     0.00,
     ''
+);
+
+INSERT INTO "member_events" (
+  "id",
+  "createdAt",
+  "address",
+  "chainId",
+  "txHash",
+  "blockNumber",
+  "txIndex",
+  "logIndex",
+  "eventName",
+  "data",
+  "fee",
+  "gasPrice",
+  "gasUsed",
+  "feeUsd"
+) VALUES (
+  '20220101',
+  Now(),
+  E'\\x3146f17d9bef9dadd00e61c87cabe6f9bef79b2a',
+  0,
+  E'\\x2227ed6a09017d459c7cb1debcade9f1900f0d4598c9f6cfb441afc117c4b268',
+  12942126,
+  1,
+  1,
+  'CastVote',
+  '{}',
+  55,
+  33,
+  473402,
+  39.7
 );
 
 INSERT INTO "voting_event" (
