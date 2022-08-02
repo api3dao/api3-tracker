@@ -1,13 +1,13 @@
 import React from "react";
-import styles from "./StakingTrend.module.css";
 import { IStakingTrendProps } from "../services/api3";
 
 export const StakingTrend = (props: IStakingTrendProps) => {
   const isMin = props.apr <= 0.025;
   const isMax = props.apr >= 0.75;
   const goingDown = props.totalStaked > props.stakingTarget;
-  const dir =
-    isMax || isMin ? styles.const : goingDown ? styles.desc : styles.asc;
+  const dir = "text-center p-3 text-sm " + (
+    isMax || isMin ? "text-color-text" : goingDown ? "text-color-error" : "text-color-accent"
+  );
 
   let note = "";
   if (isMin)

@@ -1,5 +1,4 @@
 import React from "react";
-// import styles from "./VotingsList.module.css";
 import { IVoting } from "./../services/api3";
 import Link from "next/link";
 

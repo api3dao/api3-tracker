@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./Treasury.module.css";
 import { ITreasury } from "../services/api3";
 import { TxIcon } from "../components/Ethscan";
 import { BorderedPanel } from "../components/BorderedPanel";
@@ -15,19 +14,15 @@ export const Treasury = (props: ITreasury) => {
       </div>
       <div>
         <div className="text-center my-5">
-          <h3 className={styles.title}>API3</h3>
-          <div className="text-center">
-            <strong className={styles.bigTitle}>
+          <h3 className="text-sm text-color-cell-title">API3</h3>
+          <div className="text-center text-bold text-3xl">
               {toCurrency(props.valueAPI3)}
-            </strong>
           </div>
         </div>
         <div className="text-center my-5">
-          <h3 className={styles.title}>USDC</h3>
-          <div className={styles.bigTitle}>
-            <strong className={styles.bigTitle}>
+          <h3 className="text-sm text-color-cell-title">USDC</h3>
+          <div className="text-center text-bold text-3xl">
               {toCurrency(props.valueUSDC)}
-            </strong>
           </div>
         </div>
       </div>

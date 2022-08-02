@@ -1,25 +1,26 @@
 import React from "react";
-import styles from "./TokenSupply.module.css";
 import { ISupply } from "../services/api3";
 import { toCurrency } from "../services/format";
 
 export const TokenSupply = (props: ISupply) => {
+  const classTitle = "text-sm text-center font-bold text-color-cell-title uppercase";
+  const classCell = "text-sm text-center py-4 lg:min-h-96px border-t border-solid border-color-cell-border";
   return (
     <div className="md:grid grid-cols-4">
-      <div className={styles.cell}>
-        <h3 className={styles.title}>Locked by governance</h3>
+      <div className={classCell}>
+        <h3 className={classTitle}>Locked by governance</h3>
         <strong>{toCurrency(props.lockedByGovernance)} tokens</strong>
       </div>
-      <div className={styles.cell}>
-        <h3 className={styles.title}>Locked vestings</h3>
+      <div className={classCell}>
+        <h3 className={classTitle}>Locked vestings</h3>
         <strong>{toCurrency(props.lockedVestings)} tokens</strong>
       </div>
-      <div className={styles.cell}>
-        <h3 className={styles.title}>Locked rewards</h3>
+      <div className={classCell}>
+        <h3 className={classTitle}>Locked rewards</h3>
         <strong>{toCurrency(props.lockedRewards)} tokens</strong>
       </div>
-      <div className={styles.cell}>
-        <h3 className={styles.title}>Time locked</h3>
+      <div className={classCell}>
+        <h3 className={classTitle}>Time locked</h3>
         <strong>{toCurrency(props.timeLocked)} tokens</strong>
       </div>
     </div>
