@@ -40,6 +40,6 @@ jobs:
       run: docker save api3tracker-storybook:latest | bzip2 | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'bunzip2 -d | docker load'
     - name: Apply Terraform plan
       run: |
-         export REMOTE_CMD="cd $SSH_REMOTE_PATH && terraform init && terraform apply -auto-approve"
+         export REMOTE_CMD="cd $SSH_REMOTE_PATH && terraform init && terraform apply -auto-approve && docker system prune -af"
          ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST bash -c '"'$REMOTE_CMD'"'
 
