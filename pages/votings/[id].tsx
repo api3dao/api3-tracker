@@ -1,13 +1,11 @@
 import type { NextPage } from "next";
-import { Header } from "../../components/Header";
-import { Footer } from "../../components/Footer";
+import { Footer, Header, Meta } from "../../components/";
 import { VotingSummary } from "../../components/VotingSummary";
 import { VotingEventsList } from "../../components/VotingEvents";
 import { fetchWebconfig } from "../../services/webconfig";
 import { Votings, VotingEvents } from "../../services/votings";
 import { Blocks } from "../../services/blocks";
 import { serializable } from "../../services/format";
-import { Meta } from "../../components/Meta";
 
 export async function getServerSideProps(context: any) {
   const id = context.params.id;

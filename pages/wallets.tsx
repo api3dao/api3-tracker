@@ -1,9 +1,7 @@
 import type { NextPage } from "next";
-import { Header } from "../components/Header";
-import { Footer } from "../components/Footer";
+import { Footer, Header, Meta } from "../components/";
 import { fetchWebconfig } from "../services/webconfig";
 import { Wallets } from "../services/wallets";
-import { Meta } from "../components/Meta";
 import { WalletsList } from "../components/WalletsList";
 import { Blocks } from "../services/blocks";
 import { serializable } from "../services/format";

@@ -1,7 +1,5 @@
 import type { NextPage } from "next";
-import { Header } from "../components/Header";
-import { Footer } from "../components/Footer";
-import { Meta } from "../components/Meta";
+import { Footer, Header, Meta } from "../components/";
 import { Epoch } from "../components/Overview";
 import { TokenSupply } from "../components/TokenSupply";
 import { TokenCirculating } from "../components/TokenCirculating";
