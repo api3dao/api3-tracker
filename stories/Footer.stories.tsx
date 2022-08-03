@@ -11,6 +11,10 @@ export default {
   },
 } as ComponentMeta<typeof Footer>;
 
-const Template: ComponentStory<typeof Footer> = (args) => <Footer />;
+const Template: ComponentStory<typeof Footer> = (args) => <Footer {...args} />;
 
 export const Default = Template.bind({});
+Default.args = {
+  github: "https://github.com/api3dao/api3-tracker",
+  blockNumber: 15125158,
+}
