@@ -8,28 +8,31 @@ import { RewardsList, RewardsSummary } from "../components/Rewards";
 import { IEpoch } from "../services/api3";
 import { Epochs } from "../services/epochs";
 import { Supply } from "../services/supply";
+import { Blocks } from "../services/blocks";
 import { serializable } from "../services/format";
 
 export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
   const latest: Array<IEpoch> = await Epochs.fetchLatest(3);
+  const supply = await Supply.fetch();
+  const lastBlock = await Blocks.fetchLast();
   let totalMinted = new Prisma.Decimal(0);
   for (const epoch of latest) {
     totalMinted = totalMinted.add(epoch.mintedShares);
   }
-  const supply = await Supply.fetch();
   return {
     props: {
       webconfig,
       totalMinted: serializable(totalMinted),
       supply: serializable(supply),
       latest: serializable(latest),
+      lastBlock: serializable(lastBlock),
     }, // will be passed to the page component as props
   };
 }
 
 const RewardsPage: NextPage = (props: any) => {
-  const { latest, supply, webconfig } = props;
+  const { latest, supply, lastBlock, webconfig } = props;
   return (
     <div>
       <Meta webconfig={webconfig} page="rewards" />
@@ -45,7 +48,7 @@ const RewardsPage: NextPage = (props: any) => {
         <RewardsList list={latest} />
       </main>
 
-      <Footer />
+      <Footer github={webconfig.github} blockNumber={lastBlock.blockNumber} />
     </div>
   );
 };
