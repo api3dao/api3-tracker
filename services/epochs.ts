@@ -1,5 +1,5 @@
 import prisma from "./db";
-import { IEpoch } from "./../services/api3";
+import { IEpoch } from "./../services/types";
 
 export const Epochs = {
   // fetch a few latest epochs

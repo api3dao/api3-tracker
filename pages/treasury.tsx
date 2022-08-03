@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import { Footer, Header, Meta } from "../components/";
 import { fetchWebconfig } from "../services/webconfig";
-import { ITreasury } from "../services/api3";
+import { ITreasury } from "../services/types";
 import { toHex } from "../services/format";
 import { Treasury } from "../components/Treasury";
 import { ITreasuryType, Treasuries } from "../services/treasuries";

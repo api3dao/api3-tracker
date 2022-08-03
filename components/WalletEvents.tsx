@@ -1,5 +1,5 @@
 import React from "react";
-import { IWalletEvent } from "./../services/api3";
+import { IWalletEvent } from "./../services/types";
 import { niceDate, toCurrency } from "./../services/format";
 
 export interface IWalletEventsListProps {

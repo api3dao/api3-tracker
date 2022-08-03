@@ -1,5 +1,5 @@
 import prisma from "./db";
-import { IWallet, IWalletEvent } from "./api3";
+import { IWallet, IWalletEvent } from "./types";
 
 export const WalletEvents = {
   // fetch a list of votings for the certain status

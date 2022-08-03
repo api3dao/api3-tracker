@@ -1,6 +1,6 @@
 import React from "react";
 import { Prisma } from "@prisma/client";
-import { IStakingTrendProps } from "../services/api3";
+import { IStakingTrendProps } from "../services/types";
 
 export const StakingTrend = (props: IStakingTrendProps) => {
   const aprPct = new Prisma.Decimal(props.apr).div(100);

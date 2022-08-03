@@ -1,5 +1,5 @@
 import React from "react";
-import { ISupply } from "../services/api3";
+import { ISupply } from "../services/types";
 import { BorderedPanel } from "../components/BorderedPanel";
 import { toCurrency } from "../services/format";
 

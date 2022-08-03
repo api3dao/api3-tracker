@@ -1,5 +1,5 @@
 import React from "react";
-import { IVoting } from "./../services/api3";
+import { IVoting } from "./../services/types";
 import Link from "next/link";
 import { niceDateTime, toPct } from "./../services/format";
 

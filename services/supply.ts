@@ -1,5 +1,5 @@
 import prisma from "./db";
-import { ISupply } from "./../services/api3";
+import { ISupply } from "./../services/types";
 
 export const Supply = {
   // fetch current supply

@@ -1,6 +1,6 @@
 import React from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { IContract } from "../services/webconfig";
+import { IContract } from "../services/types";
 import { ContractsList } from "../components/ContractsList";
 
 const contracts: Array<IContract> = [

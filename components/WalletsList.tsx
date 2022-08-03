@@ -1,5 +1,5 @@
 import React from "react";
-import { IWallet } from "./../services/api3";
+import { IWallet } from "./../services/types";
 import Link from "next/link";
 import { toHex, niceDateTime, toCurrency } from "./../services/format";
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { BorderedPanel } from "./BorderedPanel";
 import { toCurrency } from "../services/format";
-import { IVoting } from "../services/api3";
+import { IVoting } from "../services/types";
 
 export const VotingSummary = (props: IVoting) => {
   const title = `API3 DAO ${props.status} Proposal Voting`;

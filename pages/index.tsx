@@ -7,7 +7,7 @@ import { TokenStaking } from "../components/TokenStaking";
 import { StakingTrend } from "../components/StakingTrend";
 import { ContractsList } from "../components/ContractsList";
 import { fetchWebconfig } from "../services/webconfig";
-import { ISupply, IEpoch } from "../services/api3";
+import { ISupply, IEpoch } from "../services/types";
 import { Epochs } from "../services/epochs";
 import { Supply } from "../services/supply";
 import { Votings } from "../services/votings";
