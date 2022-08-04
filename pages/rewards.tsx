@@ -4,9 +4,7 @@ import { Prisma } from "@prisma/client";
 import { fetchWebconfig } from "../services/webconfig";
 import { RewardsList, RewardsSummary } from "../components/Rewards";
 import { IEpoch } from "../services/types";
-import { Epochs } from "../services/epochs";
-import { Supply } from "../services/supply";
-import { Blocks } from "../services/blocks";
+import { Epochs, Supply, Blocks } from "../services/api";
 import { serializable } from "../services/format";
 
 export async function getServerSideProps() {

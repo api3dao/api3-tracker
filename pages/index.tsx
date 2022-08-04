@@ -8,10 +8,7 @@ import { StakingTrend } from "../components/StakingTrend";
 import { ContractsList } from "../components/ContractsList";
 import { fetchWebconfig } from "../services/webconfig";
 import { ISupply, IEpoch } from "../services/types";
-import { Epochs } from "../services/epochs";
-import { Supply } from "../services/supply";
-import { Votings } from "../services/votings";
-import { Blocks } from "../services/blocks";
+import { Epochs, Supply, Votings, Blocks } from "../services/api";
 import { serializable } from "../services/format";
 
 export async function getServerSideProps() {

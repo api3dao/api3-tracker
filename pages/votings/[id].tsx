@@ -3,8 +3,7 @@ import { Footer, Header, Meta } from "../../components/";
 import { VotingSummary } from "../../components/VotingSummary";
 import { VotingEventsList } from "../../components/VotingEvents";
 import { fetchWebconfig } from "../../services/webconfig";
-import { Votings, VotingEvents } from "../../services/votings";
-import { Blocks } from "../../services/blocks";
+import { Votings, VotingEvents, Blocks } from "../../services/api";
 import { serializable } from "../../services/format";
 
 export async function getServerSideProps(context: any) {

@@ -3,8 +3,7 @@ import { Footer, Header, Meta } from "../../components/";
 import { WalletSummary } from "../../components/WalletSummary";
 import { WalletEventsList } from "../../components/WalletEvents";
 import { fetchWebconfig } from "../../services/webconfig";
-import { Wallets, WalletEvents } from "../../services/wallets";
-import { Blocks } from "../../services/blocks";
+import { Wallets, WalletEvents, Blocks } from "../../services/api";
 import { serializable } from "../../services/format";
 
 export async function getServerSideProps(context: any) {

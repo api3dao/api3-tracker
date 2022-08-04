@@ -2,9 +2,8 @@ import type { NextPage } from "next";
 import { Footer, Header, Meta } from "../components/";
 import { VotingsList } from "../components/VotingsList";
 import { fetchWebconfig } from "../services/webconfig";
-import { Votings } from "../services/votings";
+import { Votings, Blocks } from "../services/api";
 import { serializable } from "../services/format";
-import { Blocks } from "../services/blocks";
 
 export async function getServerSideProps() {
   const webconfig = fetchWebconfig();

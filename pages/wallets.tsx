@@ -1,9 +1,8 @@
 import type { NextPage } from "next";
 import { Footer, Header, Meta } from "../components/";
 import { fetchWebconfig } from "../services/webconfig";
-import { Wallets } from "../services/wallets";
+import { Wallets, Blocks } from "../services/api";
 import { WalletsList } from "../components/WalletsList";
-import { Blocks } from "../services/blocks";
 import { serializable } from "../services/format";
 
 export async function getServerSideProps() {

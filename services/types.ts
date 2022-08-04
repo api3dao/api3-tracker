@@ -1,5 +1,13 @@
 import { Prisma } from "@prisma/client";
 
+export const Decimal = Prisma.Decimal;
+
+export interface IBlockEvent {
+  createdAt: string;
+  txHash: string;
+  blockNumber: number;
+}
+
 export interface IContract {
   name: string;
   title: string;
