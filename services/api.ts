@@ -1,20 +1,20 @@
 import prisma from "./db";
-import { Decimal, IWallet, IWalletEvent, IVoting, IVotingEvent, IEpoch, ISupply } from "./../services/types";
+import { Decimal, IBlockNumber, IWallet, IWalletEvent, IVoting, IVotingEvent, IEpoch, ISupply } from "./../services/types";
 import { VotingType, TreasuryType } from ".prisma/client";
 
 export type ITreasuryType = TreasuryType;
 export type IVotingType = VotingType;
 
-
 export const Blocks = {
   // fetch the last block
-  fetchLast: async (): Promise<any> => {
-    return (
+  fetchLast: async (): Promise<IBlockNumber> => {
+    const list = (
       await prisma.memberEvent.findMany({
         take: 1,
         orderBy: { createdAt: "desc" },
       })
-    ).map((x: any) => ({ ...x }))[0];
+    ).map((x: any) => ({ ...x }));
+    return ( list.length > 0 ) ? list[0] : {};
   },
 };
 
