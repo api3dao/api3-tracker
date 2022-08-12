@@ -37,6 +37,12 @@ terraform init
 terraform apply
 ```
 
+Once ready, install new database with mocks:
+
+```sh
+./bin/prisma.sh migrate dev
+```
+
 Please review the components that will be installed and approve.
 
 ## Local Development

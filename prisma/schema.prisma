@@ -143,7 +143,7 @@ model Voting {
   vt        VotingType // Voting Type
   createdAt DateTime // Date of Voting Creation Transaction (taken from the block)
   name      String // name of the voting
-  status      String // status of the voting
+  status    String // status of the voting
 
   transferValue   Decimal? @db.Decimal(60, 18) // in case of transfer - value of the token for transfer
   transferToken   String? // in case of transfer - name of the token for transfer

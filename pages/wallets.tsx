@@ -8,7 +8,7 @@ import { serializable } from "../services/format";
 
 export async function getServerSideProps() {
   const results = await Promise.all([Wallets.fetchList(), Blocks.fetchLast()]);
-  const list : Array<IWallet> = results[0];
+  const list: Array<IWallet> = results[0];
   const lastBlock: IBlockNumber = results[1];
 
   return {

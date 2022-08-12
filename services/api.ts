@@ -1,5 +1,14 @@
 import prisma from "./db";
-import { Decimal, IBlockNumber, IWallet, IWalletEvent, IVoting, IVotingEvent, IEpoch, ISupply } from "./../services/types";
+import {
+  Decimal,
+  IBlockNumber,
+  IWallet,
+  IWalletEvent,
+  IVoting,
+  IVotingEvent,
+  IEpoch,
+  ISupply,
+} from "./../services/types";
 import { VotingType, TreasuryType } from ".prisma/client";
 
 export type ITreasuryType = TreasuryType;
@@ -14,7 +23,7 @@ export const Blocks = {
         orderBy: { createdAt: "desc" },
       })
     ).map((x: any) => ({ ...x }));
-    return ( list.length > 0 ) ? list[0] : {};
+    return list.length > 0 ? list[0] : {};
   },
 };
 
@@ -102,12 +111,10 @@ export const Votings = {
     ).map((x: any) => ({ ...x }));
   },
   // fetch one voting by its ID
-  fetch: async (id: string): Promise<IVoting|null> => {
-    return (
-      await prisma.voting.findUnique({
-        where: { id },
-      })
-    ) as IVoting | null;
+  fetch: async (id: string): Promise<IVoting | null> => {
+    return (await prisma.voting.findUnique({
+      where: { id },
+    })) as IVoting | null;
   },
   // fetch total number of votings
   total: async (): Promise<number> => {
@@ -158,12 +165,10 @@ export const Wallets = {
     ).map((x: any) => ({ ...x }));
   },
   // fetch one voting by its ID
-  fetch: async (address: Buffer): Promise<IWallet|null> => {
-    return (
-      await prisma.member.findUnique({
-        where: { address },
-      })
-    ) as IWallet | null;
+  fetch: async (address: Buffer): Promise<IWallet | null> => {
+    return (await prisma.member.findUnique({
+      where: { address },
+    })) as IWallet | null;
   },
   // fetch total number of members
   total: async (): Promise<number> => {

@@ -15,7 +15,7 @@ export async function getServerSideProps(context: any) {
     WalletEvents.fetchList(address),
     Blocks.fetchLast(),
   ]);
-  const wallet: IWallet | null= results[0];
+  const wallet: IWallet | null = results[0];
   const events: Array<IWalletEvent> = results[1];
   const lastBlock: IBlockNumber = results[2];
   return {

@@ -17,4 +17,4 @@ export const Default = Template.bind({});
 Default.args = {
   github: "https://github.com/api3dao/api3-tracker",
   blockNumber: 15125158,
-}
+};
