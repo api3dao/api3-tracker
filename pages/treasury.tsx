@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import { Footer, Header, Meta } from "../components/";
 import { fetchWebconfig } from "../services/webconfig";
-import { ITreasury } from "../services/types";
+import { IBlockNumber, ITreasury } from "../services/types";
 import { Treasury } from "../components/Treasury";
 import { ITreasuryType, Treasuries, Blocks } from "../services/api";
 import { toHex, serializable } from "../services/format";
@@ -13,7 +13,7 @@ export async function getServerSideProps() {
      Blocks.fetchLast(),
   ]);
   const names = results[0];
-  const lastBlock = results[1];
+  const lastBlock: IBlockNumber = results[1];
   const list = await Promise.all(
     names.map(async (ttype: ITreasuryType): Promise<ITreasury> => {
       const tokens = await Treasuries.fetch(ttype);

@@ -4,6 +4,7 @@ import { WalletSummary } from "../../components/WalletSummary";
 import { WalletEventsList } from "../../components/WalletEvents";
 import { fetchWebconfig } from "../../services/webconfig";
 import { Wallets, WalletEvents, Blocks } from "../../services/api";
+import { IWallet, IWalletEvent, IBlockNumber } from "../../services/types";
 import { serializable } from "../../services/format";
 
 export async function getServerSideProps(context: any) {
@@ -14,9 +15,9 @@ export async function getServerSideProps(context: any) {
     WalletEvents.fetchList(address),
     Blocks.fetchLast(),
   ]);
-  const wallet = results[0];
-  const events = results[1];
-  const lastBlock = results[2];
+  const wallet: IWallet | null= results[0];
+  const events: Array<IWalletEvent> = results[1];
+  const lastBlock: IBlockNumber = results[2];
   return {
     props: {
       webconfig: fetchWebconfig(),

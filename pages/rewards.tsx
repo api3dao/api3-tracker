@@ -3,7 +3,7 @@ import { Footer, Header, Meta } from "../components/";
 import { Prisma } from "@prisma/client";
 import { fetchWebconfig } from "../services/webconfig";
 import { RewardsList, RewardsSummary } from "../components/Rewards";
-import { IEpoch } from "../services/types";
+import { IBlockNumber, IEpoch, ISupply } from "../services/types";
 import { Epochs, Supply, Blocks } from "../services/api";
 import { serializable } from "../services/format";
 
@@ -14,8 +14,8 @@ export async function getServerSideProps() {
     Blocks.fetchLast(),
   ]);
   const latest: Array<IEpoch> = results[0];
-  const supply = results[1];
-  const lastBlock = results[2];
+  const supply: ISupply | null = results[1];
+  const lastBlock: IBlockNumber = results[2];
   let totalMinted = new Prisma.Decimal(0);
   for (const epoch of latest) {
     totalMinted = totalMinted.add(epoch.mintedShares);

@@ -7,7 +7,7 @@ import { TokenStaking } from "../components/TokenStaking";
 import { StakingTrend } from "../components/StakingTrend";
 import { ContractsList } from "../components/ContractsList";
 import { fetchWebconfig } from "../services/webconfig";
-import { ISupply, IEpoch } from "../services/types";
+import { IBlockNumber, ISupply, IEpoch } from "../services/types";
 import { Epochs, Supply, Votings, Blocks } from "../services/api";
 import { serializable } from "../services/format";
 
@@ -21,7 +21,7 @@ export async function getServerSideProps() {
   const latest: Array<IEpoch> = results[0];
   const supply: ISupply | null = results[1];
   const totalVotings: number = results[2];
-  const lastBlock: number = results[3];
+  const lastBlock: IBlockNumber = results[3];
   const current: IEpoch = latest[0];
   return {
     props: {

@@ -4,6 +4,7 @@ import { VotingSummary } from "../../components/VotingSummary";
 import { VotingEventsList } from "../../components/VotingEvents";
 import { fetchWebconfig } from "../../services/webconfig";
 import { Votings, VotingEvents, Blocks } from "../../services/api";
+import { IBlockNumber, IVoting, IVotingEvent } from "../../services/types";
 import { serializable } from "../../services/format";
 
 export async function getServerSideProps(context: any) {
@@ -13,9 +14,9 @@ export async function getServerSideProps(context: any) {
     VotingEvents.fetchList(id),
     Blocks.fetchLast(),
   ]);
-  const voting = results[0];
-  const events = results[1];
-  const lastBlock = results[2];
+  const voting: IVoting | null = results[0];
+  const events: Array<IVotingEvent> = results[1];
+  const lastBlock: IBlockNumber = results[2];
   return {
     props: {
       webconfig: fetchWebconfig(),
