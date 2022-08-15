@@ -44,80 +44,21 @@ a {
   text-decoration: none;
 }
 
-@media (max-width: 800px) {
-  .desktop-only {
-    display: none !important;
-  }
-}
-
-@media (min-width: 799px) {
-  .mobile-only {
-    display: none !important;
-  }
-}
-
 .accent {
   color: var(--color-accent) !important;
 }
 .warning {
   color: var(--color-warning) !important;
 }
-.padded {
-  padding-top: 20px !important;
-  padding-bottom: 20px !important;
-}
-.m20 {
-  margin-bottom: 20px !important;
-}
 .darken {
   color: var(--color-grey) !important;
 }
 
-.inner {
-  margin: 0px auto;
-}
-
-main {
-  margin-top: 6px;
-}
-@media (min-width: 960px) {
-  main {
-    margin-top: 160px;
-  }
-}
-
-main > div > div.inner,
-body > div > div.inner {
-  margin-top: 40px;
-  padding-top: 30px;
-  padding-bottom: 30px;
-}
-
-@media (min-width: 960px) {
-  main > div > div.inner,
-  body > div > div.inner {
-    padding-top: 120px;
-    padding-bottom: 50px;
-  }
-}
-
-@media (min-width: 960px) {
-  .inner {
-    max-width: 1024px;
-  }
-}
-
-.content {
-  max-width: 1024px;
-  margin: 0px auto;
-  padding: 0px 20px;
-}
-
 h1 {
   font-size: 1.25em;
+  font-weight: bold;
   text-align: center;
-  text-transform: uppercase;
-  margin: 0px;
+  margin-bottom: 20px;
 }
 
 @media (min-width: 960px) {
@@ -134,51 +75,9 @@ p.note {
   padding-right: 20px;
 }
 
-.well {
-  background: var(--color-well);
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 5px #e4e4e9;
-  border-radius: 5px;
-}
-.well h1,
-.well h2,
-.well h3,
-.well h4 {
-  margin-top: 0px;
-  color: #444;
-}
-
-.network__property {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.network__item {
-  min-width: 290px;
-}
-
-@media (min-width: 640px) {
-  .network__list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-evenly;
-    align-items: center;
-  }
-  .network__item {
-    width: auto;
-  }
-}
-
 .centered {
   margin: 0px auto;
   text-align: center;
-}
-
-.screen-votings .votings-empty {
-  text-align: center;
-  margin-top: 20px;
 }
 
 .vested {
@@ -383,28 +282,8 @@ table.table tbody tr:nth-child(odd) {
   color: #000;
 }
 
-.delegates-all {
-  padding: 30px;
-  border: 1px var(--color-accent) solid;
-  background: var(--color-body);
-  margin-bottom: 30px;
-  text-align: center;
-  line-height: 1.75;
-}
-
-.screen-treasury .border-inner {
-  min-width: 240px;
-}
-
 .vote-script a {
   color: white !important;
-}
-
-.epochs-empty,
-.votings-empty,
-.events-empty {
-  text-align: center;
-  color: var(--color-grey) !important;
 }
 
 a.icon {

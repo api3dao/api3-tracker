@@ -60,7 +60,9 @@ export default {
 } as ComponentMeta<typeof ContractsList>;
 
 const Template: ComponentStory<typeof ContractsList> = (args) => (
-  <div className="mx-auto max-w-sm"><ContractsList {...args} /></div>
+  <div className="mx-auto max-w-sm">
+    <ContractsList {...args} />
+  </div>
 );
 
 export const Mainnet = Template.bind({});

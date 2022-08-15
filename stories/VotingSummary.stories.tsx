@@ -1,4 +1,5 @@
 import React from "react";
+import { Prisma } from "@prisma/client";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { VotingSummary } from "../components/VotingSummary";
 
@@ -24,13 +25,13 @@ Executed.args = {
   description: `
    https://gateway.pinata.cloud/ipfs/QmYt3LF3AmzVv6Ctbsg1w13vg98RDmyZAhkLh8dMoXQT84
    https://forum.api3.org/t/business-development-team-proposal-august-october-2022-cycle-8/1540`,
-  transferValue: 26738,
+  transferValue: new Prisma.Decimal(26738),
   transferToken: "USDC",
   transferAddress: "0xe2279b907f027cc89fe744b2b5cf46f978e502d3",
-  totalFor: 117138,
-  totalAgainst: 12800,
-  totalStaked: 42420299,
-  totalRequired: 6363044,
+  totalFor: new Prisma.Decimal(117138),
+  totalAgainst: new Prisma.Decimal(12800),
+  totalStaked: new Prisma.Decimal(42420299),
+  totalRequired: new Prisma.Decimal(6363044),
   totalGasUsed: 0.0261812,
   totalUsd: 38.76,
 };
@@ -43,13 +44,13 @@ Rejected.args = {
   description: `
    https://gateway.pinata.cloud/ipfs/QmYt3LF3AmzVv6Ctbsg1w13vg98RDmyZAhkLh8dMoXQT84
    https://forum.api3.org/t/business-development-team-proposal-august-october-2022-cycle-8/1540`,
-  transferValue: 26738,
+  transferValue: new Prisma.Decimal(26738),
   transferToken: "USDC",
   transferAddress: "0xe2279b907f027cc89fe744b2b5cf46f978e502d3",
-  totalFor: 117138,
-  totalAgainst: 10900000,
-  totalStaked: 42420299,
-  totalRequired: 6363044,
+  totalFor: new Prisma.Decimal(117138),
+  totalAgainst: new Prisma.Decimal(10900000),
+  totalStaked: new Prisma.Decimal(42420299),
+  totalRequired: new Prisma.Decimal(6363044),
   totalGasUsed: 0.0261812,
   totalUsd: 38.76,
 };
@@ -62,13 +63,13 @@ Pending.args = {
   description: `
    https://gateway.pinata.cloud/ipfs/QmYt3LF3AmzVv6Ctbsg1w13vg98RDmyZAhkLh8dMoXQT84
    https://forum.api3.org/t/business-development-team-proposal-august-october-2022-cycle-8/1540`,
-  transferValue: 26738,
+  transferValue: new Prisma.Decimal(26738),
   transferToken: "USDC",
   transferAddress: "0xe2279b907f027cc89fe744b2b5cf46f978e502d3",
-  totalFor: 117138,
-  totalAgainst: 0,
-  totalStaked: 42420299,
-  totalRequired: 6363044,
+  totalFor: new Prisma.Decimal(117138),
+  totalAgainst: new Prisma.Decimal(0),
+  totalStaked: new Prisma.Decimal(42420299),
+  totalRequired: new Prisma.Decimal(6363044),
   totalGasUsed: 0.0261812,
   totalUsd: 38.76,
 };

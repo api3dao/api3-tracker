@@ -5,10 +5,17 @@ import { IVoting } from "../services/api3";
 
 export const VotingSummary = (props: IVoting) => {
   const title = `API3 DAO ${props.status} Proposal Voting`;
-  let statusClass = "text-4xl py-6 my-10 text-align uppercase border border-solid border-color-border";
-  let statusText = ""
-  if (props.status == "Executed") { statusClass+=" text-color-accent"; statusText = "Accepted and Executed"; };
-  if (props.status == "Accepted") { statusClass+=" text-color-accent"; statusText = "Passing, not executed"; };
+  let statusClass =
+    "text-4xl py-6 my-10 text-align uppercase border border-solid border-color-border";
+  let statusText = "";
+  if (props.status == "Executed") {
+    statusClass += " text-color-accent";
+    statusText = "Accepted and Executed";
+  }
+  if (props.status == "Accepted") {
+    statusClass += " text-color-accent";
+    statusText = "Passing, not executed";
+  }
 
   return (
     <div className="text-center my-10">
@@ -33,11 +40,11 @@ export const VotingSummary = (props: IVoting) => {
           </span>
         </div>
       ) : null}
-      {statusText ? <div className={statusClass}>{statusText}</div>: null }
+      {statusText ? <div className={statusClass}>{statusText}</div> : null}
       <div className="my-8 min-w-full lg:grid lg:grid-cols-2 lg:justify-center">
         <div className="mx-auto lg:ml-auto lg:mr-5">
           <BorderedPanel title="For" big={true}>
-            {props.totalFor > 0 ? (
+            {props.totalFor.toNumber() > 0 ? (
               <div className="my-10 mt-3">
                 {" "}
                 <div className="font-bold text-4xl">
@@ -47,7 +54,7 @@ export const VotingSummary = (props: IVoting) => {
                   votes supported this proposal
                 </div>
                 <div className="font-bold text-sm">
-                  {(props.totalFor / props.totalStaked).toFixed(4)}%
+                  {props.totalFor.div(props.totalStaked).toFixed(4)}%
                 </div>
               </div>
             ) : (
@@ -59,7 +66,7 @@ export const VotingSummary = (props: IVoting) => {
         </div>
         <div className="lg:max-w-300px">
           <BorderedPanel title="Against" big={true}>
-            {props.totalAgainst > 0 ? (
+            {props.totalAgainst.toNumber() > 0 ? (
               <div className="my-10 mt-3">
                 <div className="font-bold text-4xl">
                   {toCurrency(props.totalAgainst)}
@@ -68,7 +75,7 @@ export const VotingSummary = (props: IVoting) => {
                   votes against this proposal
                 </div>
                 <div className="font-bold text-sm">
-                  {(props.totalAgainst / props.totalStaked).toFixed(4)}%
+                  {props.totalAgainst.div(props.totalStaked).toFixed(4)}%
                 </div>
               </div>
             ) : (

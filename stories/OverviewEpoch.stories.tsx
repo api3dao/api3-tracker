@@ -1,6 +1,6 @@
 import React from "react";
+import { Prisma } from "@prisma/client";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-
 import { Epoch } from "../components/Overview";
 
 export default {
@@ -19,30 +19,30 @@ const Template: ComponentStory<typeof Epoch> = (args) => (
 
 export const CurrrentEpoch = Template.bind({});
 CurrrentEpoch.args = {
-  isCurrent: true,
+  isCurrent: 1,
   epoch: 3333,
-  createdAt: new Date(),
-  apr: 14.75,
-  rewardsPct: 0.2829,
+  createdAt: new Date().toISOString(),
+  apr: new Prisma.Decimal(14.75),
+  rewardsPct: new Prisma.Decimal(0.2829),
   members: 8000,
-  totalStake: 55481434,
-  stakedRewards: 13756546,
-  totalShares: 58903799,
-  mintedShares: 156944,
-  releaseDate: new Date(),
+  totalStake: new Prisma.Decimal(55481434),
+  stakedRewards: new Prisma.Decimal(13756546),
+  totalShares: new Prisma.Decimal(58903799),
+  mintedShares: new Prisma.Decimal(156944),
+  releaseDate: new Date().toISOString(),
 };
 
 export const PreviousEpoch = Template.bind({});
 PreviousEpoch.args = {
-  isCurrent: false,
+  isCurrent: 0,
   epoch: 3332,
-  createdAt: new Date(),
-  apr: 14.75,
-  rewardsPct: 0.2829,
+  createdAt: new Date().toISOString(),
+  apr: new Prisma.Decimal(14.75),
+  rewardsPct: new Prisma.Decimal(0.2829),
   members: 8000,
-  totalStake: 55481434,
-  stakedRewards: 13756546,
-  totalShares: 58903799,
-  mintedShares: 156944,
-  releaseDate: new Date(),
+  totalStake: new Prisma.Decimal(55481434),
+  stakedRewards: new Prisma.Decimal(13756546),
+  totalShares: new Prisma.Decimal(58903799),
+  mintedShares: new Prisma.Decimal(156944),
+  releaseDate: new Date().toISOString(),
 };

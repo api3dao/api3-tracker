@@ -15,8 +15,10 @@ export const BorderedPanel = (props: IBorderedPanelProps) => {
   return (
     <div className="my-8">
       <div className="flex justify-center my-0">
-        <div className="w-8 min-w-16px border border-solid border-color-panel-border border-r-0">&nbsp;</div>
-        <div className="flex flex-col">
+        <div className="w-8 min-w-16px border border-solid border-color-panel-border border-r-0">
+          &nbsp;
+        </div>
+        <div className="flex flex-col min-w-220px">
           <div className={classTitle}>{props.title}</div>
           <div>{props.children}</div>
         </div>

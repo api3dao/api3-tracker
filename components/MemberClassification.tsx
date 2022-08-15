@@ -20,7 +20,7 @@ const badges = [
     name: "supporter",
     className: "bg-color-success",
     title: "API3 tokens are not vested, member can withdraw, but never did",
-  }
+  },
 ];
 
 export const MemberClassification = (props: IBadgerProps) => {
@@ -34,7 +34,8 @@ export const MemberClassification = (props: IBadgerProps) => {
               className="text-sm text-left leading-6 text-color-grey"
               key={b.name}
             >
-              <span className={classBadge + b.className}>{b.name}</span> -{b.title}
+              <span className={classBadge + b.className}>{b.name}</span> -
+              {b.title}
             </li>
           )
         )}

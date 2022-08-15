@@ -11,12 +11,15 @@ CREATE TABLE "epochs" (
     "blockNumber" INTEGER NOT NULL,
     "chainId" INTEGER NOT NULL,
     "txHash" BYTEA NOT NULL,
-    "apr" DECIMAL(65,30) NOT NULL,
-    "members" BIGINT NOT NULL,
-    "totalStake" BIGINT NOT NULL,
-    "totalShares" BIGINT NOT NULL,
-    "mintedShares" BIGINT NOT NULL,
+    "apr" DECIMAL(10,2) NOT NULL,
+    "members" INTEGER NOT NULL,
+    "totalStake" DECIMAL(60, 18) NOT NULL,
+    "totalShares" DECIMAL(60, 18) NOT NULL,
+    "mintedShares" DECIMAL(60, 18) NOT NULL,
     "releaseDate" TIMESTAMP(3) NOT NULL,
+    "isCurrent" INTEGER NOT NULL,
+    "rewardsPct" DECIMAL(10,4) NOT NULL,
+    "stakedRewards" DECIMAL(60, 18) NOT NULL,
 
     CONSTRAINT "epochs_pkey" PRIMARY KEY ("epoch")
 );
@@ -25,10 +28,10 @@ CREATE TABLE "epochs" (
 CREATE TABLE "member_epochs" (
     "epoch" INTEGER NOT NULL,
     "address" BYTEA NOT NULL,
-    "userShare" BIGINT NOT NULL,
-    "userStake" BIGINT NOT NULL,
-    "userVotingPower" DECIMAL(65,30) NOT NULL,
-    "userReward" BIGINT NOT NULL,
+    "userShare" DECIMAL(60,18) NOT NULL,
+    "userStake" DECIMAL(60,18) NOT NULL,
+    "userVotingPower" DECIMAL(10,2) NOT NULL,
+    "userReward" DECIMAL(60,18) NOT NULL,
 
     CONSTRAINT "member_epochs_pkey" PRIMARY KEY ("epoch","address")
 );
@@ -43,11 +46,12 @@ CREATE TABLE "member_events" (
     "blockNumber" INTEGER NOT NULL,
     "txIndex" INTEGER NOT NULL,
     "logIndex" INTEGER NOT NULL,
+    "eventName" TEXT NOT NULL,
     "data" JSONB,
     "fee" BIGINT,
     "gasPrice" BIGINT,
     "gasUsed" BIGINT,
-    "feeUsd" DECIMAL(65,30),
+    "feeUsd" DECIMAL(10,2),
 
     CONSTRAINT "member_events_pkey" PRIMARY KEY ("id")
 );
@@ -57,7 +61,7 @@ CREATE TABLE "member_delegations" (
     "from" BYTEA NOT NULL,
     "to" BYTEA NOT NULL,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "userShares" BIGINT NOT NULL,
+    "userShares" DECIMAL(60,18) NOT NULL,
 
     CONSTRAINT "member_delegations_pkey" PRIMARY KEY ("from")
 );
@@ -68,13 +72,13 @@ CREATE TABLE "members" (
     "ensName" TEXT NOT NULL,
     "ensUpdated" TIMESTAMP(3) NOT NULL,
     "badges" TEXT NOT NULL,
-    "userShare" BIGINT NOT NULL,
-    "userStake" BIGINT NOT NULL,
-    "userVotingPower" DECIMAL(65,30) NOT NULL,
-    "userReward" BIGINT NOT NULL,
-    "userLockedReward" BIGINT NOT NULL,
-    "userDeposited" BIGINT NOT NULL,
-    "userWithdrew" BIGINT NOT NULL,
+    "userShare" DECIMAL(60,18) NOT NULL,
+    "userStake" DECIMAL(60,18) NOT NULL,
+    "userVotingPower" DECIMAL(10,2) NOT NULL,
+    "userReward" DECIMAL(60,18) NOT NULL,
+    "userLockedReward" DECIMAL(60,18) NOT NULL,
+    "userDeposited" DECIMAL(60,18) NOT NULL,
+    "userWithdrew" DECIMAL(60,18) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "tags" TEXT NOT NULL
@@ -89,15 +93,16 @@ CREATE TABLE "voting_event" (
     "blockNumber" INTEGER NOT NULL,
     "txIndex" INTEGER NOT NULL,
     "logIndex" INTEGER NOT NULL,
+    "eventName" TEXT NOT NULL,
     "data" JSONB,
     "fee" BIGINT,
     "gasPrice" BIGINT,
     "gasUsed" BIGINT,
-    "feeUsd" DECIMAL(65,30),
+    "feeUsd" DECIMAL(10,2),
     "address" BYTEA NOT NULL,
     "supports" INTEGER NOT NULL DEFAULT 0,
-    "userShare" BIGINT NOT NULL,
-    "userVotingPower" DECIMAL(65,30) NOT NULL,
+    "userShare" DECIMAL(60,18) NOT NULL,
+    "userVotingPower" DECIMAL(10,2) NOT NULL,
     "votingId" TEXT,
 
     CONSTRAINT "voting_event_pkey" PRIMARY KEY ("id")
@@ -109,10 +114,16 @@ CREATE TABLE "voting" (
     "vt" "VotingType" NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL,
     "name" TEXT NOT NULL,
-    "transferValue" BIGINT,
+    "status" TEXT NOT NULL,
+    "transferValue" DECIMAL(60,18),
+    "transferAddress" BYTEA,
     "transferToken" TEXT,
     "totalGasUsed" BIGINT,
-    "totalUsd" DECIMAL(65,30),
+    "totalUsd" DECIMAL(10,2),
+    "totalFor" DECIMAL(60,18) NOT NULL,
+    "totalAgainst" DECIMAL(60,18) NOT NULL,
+    "totalStaked" DECIMAL(60,18) NOT NULL,
+    "totalRequired" DECIMAL(60,18) NOT NULL,
 
     CONSTRAINT "voting_pkey" PRIMARY KEY ("id")
 );
@@ -132,7 +143,7 @@ CREATE TABLE "ens_event" (
     "fee" BIGINT,
     "gasPrice" BIGINT,
     "gasUsed" BIGINT,
-    "feeUsd" DECIMAL(65,30),
+    "feeUsd" DECIMAL(10,2),
 
     CONSTRAINT "ens_event_pkey" PRIMARY KEY ("id")
 );
@@ -140,13 +151,13 @@ CREATE TABLE "ens_event" (
 -- CreateTable
 CREATE TABLE "price_ethereum" (
     "ts" TIMESTAMP(3) NOT NULL,
-    "usd" DECIMAL(65,30) NOT NULL,
-    "eur" DECIMAL(65,30) NOT NULL,
-    "rub" DECIMAL(65,30) NOT NULL,
-    "cny" DECIMAL(65,30) NOT NULL,
-    "cad" DECIMAL(65,30) NOT NULL,
-    "jpy" DECIMAL(65,30) NOT NULL,
-    "gbp" DECIMAL(65,30) NOT NULL,
+    "usd" DECIMAL(10,2) NOT NULL,
+    "eur" DECIMAL(10,2) NOT NULL,
+    "rub" DECIMAL(10,2) NOT NULL,
+    "cny" DECIMAL(10,2) NOT NULL,
+    "cad" DECIMAL(10,2) NOT NULL,
+    "jpy" DECIMAL(10,2) NOT NULL,
+    "gbp" DECIMAL(10,2) NOT NULL,
 
     CONSTRAINT "price_ethereum_pkey" PRIMARY KEY ("ts")
 );
@@ -155,24 +166,27 @@ CREATE TABLE "price_ethereum" (
 CREATE TABLE "treasuries" (
     "ts" TIMESTAMP(3) NOT NULL,
     "ttype" "TreasuryType" NOT NULL,
-    "value" BIGINT NOT NULL,
-    "decimals" INTEGER NOT NULL,
+    "address" BYTEA NOT NULL,
+    "token" TEXT NOT NULL,
+    "tokenAddress" BYTEA  NOT NULL,
+    "value" DECIMAL(60, 18)  NOT NULL,
+    "current" INTEGER NOT NULL DEFAULT 0,
 
-    CONSTRAINT "treasuries_pkey" PRIMARY KEY ("ts","ttype")
+    CONSTRAINT "treasuries_pkey" PRIMARY KEY ("ts","ttype","token")
 );
 
 -- CreateTable
 CREATE TABLE "api3_supply" (
     "ts" TIMESTAMP(3) NOT NULL,
     "blockNumber" BIGINT NOT NULL,
-    "circulatingSupply" BIGINT NOT NULL,
-    "totalLocked" BIGINT NOT NULL,
-    "totalStaked" BIGINT NOT NULL,
-    "stakingTarget" BIGINT NOT NULL,
-    "lockedByGovernance" BIGINT NOT NULL,
-    "lockedVestings" BIGINT NOT NULL,
-    "lockedRewards" BIGINT NOT NULL,
-    "timeLocked" BIGINT NOT NULL,
+    "circulatingSupply" DECIMAL(60, 18) NOT NULL,
+    "totalLocked" DECIMAL(60, 18) NOT NULL,
+    "totalStaked" DECIMAL(60, 18) NOT NULL,
+    "stakingTarget" DECIMAL(60, 18) NOT NULL,
+    "lockedByGovernance" DECIMAL(60, 18) NOT NULL,
+    "lockedVestings" DECIMAL(60, 18) NOT NULL,
+    "lockedRewards" DECIMAL(60, 18) NOT NULL,
+    "timeLocked" DECIMAL(60, 18) NOT NULL,
 
     CONSTRAINT "api3_supply_pkey" PRIMARY KEY ("ts")
 );

@@ -1,7 +1,6 @@
 import React from "react";
 import { IWalletEvent } from "./../services/api3";
-import Link from "next/link";
-import { toCurrency } from "./../services/format";
+import { niceDate, toCurrency } from "./../services/format";
 
 export interface IWalletEventsListProps {
   list: Array<IWalletEvent>;
@@ -22,7 +21,7 @@ export const WalletEventsListTr = (row: IWalletEvent) => (
   <tr>
     <td className="text-center">{row.id}.</td>
     <td className="text-center">
-      {row.createdAt.toISOString().replace("T", " ")}
+      {niceDate(row.createdAt)}
     </td>
     <td className="text-center">{toCurrency(row.blockNumber)} </td>
     <td className="text-left">
@@ -47,7 +46,7 @@ export const WalletEventsListTr = (row: IWalletEvent) => (
 
 export const WalletEventsList = (props: IWalletEventsListProps) => {
   return (
-    <div>
+    <div className="max-w-screen-lg mx-auto">
       <table className="table invisible lg:visible">
         <WalletEventsListThead />
         <tbody>

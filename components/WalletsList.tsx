@@ -1,7 +1,7 @@
 import React from "react";
 import { IWallet } from "./../services/api3";
 import Link from "next/link";
-import { toCurrency } from "./../services/format";
+import { toHex, niceDateTime, toCurrency } from "./../services/format";
 
 export interface IWalletsListProps {
   list: Array<IWallet>;
@@ -25,19 +25,21 @@ export const WalletsListThead = () => (
 export const WalletsListTr = (row: IWallet) => (
   <tr>
     <td className="text-center">1.</td>
-    <td className="text-center max-w-3">
-      {row.createdAt.toISOString().replace("T", " ")}
-    </td>
-    <td className="text-center max-w-3">
-      {row.updatedAt.toISOString().replace("T", " ")}
-    </td>
+    <td className="text-center max-w-3">{niceDateTime(row.createdAt)}</td>
+    <td className="text-center max-w-3">{niceDateTime(row.updatedAt)}</td>
     <td className="text-left">
-      <Link href={`wallets/${row.address}`} className="text-bold">
-        <div>
-          <span className="font-bold">{row.ensName}</span>
-          <br />
-          <span className="accent">{row.address}</span>
-        </div>
+      <Link href={`/wallets/${toHex(row.address)}`} className="text-bold">
+        {row.ensName ? (
+          <div>
+            <span className="font-bold">{row.ensName}</span>
+            <br />
+            <span className="accent">{toHex(row.address)}</span>
+          </div>
+        ) : (
+          <div>
+            <span className="accent">{toHex(row.address)}</span>
+          </div>
+        )}
       </Link>
     </td>
     <td className="text-right">{toCurrency(row.userVotingPower)}</td>
@@ -49,7 +51,7 @@ export const WalletsListTr = (row: IWallet) => (
 
 export const WalletsList = (props: IWalletsListProps) => {
   return (
-    <div>
+    <div className="max-w-screen-lg mx-auto">
       <table className="table invisible lg:visible">
         <WalletsListThead />
         <tbody>

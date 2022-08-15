@@ -3,8 +3,10 @@ import { ISupply } from "../services/api3";
 import { toCurrency } from "../services/format";
 
 export const TokenStaking = (props: ISupply) => {
-  const classTitle = "text-sm text-center font-bold font-color-cell-title uppercase";
-  const classCell = "text-sm text-center py-4 lg:min-h-96px border-t border-solid border-color-cell-border";
+  const classTitle =
+    "text-sm text-center mt-4 pb-2 text-color-cell-title uppercase";
+  const classCell =
+    "text-sm text-center py-4 lg:min-h-96px border-t border-solid border-color-cell-border";
   const classValue = "font-bold";
   return (
     <div className="sm:grid grid-cols-2">

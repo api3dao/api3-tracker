@@ -12,17 +12,20 @@ datasource db {
 }
 
 model Epoch {
-  epoch        Int      @id // ID of epoch, PK
-  createdAt    DateTime // date of epoch event
-  blockNumber  Int // Block number of the epoch
-  chainId      Int // Chain ID
-  txHash       Bytes // Transaction hash
-  apr          Decimal // APR during this epoch
-  members      BigInt // Number of members
-  totalStake   BigInt // Total stake
-  totalShares  BigInt // Total shares
-  mintedShares BigInt // # of minted tokens
-  releaseDate  DateTime // Date when minted tokens will be released
+  epoch         Int      @id // ID of epoch, PK
+  createdAt     DateTime // date of epoch event
+  blockNumber   Int // Block number of the epoch
+  chainId       Int // Chain ID
+  txHash        Bytes // Transaction hash
+  apr           Decimal  @db.Decimal(10, 2) // APR during this epoch
+  members       Int // Number of members
+  totalStake    Decimal  @db.Decimal(60, 18) // Total stake
+  totalShares   Decimal  @db.Decimal(60, 18) // Total shares
+  mintedShares  Decimal  @db.Decimal(60, 18) // # of minted tokens
+  releaseDate   DateTime // Date when minted tokens will be released
+  isCurrent     Int // whether this epoch is current
+  rewardsPct    Decimal  @db.Decimal(10, 4) // real epoch rewards (calculated from APR)
+  stakedRewards Decimal  @db.Decimal(60, 18) // total staked rewards at the moment of the epoch
 
   @@map("epochs")
 }
@@ -32,10 +35,10 @@ model MemberEpoch {
   address Bytes // relation scalar field
   member  Member @relation(name: "memberEpochs", fields: [address], references: [address])
 
-  userShare       BigInt // number of user shares at the moment of this epoch
-  userStake       BigInt // number of user stake at the moment of this epoch
-  userVotingPower Decimal // user voting power at this epoch
-  userReward      BigInt // user reward for this epoch
+  userShare       Decimal @db.Decimal(60, 18) // number of user shares at the moment of this epoch
+  userStake       Decimal @db.Decimal(60, 18) // number of user stake at the moment of this epoch
+  userVotingPower Decimal @db.Decimal(10, 2) // user voting power at this epoch
+  userReward      Decimal @db.Decimal(60, 18) // user reward for this epoch
 
   @@id([epoch, address])
   @@map("member_epochs")
@@ -51,11 +54,12 @@ model MemberEvent {
   blockNumber Int // Block Number
   txIndex     Int // Transaction Index inside the block
   logIndex    Int // Index inside the events logs of this transaction
+  eventName   String // name of the event (based on the signature)
   data        Json? // data of the event
   fee         BigInt? // fee that was taken on this transaction
   gasPrice    BigInt? // gas price of this transaction
   gasUsed     BigInt? // gas used for this transaction
-  feeUsd      Decimal? // USD equivalent of the fee
+  feeUsd      Decimal? @db.Decimal(10, 2) // USD equivalent of the fee
 
   @@map("member_events")
 }
@@ -66,7 +70,7 @@ model MemberDelegation {
   to         Bytes    @unique
   memberTo   Member   @relation(name: "delegated", fields: [to], references: [address])
   updatedAt  DateTime @default(now()) // time of the last delegation update
-  userShares BigInt // number of delegated shares
+  userShares Decimal  @db.Decimal(60, 18) // number of delegated shares
 
   @@id([from])
   @@map("member_delegations")
@@ -79,13 +83,13 @@ model Member {
 
   badges String // comma-separated badges for this member
 
-  userShare        BigInt // number of user shares at the moment of this epoch
-  userStake        BigInt // number of user stake at the moment of this epoch
-  userVotingPower  Decimal // user voting power at this epoch
-  userReward       BigInt // user reqard for this epoch
-  userLockedReward BigInt // how much of the reward is still locked
-  userDeposited    BigInt // total user deposited over the time
-  userWithdrew     BigInt // total user withdrew over the time
+  userShare        Decimal @db.Decimal(60, 18) // number of user shares at the moment of this epoch
+  userStake        Decimal @db.Decimal(60, 18) // number of user stake at the moment of this epoch
+  userVotingPower  Decimal @db.Decimal(10, 2) // user voting power at this epoch
+  userReward       Decimal @db.Decimal(60, 18) // user reqard for this epoch
+  userLockedReward Decimal @db.Decimal(60, 18) // how much of the reward is still locked
+  userDeposited    Decimal @db.Decimal(60, 18) // total user deposited over the time
+  userWithdrew     Decimal @db.Decimal(60, 18) // total user withdrew over the time
 
   createdAt DateTime @default(now()) // date of the first event with this address
   updatedAt DateTime @default(now()) // date of the last update with this address
@@ -114,18 +118,19 @@ model VotingEvent {
   blockNumber Int // Block Number
   txIndex     Int // Transaction Index inside the block
   logIndex    Int // Index inside the events logs of this transaction
+  eventName   String // name of the event (based on the signature)
   data        Json? // data of the event
   fee         BigInt? // fee that was taken on this transaction
   gasPrice    BigInt? // gas price of this transaction
   gasUsed     BigInt? // gas used for this transaction
-  feeUsd      Decimal? // USD equivalent of the fee
+  feeUsd      Decimal? @db.Decimal(10, 2) // USD equivalent of the fee
 
   address Bytes // Address of the member to whom this transaction is related to
   member  Member @relation(name: "votingMember", fields: [address], references: [address])
 
   supports        Int     @default(0) // -1 - against, 1 - supports, 0 - unrelated
-  userShare       BigInt // number of user shares at the moment of this voting
-  userVotingPower Decimal // user voting power at the moment of this voting
+  userShare       Decimal @db.Decimal(60, 18) // number of user shares at the moment of this voting
+  userVotingPower Decimal @db.Decimal(10, 2) // user voting power at the moment of this voting
 
   votingId String?
   voting   Voting? @relation(name: "votingEvents", fields: [votingId], references: [id])
@@ -138,12 +143,19 @@ model Voting {
   vt        VotingType // Voting Type
   createdAt DateTime // Date of Voting Creation Transaction (taken from the block)
   name      String // name of the voting
+  status      String // status of the voting
 
-  transferValue BigInt? // in case of transfer - value of the token for transfer
-  transferToken String? // in case of transfer - name of the token for transfer
+  transferValue   Decimal? @db.Decimal(60, 18) // in case of transfer - value of the token for transfer
+  transferToken   String? // in case of transfer - name of the token for transfer
+  transferAddress Bytes? // in case of transfer - address of the destination
 
   totalGasUsed BigInt? // total gas price of this voting
-  totalUsd     Decimal? // total USD estimate for gas
+  totalUsd     Decimal? @db.Decimal(10, 2) // total USD estimate for gas
+
+  totalFor      Decimal @db.Decimal(60, 18)
+  totalAgainst  Decimal @db.Decimal(60, 18)
+  totalStaked   Decimal @db.Decimal(60, 18)
+  totalRequired Decimal @db.Decimal(60, 18)
 
   events VotingEvent[] @relation("votingEvents") // relations to events
 
@@ -164,20 +176,20 @@ model EnsEvent {
   fee         BigInt? // fee that was taken on this transaction
   gasPrice    BigInt? // gas price of this transaction
   gasUsed     BigInt? // gas used for this transaction
-  feeUsd      Decimal? // USD equivalent of the fee
+  feeUsd      Decimal? @db.Decimal(10, 2) // USD equivalent of the fee
 
   @@map("ens_event")
 }
 
 model PriceEthereum {
   ts  DateTime @id
-  usd Decimal
-  eur Decimal
-  rub Decimal
-  cny Decimal
-  cad Decimal
-  jpy Decimal
-  gbp Decimal
+  usd Decimal  @db.Decimal(10, 2)
+  eur Decimal  @db.Decimal(10, 2)
+  rub Decimal  @db.Decimal(10, 2)
+  cny Decimal  @db.Decimal(10, 2)
+  cad Decimal  @db.Decimal(10, 2)
+  jpy Decimal  @db.Decimal(10, 2)
+  gbp Decimal  @db.Decimal(10, 2)
 
   @@map("price_ethereum")
 }
@@ -189,28 +201,31 @@ enum TreasuryType {
 }
 
 model Treasury {
-  ts       DateTime
-  ttype    TreasuryType
-  value    BigInt
-  decimals Int
+  ts           DateTime
+  ttype        TreasuryType
+  address      Bytes
+  token        String
+  tokenAddress Bytes
+  value        Decimal      @db.Decimal(60, 18)
+  current      Int          @default(0)
 
-  @@id([ts, ttype])
+  @@id([ts, ttype, token])
   @@map("treasuries")
 }
 
 model Api3Supply {
   ts                DateTime @id
   blockNumber       BigInt
-  circulatingSupply BigInt
+  circulatingSupply Decimal  @db.Decimal(60, 18)
 
-  totalLocked   BigInt
-  totalStaked   BigInt
-  stakingTarget BigInt
+  totalLocked   Decimal @db.Decimal(60, 18)
+  totalStaked   Decimal @db.Decimal(60, 18)
+  stakingTarget Decimal @db.Decimal(60, 18)
 
-  lockedByGovernance BigInt
-  lockedVestings     BigInt
-  lockedRewards      BigInt
-  timeLocked         BigInt
+  lockedByGovernance Decimal @db.Decimal(60, 18)
+  lockedVestings     Decimal @db.Decimal(60, 18)
+  lockedRewards      Decimal @db.Decimal(60, 18)
+  timeLocked         Decimal @db.Decimal(60, 18)
 
   @@map("api3_supply")
 }

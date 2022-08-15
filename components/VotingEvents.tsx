@@ -1,7 +1,7 @@
 import React from "react";
 import { IVotingEvent } from "./../services/api3";
 import Link from "next/link";
-import { toCurrency } from "./../services/format";
+import { niceDate, toHex, toCurrency } from "./../services/format";
 
 export interface IVotingEventsListProps {
   list: Array<IVotingEvent>;
@@ -25,13 +25,11 @@ export const VotingEventsListThead = () => (
 export const VotingEventsListTr = (row: IVotingEvent) => (
   <tr>
     <td className="text-center">{row.id}.</td>
-    <td className="text-center">
-      {row.createdAt.toISOString().replace("T", " ")}
-    </td>
+    <td className="text-center"> {niceDate(row.createdAt)} </td>
     <td className="text-center">{toCurrency(row.blockNumber)} </td>
     <td className="text-center">{row.eventName} </td>
     <td className="text-left">
-      <Link href={`wallets/${row.address}`} className="text-bold">
+      <Link href={`/wallets/${toHex(row.address)}`} className="text-bold">
         <div>
           {row.ensName
             ? [
@@ -41,7 +39,7 @@ export const VotingEventsListTr = (row: IVotingEvent) => (
                 <br key={1} />,
               ]
             : null}
-          <div className="accent">{row.address}</div>
+          <div className="accent">{toHex(row.address)}</div>
           <div className="darken">
             Gas Used: 473402, Gas Price: 33 GWei, Est $39.7
           </div>
@@ -55,6 +53,7 @@ export const VotingEventsListTr = (row: IVotingEvent) => (
 );
 
 export const VotingEventsList = (props: IVotingEventsListProps) => {
+  if (!props.list.length) return null;
   return (
     <div>
       <table className="table invisible lg:visible">

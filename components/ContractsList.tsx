@@ -12,7 +12,9 @@ export const ContractsList = (props: IContractsListProps) => (
     <div className="mt-0 mb-4 py-0">
       {props.contracts.map((contract: IContract) => (
         <div key={contract.name} className="mb-2">
-          <label className="text-color-cell-title text-xs font-bold">{contract.title}</label>
+          <label className="text-color-cell-title text-xs font-bold">
+            {contract.title}
+          </label>
           <Address address={contract.address} />
         </div>
       ))}
