@@ -62,9 +62,9 @@ locals {
             value = local.shortname
         }]
     )
-    
+
     env = [
-    //todo: POSTGRES connection
+        "DATABASE_URL=${var.connection}",
     ]
 
     upload = length(var.webconfig) > 0 ? [ {
