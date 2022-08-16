@@ -156,7 +156,7 @@ export const WalletEvents = {
 
 export const Wallets = {
   // fetch a list of votings for the certain status
-  fetchList: async (): Promise<Array<any>> => {
+  fetchList: async (): Promise<Array<IWallet>> => {
     return (
       await prisma.member.findMany({
         where: {},
