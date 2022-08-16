@@ -1,3 +1,4 @@
+const webpack = require("webpack");
 const path = require("path");
 const toPath = (_path) => path.join(process.cwd(), _path);
 
@@ -39,6 +40,22 @@ module.exports = {
     config.resolve.roots = [
       path.resolve(__dirname, "../public"),
       "node_modules",
+    ];
+    config.resolve.extensions = [".ts", ".tsx", ".js", ".jsx"];
+    config.resolve.fallback = {
+      // stream: require.resolve("stream-browserify"),
+      buffer: require.resolve("buffer/"),
+    };
+    config.plugins = [
+      ...config.plugins,
+      // Work around for Buffer is undefined:
+      // https://github.com/webpack/changelog-v5/issues/10
+      new webpack.ProvidePlugin({
+        Buffer: ["buffer", "Buffer"],
+      }),
+      //new webpack.ProvidePlugin({
+       // process: "process/browser",
+      // }),
     ];
 
     return config;
