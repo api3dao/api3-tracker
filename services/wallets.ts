@@ -1,8 +1,5 @@
 import prisma from "./db";
-import { Prisma } from "@prisma/client";
 import { IWallet, IWalletEvent } from "./api3";
-
-const Decimal = Prisma.Decimal;
 
 export const WalletEvents = {
   // fetch a list of votings for the certain status
