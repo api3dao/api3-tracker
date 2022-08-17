@@ -6,6 +6,7 @@ import { fetchWebconfig } from "../services/webconfig";
 import { Votings } from "../services/votings";
 import { Meta } from "../components/Meta";
 import { serializable } from "../services/format";
+import { Blocks } from "../services/blocks";
 
 export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
@@ -13,6 +14,7 @@ export async function getServerSideProps() {
   const executed = await Votings.fetchList("executed");
   const invalid = await Votings.fetchList("invalid");
   const rejected = await Votings.fetchList("rejecte");
+  const lastBlock = await Blocks.fetchLast();
   return {
     props: {
       webconfig,
@@ -20,12 +22,13 @@ export async function getServerSideProps() {
       executed: serializable(executed),
       invalid: serializable(invalid),
       rejected: serializable(rejected),
+      lastBlock: serializable(lastBlock),
     }, // will be passed to the page component as props
   };
 }
 
 const VotingsPage: NextPage = (props: any) => {
-  const { pending, executed, invalid, rejected, webconfig } = props;
+  const { pending, executed, invalid, rejected, lastBlock, webconfig } = props;
 
   return (
     <div>
@@ -68,7 +71,7 @@ const VotingsPage: NextPage = (props: any) => {
         ) : null}
       </main>
 
-      <Footer />
+      <Footer github={webconfig.github} blockNumber={lastBlock.blockNumber} />
     </div>
   );
 };

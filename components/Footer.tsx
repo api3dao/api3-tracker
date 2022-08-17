@@ -1,12 +1,13 @@
 import React from "react";
 import { toCurrency } from "../services/format";
 
-export const Footer = () => {
-  // TODO: last block
-  // TODO: source link
+export interface IFooterProps {
+  blockNumber?: number;
+  github?: string;
+}
 
-  const githubLink = "https://github.com/api3dao/api3-tracker";
-  const lastBlock = 15125158;
+export const Footer = (props: IFooterProps) => {
+  const { blockNumber, github } = props;
   return (
     <footer>
       <div className="bg-color-body text-color-text md:fixed md:bottom-0 md:left-0 md:z-20 w-full">
@@ -15,16 +16,25 @@ export const Footer = () => {
             {" "}
             © 2022 <a href="https://api3.org">API3.org</a>
           </span>
-          <span className="hidden md:inline">&nbsp; | &nbsp;</span>
-          <span className="text-center block leading-6 md:inline md:text-left">
-            <a target="_blank" rel="noreferrer noopener" href={githubLink}>
-              Github Source
-            </a>
-          </span>
-          <span className="hidden md:inline">&nbsp; | &nbsp;</span>
-          <span className="text-center block leading-6 md:inline md:text-left">
-            Last block: {toCurrency(lastBlock)}
-          </span>
+          {github ? (
+            <span className="hidden md:inline">&nbsp; | &nbsp;</span>
+          ) : null}
+          {github ? (
+            <span className="text-center block leading-6 md:inline md:text-left">
+              <a target="_blank" rel="noreferrer noopener" href={github}>
+                Github Source
+              </a>
+            </span>
+          ) : null}
+          {blockNumber ? (
+            <span className="hidden md:inline">&nbsp; | &nbsp;</span>
+          ) : null}
+          {blockNumber ? (
+            <span className="text-center block leading-6 md:inline md:text-left">
+              Last block:{" "}
+              <span className="font-bold">{toCurrency(blockNumber)}</span>
+            </span>
+          ) : null}
         </div>
       </div>
     </footer>

@@ -1,6 +1,7 @@
 import type { NextPage } from "next";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
+import { Meta } from "../components/Meta";
 import { Epoch } from "../components/Overview";
 import { TokenSupply } from "../components/TokenSupply";
 import { TokenCirculating } from "../components/TokenCirculating";
@@ -12,7 +13,7 @@ import { ISupply, IEpoch } from "../services/api3";
 import { Epochs } from "../services/epochs";
 import { Supply } from "../services/supply";
 import { Votings } from "../services/votings";
-import { Meta } from "../components/Meta";
+import { Blocks } from "../services/blocks";
 import { serializable } from "../services/format";
 
 export async function getServerSideProps() {
@@ -21,6 +22,7 @@ export async function getServerSideProps() {
   const current: IEpoch = latest[0];
   const supply: ISupply | null = await Supply.fetch();
   const totalVotings = await Votings.total();
+  const lastBlock = await Blocks.fetchLast();
   return {
     props: {
       webconfig,
@@ -28,12 +30,13 @@ export async function getServerSideProps() {
       latest: serializable(latest),
       supply: serializable(supply),
       current: serializable(current),
+      lastBlock: serializable(lastBlock),
     }, // will be passed to the page component as props
   };
 }
 
 const HomePage: NextPage = (props: any) => {
-  const { latest, current, supply, totalVotings, webconfig } = props;
+  const { latest, lastBlock, current, supply, totalVotings, webconfig } = props;
   return (
     <div>
       <Meta webconfig={webconfig} />
@@ -81,7 +84,7 @@ const HomePage: NextPage = (props: any) => {
           </div>
         </div>
       </main>
-      <Footer />
+      <Footer github={webconfig.github} blockNumber={lastBlock.blockNumber} />
     </div>
   );
 };

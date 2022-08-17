@@ -7,6 +7,7 @@ import { toHex } from "../services/format";
 import { Meta } from "../components/Meta";
 import { Treasury } from "../components/Treasury";
 import { ITreasuryType, Treasuries } from "../services/treasuries";
+import { Blocks } from "../services/blocks";
 import { serializable } from "../services/format";
 
 export async function getServerSideProps() {
@@ -31,16 +32,18 @@ export async function getServerSideProps() {
       };
     })
   );
+  const lastBlock = await Blocks.fetchLast();
   return {
     props: {
       webconfig,
       list: serializable(list),
+      lastBlock: serializable(lastBlock),
     }, // will be passed to the page component as props
   };
 }
 
 const TreasuryPage: NextPage = (props: any) => {
-  const { list, webconfig } = props;
+  const { list, lastBlock, webconfig } = props;
 
   return (
     <div>
@@ -51,8 +54,8 @@ const TreasuryPage: NextPage = (props: any) => {
         <div className="inner">
           <h1>API3 DAO TREASURIES</h1>
           <p className="centered darken">
-            API3 DAO currently operates {list.length || 0} treasuries. Balances
-            below are updated each hour.
+            API3 DAO currently operates {list.length || 0} treasuries.
+            Balances below are updated each hour.
           </p>
         </div>
         <div className="max-w-screen-lg lg:flex justify-center my-0 mx-auto">
@@ -64,7 +67,7 @@ const TreasuryPage: NextPage = (props: any) => {
         </div>
       </main>
 
-      <Footer />
+      <Footer github={webconfig.github} blockNumber={lastBlock.blockNumber} />
     </div>
   );
 };
