@@ -12,15 +12,20 @@ import { Epochs, Supply, Votings, Blocks } from "../services/api";
 import { serializable } from "../services/format";
 
 export async function getServerSideProps() {
-  const webconfig = fetchWebconfig();
-  const latest: Array<IEpoch> = await Epochs.fetchLatest(3);
+  const results = await Promise.all([
+    Epochs.fetchLatest(3),
+    Supply.fetch(),
+    Votings.total(),
+    Blocks.fetchLast(),
+  ]);
+  const latest: Array<IEpoch> = results[0];
+  const supply: ISupply | null = results[1];
+  const totalVotings: number = results[2];
+  const lastBlock: number = results[3];
   const current: IEpoch = latest[0];
-  const supply: ISupply | null = await Supply.fetch();
-  const totalVotings = await Votings.total();
-  const lastBlock = await Blocks.fetchLast();
   return {
     props: {
-      webconfig,
+      webconfig: fetchWebconfig(),
       totalVotings,
       latest: serializable(latest),
       supply: serializable(supply),
