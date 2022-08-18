@@ -6,15 +6,22 @@ import { Votings, Blocks } from "../services/api";
 import { serializable } from "../services/format";
 
 export async function getServerSideProps() {
-  const webconfig = fetchWebconfig();
-  const pending = await Votings.fetchList("pending");
-  const executed = await Votings.fetchList("executed");
-  const invalid = await Votings.fetchList("invalid");
-  const rejected = await Votings.fetchList("rejecte");
-  const lastBlock = await Blocks.fetchLast();
+  const results = await Promise.all([
+    Votings.fetchList("pending"),
+    Votings.fetchList("executed"),
+    Votings.fetchList("invalid"),
+    Votings.fetchList("rejecte"),
+    Blocks.fetchLast(),
+  ]);
+
+  const pending = results[0];
+  const executed = results[1];
+  const invalid = results[2];
+  const rejected = results[3];
+  const lastBlock = results[4];
   return {
     props: {
-      webconfig,
+      webconfig: fetchWebconfig(),
       pending: serializable(pending),
       executed: serializable(executed),
       invalid: serializable(invalid),
