@@ -79,6 +79,12 @@ export default async function handler(
   for (let index = 0; index < list.length; index++) {
     out.push(rearrange(columns, toArray(list[index])));
   }
+  if (req.query.filename) {
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=${req.query.filename}.csv`
+    );
+  }
   res.status(200).send(stringify(out));
 }
 
