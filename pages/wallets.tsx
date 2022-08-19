@@ -6,13 +6,13 @@ import { WalletsList } from "../components/WalletsList";
 import { serializable } from "../services/format";
 
 export async function getServerSideProps() {
-  const webconfig = fetchWebconfig();
-  const list = await Wallets.fetchList();
-  const lastBlock = await Blocks.fetchLast();
+  const results = await Promise.all([Wallets.fetchList(), Blocks.fetchLast()]);
+  const list = results[0];
+  const lastBlock = results[1];
 
   return {
     props: {
-      webconfig,
+      webconfig: fetchWebconfig(),
       list: serializable(list),
       lastBlock: serializable(lastBlock),
     }, // will be passed to the page component as props
