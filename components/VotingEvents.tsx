@@ -1,5 +1,5 @@
 import React from "react";
-import { IVotingEvent } from "./../services/api3";
+import { IVotingEvent } from "./../services/types";
 import Link from "next/link";
 import { niceDate, toHex, toCurrency } from "./../services/format";
 

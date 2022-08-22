@@ -1,7 +1,7 @@
 import React from "react";
 import { BorderedPanel } from "./BorderedPanel";
 import { toPct, toHex, toCurrency } from "../services/format";
-import { IWallet } from "../services/api3";
+import { IWallet } from "../services/types";
 import { TxIcon } from "../components/Ethscan";
 import { MemberClassification } from "../components/MemberClassification";
 

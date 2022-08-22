@@ -1,7 +1,5 @@
 import type { NextPage } from "next";
-import { Header } from "../components/Header";
-import { Footer } from "../components/Footer";
-import { Meta } from "../components/Meta";
+import { Footer, Header, Meta } from "../components/";
 import { Epoch } from "../components/Overview";
 import { TokenSupply } from "../components/TokenSupply";
 import { TokenCirculating } from "../components/TokenCirculating";
@@ -9,11 +7,8 @@ import { TokenStaking } from "../components/TokenStaking";
 import { StakingTrend } from "../components/StakingTrend";
 import { ContractsList } from "../components/ContractsList";
 import { fetchWebconfig } from "../services/webconfig";
-import { ISupply, IEpoch } from "../services/api3";
-import { Epochs } from "../services/epochs";
-import { Supply } from "../services/supply";
-import { Votings } from "../services/votings";
-import { Blocks } from "../services/blocks";
+import { ISupply, IEpoch } from "../services/types";
+import { Epochs, Supply, Votings, Blocks } from "../services/api";
 import { serializable } from "../services/format";
 
 export async function getServerSideProps() {

@@ -1,14 +1,10 @@
 import type { NextPage } from "next";
+import { Footer, Header, Meta } from "../components/";
 import { Prisma } from "@prisma/client";
-import { Header } from "../components/Header";
-import { Footer } from "../components/Footer";
 import { fetchWebconfig } from "../services/webconfig";
-import { Meta } from "../components/Meta";
 import { RewardsList, RewardsSummary } from "../components/Rewards";
-import { IEpoch } from "../services/api3";
-import { Epochs } from "../services/epochs";
-import { Supply } from "../services/supply";
-import { Blocks } from "../services/blocks";
+import { IEpoch } from "../services/types";
+import { Epochs, Supply, Blocks } from "../services/api";
 import { serializable } from "../services/format";
 
 export async function getServerSideProps() {

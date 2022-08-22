@@ -1,6 +1,6 @@
 import React from "react";
 import { BorderedPanel } from "./BorderedPanel";
-import { IEpoch } from "./../services/api3";
+import { IEpoch } from "./../services/types";
 import { niceDate, toCurrency, toPct } from "../services/format";
 
 export const Epoch = (props: IEpoch) => {

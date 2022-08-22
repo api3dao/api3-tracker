@@ -1,5 +1,39 @@
 import { Prisma } from "@prisma/client";
 
+export const Decimal = Prisma.Decimal;
+
+export interface IBlockEvent {
+  createdAt: string;
+  txHash: string;
+  blockNumber: number;
+}
+
+export interface IContract {
+  name: string;
+  title: string;
+  address: string;
+}
+
+export interface IWebPage {
+  slug: string;
+  siteName?: string;
+  title?: string;
+  description?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  image?: string;
+  imageWidth?: number;
+  imageHeight?: number;
+}
+
+export interface IWebConfig {
+  github?: string;
+  ethscan?: string;
+  opengraph: IWebPage;
+  pages: Map<string, IWebPage>;
+  contracts?: Array<IContract>;
+}
+
 export interface IEpoch {
   isCurrent: number;
   epoch: number; // id of epoch

@@ -1,5 +1,5 @@
 import React from "react";
-import { ISupply } from "../services/api3";
+import { ISupply } from "../services/types";
 import { toCurrency } from "../services/format";
 
 export const TokenSupply = (props: ISupply) => {

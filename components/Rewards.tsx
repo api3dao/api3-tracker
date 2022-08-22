@@ -1,6 +1,6 @@
 import React from "react";
 import { Prisma } from "@prisma/client";
-import { IEpoch, ISupply } from "./../services/api3";
+import { IEpoch, ISupply } from "./../services/types";
 import { niceDate, toCurrency, toPct } from "./../services/format";
 import { StakingTrend } from "../components/StakingTrend";
 import { BorderedPanel } from "../components/BorderedPanel";

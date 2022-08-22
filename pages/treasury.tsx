@@ -1,14 +1,10 @@
 import type { NextPage } from "next";
-import { Header } from "../components/Header";
-import { Footer } from "../components/Footer";
+import { Footer, Header, Meta } from "../components/";
 import { fetchWebconfig } from "../services/webconfig";
-import { ITreasury } from "../services/api3";
-import { toHex } from "../services/format";
-import { Meta } from "../components/Meta";
+import { ITreasury } from "../services/types";
 import { Treasury } from "../components/Treasury";
-import { ITreasuryType, Treasuries } from "../services/treasuries";
-import { Blocks } from "../services/blocks";
-import { serializable } from "../services/format";
+import { ITreasuryType, Treasuries, Blocks } from "../services/api";
+import { toHex, serializable } from "../services/format";
 
 export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
