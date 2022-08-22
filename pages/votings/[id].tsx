@@ -8,13 +8,17 @@ import { serializable } from "../../services/format";
 
 export async function getServerSideProps(context: any) {
   const id = context.params.id;
-  const webconfig = fetchWebconfig();
-  const voting = await Votings.fetch(id);
-  const events = await VotingEvents.fetchList(id);
-  const lastBlock = await Blocks.fetchLast();
+  const results = await Promise.all([
+    Votings.fetch(id),
+    VotingEvents.fetchList(id),
+    Blocks.fetchLast(),
+  ]);
+  const voting = results[0];
+  const events = results[1];
+  const lastBlock = results[2];
   return {
     props: {
-      webconfig,
+      webconfig: fetchWebconfig(),
       id,
       voting: serializable(voting),
       events: serializable(events),

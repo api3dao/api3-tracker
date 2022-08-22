@@ -8,17 +8,21 @@ import { Epochs, Supply, Blocks } from "../services/api";
 import { serializable } from "../services/format";
 
 export async function getServerSideProps() {
-  const webconfig = fetchWebconfig();
-  const latest: Array<IEpoch> = await Epochs.fetchLatest(3);
-  const supply = await Supply.fetch();
-  const lastBlock = await Blocks.fetchLast();
+  const results = await Promise.all([
+    Epochs.fetchLatest(3),
+    Supply.fetch(),
+    Blocks.fetchLast(),
+  ]);
+  const latest: Array<IEpoch> = results[0];
+  const supply = results[1];
+  const lastBlock = results[2];
   let totalMinted = new Prisma.Decimal(0);
   for (const epoch of latest) {
     totalMinted = totalMinted.add(epoch.mintedShares);
   }
   return {
     props: {
-      webconfig,
+      webconfig: fetchWebconfig(),
       totalMinted: serializable(totalMinted),
       supply: serializable(supply),
       latest: serializable(latest),

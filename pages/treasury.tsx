@@ -8,7 +8,12 @@ import { toHex, serializable } from "../services/format";
 
 export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
-  const names = await Treasuries.fetchList();
+  const results = await Promise.all([
+     Treasuries.fetchList(),
+     Blocks.fetchLast(),
+  ]);
+  const names = results[0];
+  const lastBlock = results[1];
   const list = await Promise.all(
     names.map(async (ttype: ITreasuryType): Promise<ITreasury> => {
       const tokens = await Treasuries.fetch(ttype);
@@ -28,7 +33,6 @@ export async function getServerSideProps() {
       };
     })
   );
-  const lastBlock = await Blocks.fetchLast();
   return {
     props: {
       webconfig,

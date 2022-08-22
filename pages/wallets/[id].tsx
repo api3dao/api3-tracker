@@ -9,13 +9,17 @@ import { serializable } from "../../services/format";
 export async function getServerSideProps(context: any) {
   const id = context.params.id;
   const address = Buffer.from(id.replace(/0x/, ""), "hex");
-  const wallet = await Wallets.fetch(address);
-  const events = await WalletEvents.fetchList(address);
-  const lastBlock = await Blocks.fetchLast();
-  const webconfig = fetchWebconfig();
+  const results = await Promise.all([
+    Wallets.fetch(address),
+    WalletEvents.fetchList(address),
+    Blocks.fetchLast(),
+  ]);
+  const wallet = results[0];
+  const events = results[1];
+  const lastBlock = results[2];
   return {
     props: {
-      webconfig,
+      webconfig: fetchWebconfig(),
       id,
       wallet: serializable(wallet),
       events: serializable(events),
