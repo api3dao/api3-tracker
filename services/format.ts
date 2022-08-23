@@ -65,9 +65,15 @@ export const pad2 = (x: number) => {
   return x < 10 ? "0" + x : "" + x;
 };
 
-export const niceDate = (strIso: string) => {
+export const niceDate = (strIso: string): string => {
   if (typeof strIso === "undefined" || strIso === null) {
     return "";
+  }
+  if (
+    typeof strIso === "object" &&
+    typeof (strIso as any).toISOString === "function"
+  ) {
+    return niceDate((strIso as Date).toISOString());
   }
   const date =
     typeof strIso === "number"
@@ -85,9 +91,15 @@ export const niceDate = (strIso: string) => {
   return out + _month + " " + pad2(_day);
 };
 
-export const niceDateTime = (strIso: string) => {
+export const niceDateTime = (strIso: string): string => {
   if (typeof strIso === "undefined" || strIso === null) {
     return "";
+  }
+  if (
+    typeof strIso === "object" &&
+    typeof (strIso as any).toISOString === "function"
+  ) {
+    return niceDate((strIso as Date).toISOString());
   }
   const date =
     typeof strIso === "number"

@@ -102,10 +102,18 @@ export const VotingEvents = {
 
 export const Votings = {
   // fetch a list of votings for the certain status
-  fetchList: async (status: string): Promise<Array<any>> => {
+  fetchList: async (status: string): Promise<Array<IVoting>> => {
     return (
       await prisma.voting.findMany({
         where: { status },
+        orderBy: { createdAt: "asc" },
+      })
+    ).map((x: any) => ({ ...x }));
+  },
+  // fetch all existing votings
+  fetchAll: async (): Promise<Array<IVoting>> => {
+    return (
+      await prisma.voting.findMany({
         orderBy: { createdAt: "asc" },
       })
     ).map((x: any) => ({ ...x }));
@@ -156,7 +164,7 @@ export const WalletEvents = {
 
 export const Wallets = {
   // fetch a list of votings for the certain status
-  fetchList: async (): Promise<Array<any>> => {
+  fetchList: async (): Promise<Array<IWallet>> => {
     return (
       await prisma.member.findMany({
         where: {},
