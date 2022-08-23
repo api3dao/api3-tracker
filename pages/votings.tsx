@@ -3,6 +3,7 @@ import { Footer, Header, Meta } from "../components/";
 import { VotingsList } from "../components/VotingsList";
 import { fetchWebconfig } from "../services/webconfig";
 import { Votings, Blocks } from "../services/api";
+import { IBlockNumber, IVoting } from "../services/types";
 import { serializable } from "../services/format";
 
 export async function getServerSideProps() {
@@ -10,15 +11,15 @@ export async function getServerSideProps() {
     Votings.fetchList("pending"),
     Votings.fetchList("executed"),
     Votings.fetchList("invalid"),
-    Votings.fetchList("rejecte"),
+    Votings.fetchList("rejected"),
     Blocks.fetchLast(),
   ]);
 
-  const pending = results[0];
-  const executed = results[1];
-  const invalid = results[2];
-  const rejected = results[3];
-  const lastBlock = results[4];
+  const pending: Array<IVoting> = results[0];
+  const executed: Array<IVoting> = results[1];
+  const invalid: Array<IVoting> = results[2];
+  const rejected: Array<IVoting> = results[3];
+  const lastBlock: IBlockNumber = results[4];
   return {
     props: {
       webconfig: fetchWebconfig(),

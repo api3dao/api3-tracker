@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import { Footer, Header, Meta } from "../components/";
 import { fetchWebconfig } from "../services/webconfig";
-import { ITreasury } from "../services/types";
+import { IBlockNumber, ITreasury } from "../services/types";
 import { Treasury } from "../components/Treasury";
 import { ITreasuryType, Treasuries, Blocks } from "../services/api";
 import { toHex, serializable } from "../services/format";
@@ -9,11 +9,11 @@ import { toHex, serializable } from "../services/format";
 export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
   const results = await Promise.all([
-     Treasuries.fetchList(),
-     Blocks.fetchLast(),
+    Treasuries.fetchList(),
+    Blocks.fetchLast(),
   ]);
   const names = results[0];
-  const lastBlock = results[1];
+  const lastBlock: IBlockNumber = results[1];
   const list = await Promise.all(
     names.map(async (ttype: ITreasuryType): Promise<ITreasury> => {
       const tokens = await Treasuries.fetch(ttype);
@@ -54,8 +54,8 @@ const TreasuryPage: NextPage = (props: any) => {
         <div className="inner">
           <h1>API3 DAO TREASURIES</h1>
           <p className="centered darken">
-            API3 DAO currently operates {list.length || 0} treasuries.
-            Balances below are updated each hour.
+            API3 DAO currently operates {list.length || 0} treasuries. Balances
+            below are updated each hour.
           </p>
         </div>
         <div className="max-w-screen-lg lg:flex justify-center my-0 mx-auto">

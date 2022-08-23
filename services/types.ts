@@ -8,6 +8,10 @@ export interface IBlockEvent {
   blockNumber: number;
 }
 
+export interface IBlockNumber {
+  blockNumber?: number;
+}
+
 export interface IContract {
   name: string;
   title: string;

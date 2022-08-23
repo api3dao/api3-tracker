@@ -2,13 +2,14 @@ import type { NextPage } from "next";
 import { Footer, Header, Meta } from "../components/";
 import { fetchWebconfig } from "../services/webconfig";
 import { Wallets, Blocks } from "../services/api";
+import { IWallet, IBlockNumber } from "../services/types";
 import { WalletsList } from "../components/WalletsList";
 import { serializable } from "../services/format";
 
 export async function getServerSideProps() {
   const results = await Promise.all([Wallets.fetchList(), Blocks.fetchLast()]);
-  const list = results[0];
-  const lastBlock = results[1];
+  const list: Array<IWallet> = results[0];
+  const lastBlock: IBlockNumber = results[1];
 
   return {
     props: {

@@ -20,9 +20,7 @@ export const WalletEventsListThead = () => (
 export const WalletEventsListTr = (row: IWalletEvent) => (
   <tr>
     <td className="text-center">{row.id}.</td>
-    <td className="text-center">
-      {niceDate(row.createdAt)}
-    </td>
+    <td className="text-center">{niceDate(row.createdAt)}</td>
     <td className="text-center">{toCurrency(row.blockNumber)} </td>
     <td className="text-left">
       <div className="px-5">
