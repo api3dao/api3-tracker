@@ -177,7 +177,7 @@ INSERT INTO "members" (
     0.00,
     0.00,
     0.00,
-    ''
+    'supports,member1,0x3146f17d9bef9dadd00e61c87cabe6f9bef79b2a'
 );
 
 INSERT INTO "member_events" (
