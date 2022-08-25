@@ -57,7 +57,8 @@ export default async function handler(
   }
 
   const out = [rearrange(columns, NAMES)];
-  const list: Array<IWallet> = await Wallets.fetchList();
+  const q: string = req.query.q as string || "";
+  const list: Array<IWallet> = await Wallets.fetchList(q);
   for (let index = 0; index < list.length; index++) {
     out.push(rearrange(columns, toArray(list[index])))
   }
