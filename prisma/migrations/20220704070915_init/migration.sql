@@ -214,3 +214,12 @@ ALTER TABLE "voting_event" ADD CONSTRAINT "voting_event_address_fkey" FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE "voting_event" ADD CONSTRAINT "voting_event_votingId_fkey" FOREIGN KEY ("votingId") REFERENCES "voting"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+
+-- The following is not auto-generated and allows full text search
+CREATE EXTENSION pg_trgm;
+CREATE EXTENSION btree_gin;
+
+CREATE INDEX members_tags_index
+   ON members USING GIN (to_tsvector('english', tags));
+
