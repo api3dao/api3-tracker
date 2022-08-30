@@ -14,6 +14,8 @@
     "db:rm": "docker rm -f pgapi3dao",
     "format": "prettier --write \"./**/*.{ts,tsx,js,jsx,css,scss,md,json,prisma}\" --loglevel silent",
     "format:check": "prettier --check \"./**/*.{ts,tsx,js,jsx,css,scss,md,json,prisma}\" --loglevel debug",
+    "logs:reset": "TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts logs reset",
+    "logs:download": "TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts logs download",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "rm-dev": "cat package.json | grep -v story | grep -v prettier > package.backup.json && mv package.backup.json package.json",
