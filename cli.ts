@@ -25,7 +25,8 @@ yargs(hideBin(process.argv))
         await Events.reset();
         console.log("events were deleted");
       } else if (sub == "download") {
-        console.log("downloading");
+        const total = await Events.download(endpoint);
+        console.log(`downloaded ${total} new events`);
       } else {
         console.error("ERROR: Unknown sub-command");
         process.exit(1);
