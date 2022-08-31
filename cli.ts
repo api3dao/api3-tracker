@@ -1,5 +1,6 @@
 import yargs from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
+import { Events } from "./services/sync";
 
 yargs(hideBin(process.argv))
   .env("API3TRACKER")
@@ -19,12 +20,10 @@ yargs(hideBin(process.argv))
         describe: `logs subcommand - reset or download new`,
       });
     },
-    handler: ({ endpoint, sub }) => {
-      console.log("API3TRACKER_ENDPOINT", process.env.API3TRACKER_ENDPOINT);
-      console.log("endpoint: ", endpoint);
-
+    handler: async ({ endpoint, sub }) => {
       if (sub == "reset") {
-        console.log("resetting");
+        await Events.reset();
+        console.log("events were deleted");
       } else if (sub == "download") {
         console.log("downloading");
       } else {
