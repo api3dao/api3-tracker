@@ -1,3 +1,4 @@
+import fs from "fs";
 import prisma from "./db";
 import { IBlockNumber } from "./../services/types";
 import { ethers } from "ethers";
@@ -56,21 +57,33 @@ export const Events = {
     await prisma.memberEvent.deleteMany({});
     await prisma.votingEvent.deleteMany({});
   },
-
+  ABI: new ethers.utils.Interface(
+    fs.readFileSync("./abi/api3pool.json", "utf-8")
+  ),
   handle: async (event: Log, jsonRpc: Provider) => {
-    const { blockNumber, transactionHash, transactionIndex, topics } = event;
+    const { blockNumber, transactionHash, transactionIndex } = event;
     try {
       const blockTime = await BlockTime.get(jsonRpc, event.blockHash);
+      const decoded = Events.ABI.parseLog(event);
       console.log(
         "Event ",
         new Date(blockTime * 1000),
         "@",
         blockNumber,
         transactionHash,
-        topics
+        decoded.signature,
+        decoded.args
       );
+      // get member event
+
     } catch (e) {
-      console.error("Event @", blockNumber, transactionHash, transactionIndex, e);
+      console.error(
+        "Event @",
+        blockNumber,
+        transactionHash,
+        transactionIndex,
+        e
+      );
     }
   },
 
