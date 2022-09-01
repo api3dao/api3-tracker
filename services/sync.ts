@@ -3,6 +3,7 @@ import { IBlockNumber } from "./../services/types";
 import { ethers } from "ethers";
 import { fetchWebconfig } from "./webconfig";
 import { IContract } from "./types";
+import { Log, Provider } from "@ethersproject/abstract-provider";
 
 export const Blocks = {
   // fetch the last block
@@ -39,10 +40,38 @@ export const Filters = {
   },
 };
 
+export const BlockTime = {
+  cache: new Map<String, number>(),
+  get: async (jsonRpc: Provider, blockHash: string): Promise<number> => {
+    const fromCache = BlockTime.cache.get(blockHash);
+    if (fromCache) return fromCache;
+    const blockTime = (await jsonRpc.getBlock(blockHash)).timestamp;
+    BlockTime.cache.set(blockHash, blockTime);
+    return blockTime;
+  },
+};
+
 export const Events = {
   reset: async () => {
     await prisma.memberEvent.deleteMany({});
     await prisma.votingEvent.deleteMany({});
+  },
+
+  handle: async (event: Log, jsonRpc: Provider) => {
+    const { blockNumber, transactionHash, transactionIndex, topics } = event;
+    try {
+      const blockTime = await BlockTime.get(jsonRpc, event.blockHash);
+      console.log(
+        "Event ",
+        new Date(blockTime * 1000),
+        "@",
+        blockNumber,
+        transactionHash,
+        topics
+      );
+    } catch (e) {
+      console.error("Event @", blockNumber, transactionHash, transactionIndex, e);
+    }
   },
 
   download: async (endpoint: string) => {
@@ -69,10 +98,14 @@ export const Events = {
     );
     const total = 0;
     const batches = Filters.prepare(contract, lastEventBlock, headBlockNumber);
-    batches.forEach((filter: any) => {
-      console.log(filter.fromBlock, '..', filter.toBlock);
-      // await jsonRpc.getLogs(filter);
-    });
+    for (const filter of batches) {
+      console.log(filter.fromBlock, "..", filter.toBlock);
+      const events: Array<Log> = await jsonRpc.getLogs(filter);
+      for (const txEvent of events) {
+        await Events.handle(txEvent, jsonRpc);
+      }
+      process.exit(1);
+    }
     console.log(batches.length, "batches");
     return total;
   },
