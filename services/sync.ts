@@ -143,22 +143,21 @@ export const Events = {
       const blockTime = await BlockTime.get(jsonRpc, event.blockHash);
       const decoded = Events.ABI.parseLog(event);
       const blockDt = new Date(blockTime * 1000);
-      const eventId = event.blockNumber.toString(16) + '-' + transactionIndex.toString(16) + '-' + logIndex.toString(16) + '.' +  decoded.name  + Math.random();
       console.log(
         "Event ",
-        eventId,
         blockDt,
         "@",
         blockNumber,
         transactionHash,
         decoded.signature,
-        decoded.args
+        JSON.stringify(decoded.args)
       );
       // get member event
       const addresses = Events.addresses(decoded.signature, decoded.args);
       for (const addr of addresses) {
         await Members.ensureExists(addr, blockDt);
 
+        const eventId = event.blockNumber.toString(16) + '-' + transactionIndex.toString(16) + '-' + logIndex.toString(16) + '.' +  addr.slice(-8);
         await prisma.memberEvent.create({
           data: {
             id: eventId,
@@ -220,7 +219,6 @@ export const Events = {
       for (const txEvent of events) {
         await Events.handle(txEvent, jsonRpc);
       }
-      process.exit(1);
     }
     return total;
   },
