@@ -1,6 +1,6 @@
 import fs from "fs";
 import prisma from "./db";
-import { IBlockNumber } from "./../services/types";
+import { IBlockNumber, IVotingEvent, IWalletEvent } from "./../services/types";
 import { ethers } from "ethers";
 import { fetchWebconfig } from "./webconfig";
 import { IContract } from "./types";
@@ -60,8 +60,48 @@ export const Events = {
   ABI: new ethers.utils.Interface(
     fs.readFileSync("./abi/api3pool.json", "utf-8")
   ),
+  addresses: (signature: string, args: any): Array<String> => {
+    switch (signature) {
+      case "SetDaoApps(address,address,address,address)":
+        return [];
+      case "Deposited(address,uint256,uint256)":
+        return args[0];
+      case "Staked(address,uint256,uint256,uint256,uint256,uint256,uint256)":
+        return args[0];
+      case "Delegated(address,address,uint256,uint256)":
+        return [args[0], args[1]];
+      case "UpdatedDelegation(address,address,bool,uint256,uint256)":
+        return [args[0], args[1]];
+      case "Undelegated(address,address,uint256,uint256)":
+        return [args[0], args[1]];
+      case "Unstaked(address,uint256,uint256,uint256,uint256)":
+        return [args[0]];
+      case "ScheduledUnstake(address,uint256,uint256,uint256,uint256)":
+        return [args[0]];
+      case "DepositedVesting(address,uint256,uint256,uint256,uint256,uint256)":
+        return [args[0]];
+      case "DepositedByTimelockManager":
+        return [];
+      case "VestedTimeLock(address,uint256,uint256)":
+        return [];
+      case "Withdrawn(address,uint256,uint256)":
+        return args[0];
+      case "WithdrawnToPool()":
+        return [];
+      case "PaidOutClaim()":
+        return [];
+      case "StartVote()":
+        return [];
+      case "CastVote()":
+        return [];
+      case "SetVestingAddresses()":
+        return [];
+    }
+    console.warn("Unknown signature", signature);
+    return [];
+  },
   handle: async (event: Log, jsonRpc: Provider) => {
-    const { blockNumber, transactionHash, transactionIndex } = event;
+    const { blockNumber, transactionHash, transactionIndex, logIndex } = event;
     try {
       const blockTime = await BlockTime.get(jsonRpc, event.blockHash);
       const decoded = Events.ABI.parseLog(event);
@@ -75,7 +115,27 @@ export const Events = {
         decoded.args
       );
       // get member event
-
+      const addresses = Events.addresses(decoded.signature, decoded.args);
+      for (const addr of addresses) {
+        await prisma.memberEvent.create({
+          data: {
+            id: `${blockNumber}-${transactionIndex}-${logIndex}`,
+            createdAt: new Date(blockTime * 1000),
+            address: Buffer.from(addr, "hex"),
+            chainId: 0,
+            txHash: Buffer.from(transactionHash, "hex"),
+            blockNumber,
+            txIndex: transactionIndex,
+            logIndex: logIndex,
+            eventName: decoded.name,
+            data: decoded.args,
+            // gasPrice?: bigint | number | null
+            // gasUsed?: bigint | number | null
+            // fee?: bigint | number | null
+            // feeUsd?: Decimal | DecimalJsLike | number | string | null
+          },
+        });
+      }
     } catch (e) {
       console.error(
         "Event @",
