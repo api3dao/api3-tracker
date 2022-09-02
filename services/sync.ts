@@ -42,7 +42,7 @@ export const Filters = {
 };
 
 export const BlockTime = {
-  cache: new Map<String, number>(),
+  cache: new Map<string, number>(),
   get: async (jsonRpc: Provider, blockHash: string): Promise<number> => {
     const fromCache = BlockTime.cache.get(blockHash);
     if (fromCache) return fromCache;
@@ -52,22 +52,59 @@ export const BlockTime = {
   },
 };
 
+export const Address = {
+  asBuffer: (addr: string): Buffer => {
+    return Buffer.from(addr.replace("0x", ""), "hex");
+  },
+};
+
+export const Members = {
+  ensureExists: async (addr: string, blockDt: Date) => {
+    const address = Address.asBuffer(addr);
+    const members = await prisma.member.findMany({
+      where: { address },
+    });
+    if (members.length === 0) {
+      await prisma.member.create({
+        data: {
+          address,
+          ensName: "",
+          ensUpdated: blockDt,
+          badges: "",
+          userShare: 0,
+          userStake: 0,
+          userVotingPower: 0,
+          userReward: 0,
+          userLockedReward: 0,
+          userDeposited: 0,
+          userWithdrew: 0,
+          createdAt: blockDt,
+          updatedAt: blockDt,
+          tags: "",
+        },
+      });
+    }
+    console.log("Created member", address.toString("hex"))
+  },
+};
+
 export const Events = {
   reset: async () => {
     await prisma.memberEvent.deleteMany({});
+    await prisma.member.deleteMany({});
     await prisma.votingEvent.deleteMany({});
   },
   ABI: new ethers.utils.Interface(
     fs.readFileSync("./abi/api3pool.json", "utf-8")
   ),
-  addresses: (signature: string, args: any): Array<String> => {
+  addresses: (signature: string, args: any): Array<string> => {
     switch (signature) {
       case "SetDaoApps(address,address,address,address)":
         return [];
       case "Deposited(address,uint256,uint256)":
-        return args[0];
+        return [args[0]];
       case "Staked(address,uint256,uint256,uint256,uint256,uint256,uint256)":
-        return args[0];
+        return [args[0]];
       case "Delegated(address,address,uint256,uint256)":
         return [args[0], args[1]];
       case "UpdatedDelegation(address,address,bool,uint256,uint256)":
@@ -105,9 +142,12 @@ export const Events = {
     try {
       const blockTime = await BlockTime.get(jsonRpc, event.blockHash);
       const decoded = Events.ABI.parseLog(event);
+      const blockDt = new Date(blockTime * 1000);
+      const eventId = event.blockNumber.toString(16) + '-' + transactionIndex.toString(16) + '-' + logIndex.toString(16) + '.' +  decoded.name  + Math.random();
       console.log(
         "Event ",
-        new Date(blockTime * 1000),
+        eventId,
+        blockDt,
         "@",
         blockNumber,
         transactionHash,
@@ -117,13 +157,15 @@ export const Events = {
       // get member event
       const addresses = Events.addresses(decoded.signature, decoded.args);
       for (const addr of addresses) {
+        await Members.ensureExists(addr, blockDt);
+
         await prisma.memberEvent.create({
           data: {
-            id: `${blockNumber}-${transactionIndex}-${logIndex}`,
-            createdAt: new Date(blockTime * 1000),
-            address: Buffer.from(addr, "hex"),
+            id: eventId,
+            createdAt: blockDt,
+            address: Address.asBuffer(addr),
             chainId: 0,
-            txHash: Buffer.from(transactionHash, "hex"),
+            txHash: Buffer.from(transactionHash.replace("0x", ""), "hex"),
             blockNumber,
             txIndex: transactionIndex,
             logIndex: logIndex,
@@ -171,15 +213,15 @@ export const Events = {
     );
     const total = 0;
     const batches = Filters.prepare(contract, lastEventBlock, headBlockNumber);
+    console.log("Expecting", batches.length, "batches");
     for (const filter of batches) {
-      console.log(filter.fromBlock, "..", filter.toBlock);
+      console.log("Handling batch", filter.fromBlock, "..", filter.toBlock);
       const events: Array<Log> = await jsonRpc.getLogs(filter);
       for (const txEvent of events) {
         await Events.handle(txEvent, jsonRpc);
       }
       process.exit(1);
     }
-    console.log(batches.length, "batches");
     return total;
   },
 };
