@@ -1,10 +1,54 @@
 import fs from "fs";
 import prisma from "./db";
-import { IBlockNumber, IVotingEvent, IWalletEvent } from "./../services/types";
+import { IBlockNumber } from "./../services/types";
 import { ethers } from "ethers";
 import { fetchWebconfig } from "./webconfig";
 import { IContract } from "./types";
-import { Log, Provider } from "@ethersproject/abstract-provider";
+import { Block, Log, Provider } from "@ethersproject/abstract-provider";
+
+interface BlockFullInfo {
+  // Block Header information
+  block: Block;
+  // Price of Ethereum at this point
+  price: number;
+  // Receipts list
+  receipts: Map<string, any>;
+  // Logs
+  logs: Array<Log>;
+}
+
+export const BlockLoader = {
+  fromLogs: async (
+    jsonRpc: Provider,
+    blockHash: string,
+    logs: Array<Log>
+  ): Promise<BlockFullInfo> => {
+    const block = await jsonRpc.getBlock(blockHash);
+    // TODO: load receipts for each transaction
+    // TODO: load ethereum price at the moment
+    return {
+      block,
+      price: 0,
+      receipts: new Map<string, any>(),
+      logs,
+    };
+  },
+};
+
+export const Sync = {
+  hasBlock: (blockNumber: number): boolean => {
+    return false;
+  },
+  saveBlock: async (b: BlockFullInfo) => {
+    // TODO: // save block into tables: blocks, receipts; update sync status
+  },
+  updateProcessed: async (blockNumber: number) => {
+    // TODO: update block number that has
+  },
+  pick: async (): Promise<BlockFullInfo | null> => {
+    return null;
+  },
+};
 
 export const Blocks = {
   // fetch the last block
@@ -84,15 +128,15 @@ export const Members = {
         },
       });
     }
-    console.log("Created member", address.toString("hex"))
+    console.log("Created member", address.toString("hex"));
   },
 };
 
 export const Events = {
   reset: async () => {
     await prisma.memberEvent.deleteMany({});
-    await prisma.member.deleteMany({});
     await prisma.votingEvent.deleteMany({});
+    await prisma.member.deleteMany({});
   },
   ABI: new ethers.utils.Interface(
     fs.readFileSync("./abi/api3pool.json", "utf-8")
@@ -157,7 +201,14 @@ export const Events = {
       for (const addr of addresses) {
         await Members.ensureExists(addr, blockDt);
 
-        const eventId = event.blockNumber.toString(16) + '-' + transactionIndex.toString(16) + '-' + logIndex.toString(16) + '.' +  addr.slice(-8);
+        const eventId =
+          event.blockNumber.toString(16) +
+          "-" +
+          transactionIndex.toString(16) +
+          "-" +
+          logIndex.toString(16) +
+          "." +
+          addr.slice(-8);
         await prisma.memberEvent.create({
           data: {
             id: eventId,
@@ -216,9 +267,20 @@ export const Events = {
     for (const filter of batches) {
       console.log("Handling batch", filter.fromBlock, "..", filter.toBlock);
       const events: Array<Log> = await jsonRpc.getLogs(filter);
+      const blockMap = new Map<number, Array<Log>>();
       for (const txEvent of events) {
-        await Events.handle(txEvent, jsonRpc);
+        const arr = blockMap.get(txEvent.blockNumber) || new Array<Log>();
+        arr.push(txEvent);
+        blockMap.set(txEvent.blockNumber, arr);
       }
+      blockMap.forEach(async (logs: Array<Log>, _blockNumber: number) => {
+        const fullInfo: BlockFullInfo = await BlockLoader.fromLogs(
+          jsonRpc,
+          logs[0].blockHash,
+          logs
+        );
+        Sync.saveBlock(fullInfo);
+      });
     }
     return total;
   },
