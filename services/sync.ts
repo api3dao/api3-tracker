@@ -5,6 +5,7 @@ import { ethers } from "ethers";
 import { fetchWebconfig } from "./webconfig";
 import { IContract } from "./types";
 import { Block, Log, Provider } from "@ethersproject/abstract-provider";
+import { EthereumPrice } from "./../services/price";
 
 interface BlockFullInfo {
   // Block Header information
@@ -17,19 +18,44 @@ interface BlockFullInfo {
   logs: Array<Log>;
 }
 
+const elapsed = (since: number): string => {
+  const duration = new Date().getTime() - since;
+  return `${duration / 1000}s`;
+};
+
 export const BlockLoader = {
   fromLogs: async (
     jsonRpc: Provider,
     blockHash: string,
     logs: Array<Log>
   ): Promise<BlockFullInfo> => {
+    const start = new Date().getTime();
     const block = await jsonRpc.getBlock(blockHash);
-    // TODO: load receipts for each transaction
-    // TODO: load ethereum price at the moment
+
+    // load receipts for each transaction
+    const receipts = new Map<string, any>();
+    for (const log of logs) {
+      const hash = log.transactionHash;
+      if (!receipts.has(hash)) {
+        const receipt = await jsonRpc.getTransactionReceipt(hash);
+        receipts.set(hash, receipt);
+      }
+    }
+
+    const price = await EthereumPrice.at(new Date(block.timestamp * 1000));
+    console.log(
+      "Block",
+      block.number,
+      new Date(block.timestamp * 1000),
+      logs.length + "L",
+      receipts.size + "R",
+      price.toFixed(2) + "USD",
+      "took " + elapsed(start)
+    );
     return {
       block,
-      price: 0,
-      receipts: new Map<string, any>(),
+      receipts,
+      price,
       logs,
     };
   },
@@ -273,14 +299,15 @@ export const Events = {
         arr.push(txEvent);
         blockMap.set(txEvent.blockNumber, arr);
       }
-      blockMap.forEach(async (logs: Array<Log>, _blockNumber: number) => {
+      // blockMap.forEach(async (logs: Array<Log>, _blockNumber: number) => {
+      for (const logs of blockMap.values()) {
         const fullInfo: BlockFullInfo = await BlockLoader.fromLogs(
           jsonRpc,
           logs[0].blockHash,
           logs
         );
         Sync.saveBlock(fullInfo);
-      });
+      }
     }
     return total;
   },
