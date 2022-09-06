@@ -140,14 +140,16 @@ export const Sync = {
 
 export const Blocks = {
   // fetch the last block
-  fetchLast: async (): Promise<IBlockNumber> => {
-    const list = (
-      await prisma.memberEvent.findMany({
-        take: 1,
-        orderBy: { createdAt: "desc" },
-      })
-    ).map((x: any) => ({ ...x }));
-    return list.length > 0 ? list[0] : {};
+  fetchLastDownloaded: async (): Promise<IBlockNumber> => {
+    const status = await prisma.syncStatus.findMany({
+      where: { id: 1 },
+    });
+    if (status.length > 0) {
+      return {
+        blockNumber: status[0].downloaded,
+      };
+    }
+    return { blockNumber: 0 };
   },
 };
 
@@ -342,7 +344,7 @@ export const Events = {
       console.error("api3 pool contract is not configured");
       return 0;
     }
-    const lastEventBlock = (await Blocks.fetchLast()).blockNumber || 0;
+    const lastDownloadedBlock = (await Blocks.fetchLastDownloaded()).blockNumber || 0;
     const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
     // get the head block
     const block = await jsonRpc.getBlock("latest");
@@ -353,10 +355,10 @@ export const Events = {
       "Head Block",
       headBlockNumber,
       "Last block in DB",
-      lastEventBlock
+      lastDownloadedBlock
     );
     const total = 0;
-    const batches = Filters.prepare(contract, lastEventBlock, headBlockNumber);
+    const batches = Filters.prepare(contract, lastDownloadedBlock, headBlockNumber);
     console.log("Expecting", batches.length, "batches");
     for (const filter of batches) {
       console.log("Handling batch", filter.fromBlock, "..", filter.toBlock);
