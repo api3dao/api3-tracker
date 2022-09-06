@@ -15,7 +15,7 @@ interface BlockFullInfo {
   // Receipts list
   receipts: Map<string, any>;
   // Logs
-  logs: Array<Log>;
+  logs: Map<string, Array<Log>>;
 }
 
 const elapsed = (since: number): string => {
@@ -27,19 +27,23 @@ export const BlockLoader = {
   fromLogs: async (
     jsonRpc: Provider,
     blockHash: string,
-    logs: Array<Log>
+    logsList: Array<Log>
   ): Promise<BlockFullInfo> => {
     const start = new Date().getTime();
     const block = await jsonRpc.getBlock(blockHash);
 
     // load receipts for each transaction
     const receipts = new Map<string, any>();
-    for (const log of logs) {
+    const logs = new Map<string, Array<Log>>();
+    for (const log of logsList) {
       const hash = log.transactionHash;
       if (!receipts.has(hash)) {
         const receipt = await jsonRpc.getTransactionReceipt(hash);
         receipts.set(hash, receipt);
       }
+      const l = logs.get(log.address) || new Array<Log>();
+      l.push(log);
+      logs.set(log.address, l);
     }
 
     const price = await EthereumPrice.at(new Date(block.timestamp * 1000));
@@ -47,7 +51,7 @@ export const BlockLoader = {
       "Block",
       block.number,
       new Date(block.timestamp * 1000),
-      logs.length + "L",
+      logsList.length + "L",
       receipts.size + "R",
       price.toFixed(2) + "USD",
       "took " + elapsed(start)
@@ -62,16 +66,74 @@ export const BlockLoader = {
 };
 
 export const Sync = {
-  hasBlock: (blockNumber: number): boolean => {
-    return false;
+  hasBlock: async (blockHash: string): Promise<boolean> => {
+    const status = await prisma.cacheBlock.findMany({
+      where: { hash: Hash.asBuffer(blockHash) },
+    });
+    return status.length > 0;
   },
   saveBlock: async (b: BlockFullInfo) => {
-    // TODO: // save block into tables: blocks, receipts; update sync status
+    const blockHash = Hash.asBuffer(b.block.hash);
+    const tx = new Array();
+    // 1. save block
+    tx.push(
+      prisma.cacheBlock.create({
+        data: {
+          hash: blockHash,
+          height: b.block.number,
+          createdAt: new Date(b.block.timestamp * 1000).toISOString(),
+          price: b.price,
+          data: b.block as any,
+        },
+      })
+    );
+    // 2. save receipts
+    for (const [txHash, receipt] of b.receipts.entries()) {
+      tx.push(
+        prisma.cacheReceipt.create({
+          data: {
+            hash: Hash.asBuffer(txHash),
+            receipt: receipt,
+          },
+        })
+      );
+    }
+    // 3. save logs for every contract
+    for (const [contract, logs] of b.logs) {
+      tx.push(
+        prisma.cacheLogs.create({
+          data: {
+            hash: blockHash,
+            contract: Hash.asBuffer(contract),
+            logs: logs as any,
+          },
+        })
+      );
+    }
+    // 4. update syncing status
+    tx.push(
+      prisma.syncStatus.updateMany({
+        where: { id: 1 },
+        data: {
+          updatedAt: new Date().toISOString(),
+          downloaded: b.block.number,
+        },
+      })
+    );
+
+    await prisma.$transaction(tx);
   },
   updateProcessed: async (blockNumber: number) => {
-    // TODO: update block number that has
+    // update block number
+    await prisma.syncStatus.updateMany({
+      where: { id: 1 },
+      data: {
+        updatedAt: new Date().toISOString(),
+        processed: blockNumber,
+      },
+    });
   },
-  pick: async (): Promise<BlockFullInfo | null> => {
+  next: async (): Promise<BlockFullInfo | null> => {
     return null;
   },
 };
@@ -119,6 +181,12 @@ export const BlockTime = {
     const blockTime = (await jsonRpc.getBlock(blockHash)).timestamp;
     BlockTime.cache.set(blockHash, blockTime);
     return blockTime;
+  },
+};
+
+export const Hash = {
+  asBuffer: (str: string): Buffer => {
+    return Buffer.from(str.replace("0x", ""), "hex");
   },
 };
 
@@ -301,12 +369,15 @@ export const Events = {
       }
       // blockMap.forEach(async (logs: Array<Log>, _blockNumber: number) => {
       for (const logs of blockMap.values()) {
-        const fullInfo: BlockFullInfo = await BlockLoader.fromLogs(
-          jsonRpc,
-          logs[0].blockHash,
-          logs
-        );
-        Sync.saveBlock(fullInfo);
+        const hasIt = await Sync.hasBlock(logs[0].blockHash);
+        if (!hasIt) {
+          const fullInfo: BlockFullInfo = await BlockLoader.fromLogs(
+            jsonRpc,
+            logs[0].blockHash,
+            logs
+          );
+          Sync.saveBlock(fullInfo);
+        }
       }
     }
     return total;
