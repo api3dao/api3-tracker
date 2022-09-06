@@ -229,3 +229,41 @@ model Api3Supply {
 
   @@map("api3_supply")
 }
+
+model CacheBlock {
+  hash      Bytes // Hash of the block
+  height    BigInt // Height of the Block
+  data      Json // JSON Data of the block
+  createdAt DateTime // Date of the block
+  price     Decimal  @db.Decimal(10, 2) // Ethereum Price at the time of the block
+
+  @@id([hash])
+  @@map("cache_blocks")
+}
+
+model CacheReceipt {
+  hash    Bytes // Hash of the transaction
+  receipt Json // JSON Data of the receipt
+
+  @@id([hash])
+  @@map("cache_receipts")
+}
+
+model CacheLogs {
+  hash     Bytes // Hash of the block
+  contract Bytes // Address of the contract
+  logs     Json // JSON Data: array of logs
+
+  @@id([hash, contract])
+  @@map("cache_logs")
+}
+
+model SyncStatus {
+  id         Int // ID (always 1, this table should have just one record)
+  updatedAt  DateTime // Date of the status update
+  downloaded Int      @default(0) // The last downloaded block
+  processed  Int      @default(0) // The last processed block
+
+  @@id([id])
+  @@map("sync_status")
+}
