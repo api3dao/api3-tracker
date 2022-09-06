@@ -133,6 +133,23 @@ export const Sync = {
       },
     });
   },
+
+  // reset all cache
+  reset: async () => {
+    await prisma.$transaction([
+      prisma.cacheBlock.deleteMany({}),
+      prisma.cacheReceipt.deleteMany({}),
+      prisma.cacheLogs.deleteMany({}),
+      prisma.syncStatus.updateMany({
+        where: { id: 1 },
+        data: {
+          updatedAt: new Date().toISOString(),
+          processed: 0,
+          downloaded: 0,
+        },
+      }),
+    ]);
+  },
   next: async (): Promise<BlockFullInfo | null> => {
     return null;
   },
@@ -229,10 +246,14 @@ export const Members = {
 };
 
 export const Events = {
-  reset: async () => {
+  resetState: async () => {
     await prisma.memberEvent.deleteMany({});
     await prisma.votingEvent.deleteMany({});
     await prisma.member.deleteMany({});
+  },
+  resetAll: async () => {
+    await Events.resetState();
+    await Sync.reset();
   },
   ABI: new ethers.utils.Interface(
     fs.readFileSync("./abi/api3pool.json", "utf-8")
@@ -344,7 +365,8 @@ export const Events = {
       console.error("api3 pool contract is not configured");
       return 0;
     }
-    const lastDownloadedBlock = (await Blocks.fetchLastDownloaded()).blockNumber || 0;
+    const lastDownloadedBlock =
+      (await Blocks.fetchLastDownloaded()).blockNumber || 0;
     const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
     // get the head block
     const block = await jsonRpc.getBlock("latest");
@@ -358,7 +380,11 @@ export const Events = {
       lastDownloadedBlock
     );
     const total = 0;
-    const batches = Filters.prepare(contract, lastDownloadedBlock, headBlockNumber);
+    const batches = Filters.prepare(
+      contract,
+      lastDownloadedBlock,
+      headBlockNumber
+    );
     console.log("Expecting", batches.length, "batches");
     for (const filter of batches) {
       console.log("Handling batch", filter.fromBlock, "..", filter.toBlock);

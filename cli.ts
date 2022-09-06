@@ -22,7 +22,7 @@ yargs(hideBin(process.argv))
     },
     handler: async ({ endpoint, sub }) => {
       if (sub == "reset") {
-        await Events.reset();
+        await Events.resetAll();
         console.log("events were deleted");
       } else if (sub == "download") {
         const total = await Events.download(endpoint);
