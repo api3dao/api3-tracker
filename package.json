@@ -12,6 +12,7 @@
     "db:init": "docker run --name pgapi3dao -e POSTGRES_DB=api3dao -e POSTGRES_PASSWORD=test -d -p5432:5432 postgres && sleep 3 && yarn prisma migrate dev",
     "db:shell": "PGPASSWORD=test psql -U postgres -h 127.0.0.1 api3dao",
     "db:rm": "docker rm -f pgapi3dao",
+    "db:dump": "docker exec -i pgapi3dao pg_dump -U postgres -h 127.0.0.1 api3dao > pgapi3dao.sql",
     "format": "prettier --write \"./**/*.{ts,tsx,js,jsx,css,scss,md,json,prisma}\" --loglevel silent",
     "format:check": "prettier --check \"./**/*.{ts,tsx,js,jsx,css,scss,md,json,prisma}\" --loglevel debug",
     "logs:reset": "TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts logs reset",
