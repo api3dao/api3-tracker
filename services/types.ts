@@ -18,6 +18,7 @@ export interface IContract {
   address: string;
   minBlock?: number;
   batchSize?: number;
+  watch?: number;
 }
 
 export interface IWebPage {
