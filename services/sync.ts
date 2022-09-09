@@ -75,7 +75,6 @@ export const BlockLoader = {
 
 export const Sync = {
   hasBlock: async (blockHash: string): Promise<boolean> => {
-    return false;
     const status = await prisma.cacheBlock.findMany({
       where: { hash: Hash.asBuffer(blockHash) },
     });
