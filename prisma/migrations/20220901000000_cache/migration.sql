@@ -27,6 +27,15 @@ CREATE TABLE "cache_logs" (
 );
 
 -- CreateTable
+CREATE TABLE "cache_ens" (
+    "address" BYTEA NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "cache_ens_pkey" PRIMARY KEY ("address")
+);
+
+-- CreateTable
 CREATE TABLE "sync_status" (
     "id" INTEGER NOT NULL,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -37,3 +46,5 @@ CREATE TABLE "sync_status" (
 );
 
 INSERT INTO sync_status ("id", "updatedAt", "downloaded", "processed") VALUES (1, Now(), 0, 0);
+INSERT INTO sync_status ("id", "updatedAt", "downloaded", "processed") VALUES (2, Now(), 0, 0);
+INSERT INTO sync_status ("id", "updatedAt", "downloaded", "processed") VALUES (3, Now(), 0, 0);

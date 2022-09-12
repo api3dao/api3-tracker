@@ -162,24 +162,6 @@ model Voting {
   @@map("voting")
 }
 
-model EnsEvent {
-  id          String   @id // Combined ID of event
-  createdAt   DateTime // Date of Event Transaction (taken from the block)
-  address     Bytes? // Address of the member to whom this transaction is related to
-  name        String // ENS name that was set to this address
-  chainId     Int // Chain ID
-  txHash      Bytes // Transaction hash
-  blockNumber Int // Block Number
-  txIndex     Int // Transaction Index inside the block
-  logIndex    Int // Index inside the events logs of this transaction
-  data        Json? // data of the event
-  fee         BigInt? // fee that was taken on this transaction
-  gasPrice    BigInt? // gas price of this transaction
-  gasUsed     BigInt? // gas used for this transaction
-  feeUsd      Decimal? @db.Decimal(10, 2) // USD equivalent of the fee
-
-  @@map("ens_event")
-}
 
 model PriceEthereum {
   ts  DateTime @id
@@ -258,6 +240,15 @@ model CacheLogs {
   @@map("cache_logs")
 }
 
+model CacheEns {
+  address     Bytes // Address of the member
+  createdAt   DateTime // Date of record creation
+  name        String // ENS name that was set to this address
+
+  @@id([address])
+  @@map("cache_ens")
+}
+
 model SyncStatus {
   id         Int // ID (always 1, this table should have just one record)
   updatedAt  DateTime // Date of the status update
@@ -267,3 +258,4 @@ model SyncStatus {
   @@id([id])
   @@map("sync_status")
 }
+
