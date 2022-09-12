@@ -1,6 +1,5 @@
 import fs from "fs";
 import prisma from "./db";
-import { Prisma } from "@prisma/client";
 import { IBlockNumber } from "./../services/types";
 import { ethers } from "ethers";
 import { fetchWebconfig } from "./webconfig";
