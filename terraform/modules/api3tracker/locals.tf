@@ -64,6 +64,7 @@ locals {
     )
 
     env = [
+        "API3TRACKER_ENDPOINT=${var.endpoint}",
         "DATABASE_URL=${var.connection}",
     ]
 

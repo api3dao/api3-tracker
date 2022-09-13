@@ -25,6 +25,8 @@ module "api3tracker" {
     }
   ]
 
+  // Hint: use TF_VAR_api3tracker_endpoint to set this up, pointing to Infura or Alchemy JSON+RPC provider
+  endpoint = var.api3tracker_endpoint
 }
 
 
