@@ -3,6 +3,7 @@ import { hideBin } from "yargs/helpers";
 import { Events } from "./services/sync";
 import { Treasuries } from "./services/treasuries";
 import { Supply } from "./services/supply";
+import { ENS } from "./services/ens";
 
 yargs(hideBin(process.argv))
   .env("API3TRACKER")
@@ -11,6 +12,32 @@ yargs(hideBin(process.argv))
     alias: "e",
     type: "string",
     description: "Ethereum JSON+RPC endpoint",
+  })
+  .command({
+    command: "ens [sub]",
+    describe: "Operations with ENS cache",
+    builder: (yargs) => {
+      return yargs.option(`sub`, {
+        choises: ["reset", "import", "download"],
+        type: "string",
+        describe: `logs subcommand - reset or download new`,
+      });
+    },
+    handler: async ({ endpoint, sub }) => {
+      if (sub == "reset") {
+        await ENS.resetAll();
+        console.log("ENS cache was deleted");
+      } else if (sub == "import") {
+        const total = await ENS.import(endpoint, ".cache");
+        console.log(`saved ${total} new ENS records`);
+      } else if (sub == "download") {
+        const total = await ENS.download(endpoint);
+        console.log(`saved ${total} new ENS records`);
+      } else {
+        console.error("ERROR: Unknown sub-command");
+        process.exit(1);
+      }
+    },
   })
   .command({
     command: "logs [sub]",
