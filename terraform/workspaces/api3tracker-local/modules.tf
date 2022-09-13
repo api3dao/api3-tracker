@@ -1,3 +1,7 @@
+variable api3tracker_endpoint {
+  type = string
+}
+
 module "api3tracker" {
   source = "../../app/api3tracker"
   trusted_ips = []
@@ -20,6 +24,8 @@ module "api3tracker" {
   }
   workspace = "api3tracker-local"
   env = "local"
+  // Hint: use TF_VAR_api3tracker_endpoint to set this up, pointing to Infura or Alchemy JSON+RPC provider
+  endpoint = var.api3tracker_endpoint
 }
 
 

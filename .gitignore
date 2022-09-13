@@ -44,6 +44,8 @@ package.lock.json
 terraform/workspaces/*/.terraform
 terraform/workspaces/*/bin/
 terraform/workspaces/*/cron.d/
+terraform/workspaces/*/terraform.tfvars
+terraform/workspaces/*/crash*.log
 terraform/app/*/.terraform
 crash.log
 *-debug.log
