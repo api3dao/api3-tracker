@@ -1,7 +1,12 @@
 import fs from "fs";
 import prisma from "./db";
 import { ethers } from "ethers";
-// import { withDecimals } from "./format";
+
+export const Address = {
+  asBuffer: (addr: string): Buffer => {
+    return Buffer.from(addr.replace("0x", ""), "hex");
+  },
+};
 
 export const ENS = {
   resetAll: async () => {
@@ -17,8 +22,21 @@ export const ENS = {
           .readFileSync(folder + "/" + file)
           .toString()
           .trim();
-        console.log(addr, domain);
-        inserted++;
+
+        const found = await prisma.cacheEns.findMany({
+          where: { address: Address.asBuffer(addr) },
+        });
+        if (found.length === 0) {
+          console.log(addr, domain);
+          await prisma.cacheEns.create({
+            data: {
+              address: Address.asBuffer(addr),
+              name: domain,
+              createdAt: new Date().toISOString(),
+            },
+          });
+          inserted++;
+        }
       }
     }
     return inserted;
