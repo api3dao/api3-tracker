@@ -50,7 +50,7 @@ yargs(hideBin(process.argv))
         console.log("Treasuries state was reset");
       } else if (sub == "download") {
         const total = await Treasuries.download(endpoint);
-        console.log(`downloaded state of ${total} treasuries`);
+        console.log(`downloaded state of ${total} balances`);
       } else {
         console.error("ERROR: Unknown sub-command");
         process.exit(1);

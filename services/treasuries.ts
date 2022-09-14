@@ -3,6 +3,13 @@ import { ITreasuryType } from "./api";
 import { ethers } from "ethers";
 import { fetchWebconfig } from "./webconfig";
 import { TreasuryType } from ".prisma/client";
+import { Prisma } from "@prisma/client";
+
+export const Address = {
+  asBuffer: (addr: string): Buffer => {
+    return Buffer.from(addr.replace("0x", ""), "hex");
+  },
+};
 
 const abiERC20 = [
   // Get the account balance
@@ -13,6 +20,19 @@ interface ITokenContract {
   address: string;
   decimals: number;
 }
+
+const withDecimals = (input: string, decimals: number): string => {
+  if (input.length > decimals) {
+    return (
+      input.substring(0, input.length - decimals) +
+      "." +
+      input.substring(input.length - decimals, input.length)
+    );
+  }
+  let pad = "";
+  while (pad.length + input.length < decimals) pad += "0";
+  return "0." + pad + input;
+};
 
 export const Treasuries = {
   resetAll: async () => {
@@ -60,8 +80,40 @@ export const Treasuries = {
       );
       for (const [contractAddress, contractType] of mapAddresses.entries()) {
         const tokenBalance = await tokenContract.balanceOf(contractAddress);
-        console.log(contractType, tokenSymbol, token.decimals, tokenBalance);
-        updated ++;
+        const value = withDecimals(tokenBalance.toString(), token.decimals);
+        console.log(
+          contractType,
+          tokenSymbol,
+          token.decimals,
+          tokenBalance.toString(),
+          value
+        );
+        await prisma.$transaction([
+          prisma.treasury.updateMany({
+            where: {
+              ttype: contractType,
+              address: Address.asBuffer(contractAddress),
+              token: tokenSymbol,
+              tokenAddress: Address.asBuffer(token.address),
+              current: 1,
+            },
+            data: {
+              current: 0,
+            }
+          }),
+          prisma.treasury.create({
+            data: {
+              ts: new Date().toISOString(),
+              ttype: contractType,
+              address: Address.asBuffer(contractAddress),
+              token: tokenSymbol,
+              tokenAddress: Address.asBuffer(token.address),
+              value,
+              current: 1,
+            },
+          }),
+        ]);
+        updated++;
       }
     }
     return updated;
