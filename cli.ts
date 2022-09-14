@@ -28,7 +28,7 @@ yargs(hideBin(process.argv))
         await ENS.resetAll();
         console.log("ENS cache was deleted");
       } else if (sub == "import") {
-        const total = await ENS.import(endpoint, ".cache");
+        const total = await ENS.importLocal("./.cache");
         console.log(`saved ${total} new ENS records`);
       } else if (sub == "download") {
         const total = await ENS.download(endpoint);
