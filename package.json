@@ -17,6 +17,8 @@
     "format:check": "prettier --check \"./**/*.{ts,tsx,js,jsx,css,scss,md,json,prisma}\" --loglevel debug",
     "logs:reset": "TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts logs reset",
     "logs:download": "API3TRACKER_ENDPOINT=${API3TRACKER_ENDPOINT:-`chainstate --endpoints -t alchemy,mainnet`} TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts logs download",
+    "supply:reset": "TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts supply reset",
+    "supply:download": "API3TRACKER_ENDPOINT=${API3TRACKER_ENDPOINT:-`chainstate --endpoints -t alchemy,mainnet`} TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts supply download",
     "treasuries:reset": "TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts treasuries reset",
     "treasuries:download": "API3TRACKER_ENDPOINT=${API3TRACKER_ENDPOINT:-`chainstate --endpoints -t alchemy,mainnet`} TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts treasuries download",
     "storybook": "start-storybook -p 6006",

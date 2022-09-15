@@ -74,5 +74,5 @@ contracts:
     name: convenience
   - title: API3 SUPPLY
     address: "0xcD34bC5B03C954268d27c9Bc165a623c318bD0a8"
-    name: supply
+    name: api3Supply
 
