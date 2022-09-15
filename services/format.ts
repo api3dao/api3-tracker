@@ -115,3 +115,16 @@ export const niceDateTime = (strIso: string): string => {
     pad2(date.getMinutes())
   );
 };
+
+export const withDecimals = (input: string, decimals: number): string => {
+  if (input.length > decimals) {
+    return (
+      input.substring(0, input.length - decimals) +
+      "." +
+      input.substring(input.length - decimals, input.length)
+    );
+  }
+  let pad = "";
+  while (pad.length + input.length < decimals) pad += "0";
+  return "0." + pad + input;
+};

@@ -3,7 +3,7 @@ import { ITreasuryType } from "./api";
 import { ethers } from "ethers";
 import { fetchWebconfig } from "./webconfig";
 import { TreasuryType } from ".prisma/client";
-import { Prisma } from "@prisma/client";
+import { withDecimals } from "./format";
 
 export const Address = {
   asBuffer: (addr: string): Buffer => {
@@ -20,19 +20,6 @@ interface ITokenContract {
   address: string;
   decimals: number;
 }
-
-const withDecimals = (input: string, decimals: number): string => {
-  if (input.length > decimals) {
-    return (
-      input.substring(0, input.length - decimals) +
-      "." +
-      input.substring(input.length - decimals, input.length)
-    );
-  }
-  let pad = "";
-  while (pad.length + input.length < decimals) pad += "0";
-  return "0." + pad + input;
-};
 
 export const Treasuries = {
   resetAll: async () => {
