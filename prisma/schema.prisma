@@ -162,7 +162,6 @@ model Voting {
   @@map("voting")
 }
 
-
 model PriceEthereum {
   ts  DateTime @id
   usd Decimal  @db.Decimal(10, 2)
@@ -241,9 +240,9 @@ model CacheLogs {
 }
 
 model CacheEns {
-  address     Bytes // Address of the member
-  createdAt   DateTime // Date of record creation
-  name        String // ENS name that was set to this address
+  address   Bytes // Address of the member
+  createdAt DateTime // Date of record creation
+  name      String // ENS name that was set to this address
 
   @@id([address])
   @@map("cache_ens")
@@ -258,4 +257,3 @@ model SyncStatus {
   @@id([id])
   @@map("sync_status")
 }
-

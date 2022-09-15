@@ -34,8 +34,14 @@ export const BlockLoader = {
     const foundBlock = await prisma.cacheBlock.findMany({
       where: { hash: Hash.asBuffer(blockHash) },
     });
-    const block = foundBlock.length > 0 ? (foundBlock[0].data as any) as Block : await jsonRpc.getBlock(blockHash);
-    const price = (foundBlock.length > 0) ? parseFloat(foundBlock[0].price.toString()) : await EthereumPrice.at(new Date(block.timestamp * 1000));
+    const block =
+      foundBlock.length > 0
+        ? (foundBlock[0].data as any as Block)
+        : await jsonRpc.getBlock(blockHash);
+    const price =
+      foundBlock.length > 0
+        ? parseFloat(foundBlock[0].price.toString())
+        : await EthereumPrice.at(new Date(block.timestamp * 1000));
 
     // load receipts for each transaction
     const receipts = new Map<string, any>();
@@ -44,9 +50,12 @@ export const BlockLoader = {
       const hash = log.transactionHash;
       if (!receipts.has(hash)) {
         const foundReceipt = await prisma.cacheReceipt.findMany({
-           where: { hash: Hash.asBuffer(hash) },
+          where: { hash: Hash.asBuffer(hash) },
         });
-        const receipt  = foundReceipt.length > 0 ? (foundReceipt[0].receipt as any): await jsonRpc.getTransactionReceipt(hash);
+        const receipt =
+          foundReceipt.length > 0
+            ? (foundReceipt[0].receipt as any)
+            : await jsonRpc.getTransactionReceipt(hash);
         receipts.set(hash, receipt);
       }
       const l = logs.get(log.address) || new Array<Log>();
@@ -85,13 +94,15 @@ export const Sync = {
     // 1. save block
     tx.push(
       prisma.cacheBlock.createMany({
-        data: [{
-          hash: blockHash,
-          height: b.block.number,
-          createdAt: new Date(b.block.timestamp * 1000).toISOString(),
-          price: b.price,
-          data: b.block as any,
-        }],
+        data: [
+          {
+            hash: blockHash,
+            height: b.block.number,
+            createdAt: new Date(b.block.timestamp * 1000).toISOString(),
+            price: b.price,
+            data: b.block as any,
+          },
+        ],
         skipDuplicates: true,
       })
     );
@@ -99,10 +110,12 @@ export const Sync = {
     for (const [txHash, receipt] of b.receipts.entries()) {
       tx.push(
         prisma.cacheReceipt.createMany({
-          data: [{
-            hash: Hash.asBuffer(txHash),
-            receipt: receipt,
-          }],
+          data: [
+            {
+              hash: Hash.asBuffer(txHash),
+              receipt: receipt,
+            },
+          ],
           skipDuplicates: true,
         })
       );
@@ -111,11 +124,13 @@ export const Sync = {
     for (const [contract, logs] of b.logs) {
       tx.push(
         prisma.cacheLogs.createMany({
-          data: [{
-            hash: blockHash,
-            contract: Hash.asBuffer(contract),
-            logs: logs as any,
-          }],
+          data: [
+            {
+              hash: blockHash,
+              contract: Hash.asBuffer(contract),
+              logs: logs as any,
+            },
+          ],
           skipDuplicates: true,
         })
       );
@@ -396,7 +411,9 @@ export const Events = {
     const minBlock: number = poolContract.minBlock || 0;
     const batchSize: number = poolContract.batchSize || 1000;
     const addresses: Array<string> =
-      webconfig.contracts?.filter(contract => contract.watch).map((contract: IContract) => contract.address) || [];
+      webconfig.contracts
+        ?.filter((contract) => contract.watch)
+        .map((contract: IContract) => contract.address) || [];
     if (addresses.length === 0) {
       console.error("no contracts to watch");
       return 0;
@@ -423,11 +440,23 @@ export const Events = {
       lastDownloadedBlock,
       headBlockNumber
     );
-    console.log("Expecting", batches.length, "batches", "Batch size", batchSize);
+    console.log(
+      "Expecting",
+      batches.length,
+      "batches",
+      "Batch size",
+      batchSize
+    );
     for (const cMap of batches) {
       const blockMap = new Map<number, Array<Log>>();
       for (const [_address, filter] of cMap.entries()) {
-        console.log("Reading batch", filter.fromBlock, "..", filter.toBlock, filter.address);
+        console.log(
+          "Reading batch",
+          filter.fromBlock,
+          "..",
+          filter.toBlock,
+          filter.address
+        );
         const events: Array<Log> = await jsonRpc.getLogs(filter);
         for (const txEvent of events) {
           const arr = blockMap.get(txEvent.blockNumber) || new Array<Log>();
@@ -435,17 +464,17 @@ export const Events = {
           blockMap.set(txEvent.blockNumber, arr);
         }
       }
-        for (const logs of blockMap.values()) {
-          const hasIt = await Sync.hasBlock(logs[0].blockHash);
-          if (!hasIt) {
-            const fullInfo: BlockFullInfo = await BlockLoader.fromLogs(
-              jsonRpc,
-              logs[0].blockHash,
-              logs
-            );
-            Sync.saveBlock(fullInfo);
-          }
+      for (const logs of blockMap.values()) {
+        const hasIt = await Sync.hasBlock(logs[0].blockHash);
+        if (!hasIt) {
+          const fullInfo: BlockFullInfo = await BlockLoader.fromLogs(
+            jsonRpc,
+            logs[0].blockHash,
+            logs
+          );
+          Sync.saveBlock(fullInfo);
         }
+      }
     }
     return total;
   },

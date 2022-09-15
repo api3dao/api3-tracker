@@ -11,7 +11,9 @@ export const TokenSupply = (props: ISupply) => {
     <div className="md:grid grid-cols-4 mx-auto">
       <div className={classCell}>
         <h3 className={classTitle}>Locked by governance</h3>
-        <strong>{noDecimals(toCurrency(props.lockedByGovernance))} tokens</strong>
+        <strong>
+          {noDecimals(toCurrency(props.lockedByGovernance))} tokens
+        </strong>
       </div>
       <div className={classCell}>
         <h3 className={classTitle}>Locked vestings</h3>
