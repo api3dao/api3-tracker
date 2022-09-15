@@ -43,7 +43,31 @@ export const ENS = {
   },
   download: async (endpoint: string) => {
     const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
-    // TODO: download fresh records
-    // await prisma.cacheEns.create({ data: { }, });
+    // seeking for members without names
+    const membersToScan = await prisma.member.findMany({
+      where: { ensName: { equals: "" } },
+    });
+    let inserted = 0;
+    for (const member of membersToScan) {
+      const addr: string = member.address.toString("hex");
+      const domain = await jsonRpc.lookupAddress(addr);
+      if (domain) {
+        const found = await prisma.cacheEns.findMany({
+          where: { address: Address.asBuffer(addr) },
+        });
+        if (found.length === 0) {
+          console.log(addr, domain);
+          await prisma.cacheEns.create({
+            data: {
+              address: Address.asBuffer(addr),
+              name: domain,
+              createdAt: new Date().toISOString(),
+            },
+          });
+          inserted++;
+        }
+      }
+    }
+    return inserted;
   },
 };
