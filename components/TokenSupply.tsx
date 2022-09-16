@@ -1,6 +1,6 @@
 import React from "react";
 import { ISupply } from "../services/types";
-import { toCurrency } from "../services/format";
+import { noDecimals, toCurrency } from "../services/format";
 
 export const TokenSupply = (props: ISupply) => {
   const classTitle =
@@ -11,19 +11,19 @@ export const TokenSupply = (props: ISupply) => {
     <div className="md:grid grid-cols-4 mx-auto">
       <div className={classCell}>
         <h3 className={classTitle}>Locked by governance</h3>
-        <strong>{toCurrency(props.lockedByGovernance)} tokens</strong>
+        <strong>{noDecimals(toCurrency(props.lockedByGovernance))} tokens</strong>
       </div>
       <div className={classCell}>
         <h3 className={classTitle}>Locked vestings</h3>
-        <strong>{toCurrency(props.lockedVestings)} tokens</strong>
+        <strong>{noDecimals(toCurrency(props.lockedVestings))} tokens</strong>
       </div>
       <div className={classCell}>
         <h3 className={classTitle}>Locked rewards</h3>
-        <strong>{toCurrency(props.lockedRewards)} tokens</strong>
+        <strong>{noDecimals(toCurrency(props.lockedRewards))} tokens</strong>
       </div>
       <div className={classCell}>
         <h3 className={classTitle}>Time locked</h3>
-        <strong>{toCurrency(props.timeLocked)} tokens</strong>
+        <strong>{noDecimals(toCurrency(props.timeLocked))} tokens</strong>
       </div>
     </div>
   );

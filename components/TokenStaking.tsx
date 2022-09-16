@@ -1,6 +1,6 @@
 import React from "react";
 import { ISupply } from "../services/types";
-import { toCurrency } from "../services/format";
+import { noDecimals, toCurrency } from "../services/format";
 
 export const TokenStaking = (props: ISupply) => {
   const classTitle =
@@ -13,14 +13,14 @@ export const TokenStaking = (props: ISupply) => {
       <div className={classCell}>
         <div className={classTitle}>Total Staked</div>
         <span className={classValue}>
-          {toCurrency(props.totalStaked)}
+          {noDecimals(toCurrency(props.totalStaked))}
           <span className="md"> tokens</span>
         </span>
       </div>
       <div className={classCell}>
         <div className={classTitle}>Staking Target</div>
         <span className={classValue}>
-          {toCurrency(props.stakingTarget)}
+          {noDecimals(toCurrency(props.stakingTarget))}
           <span className="md"> tokens</span>
         </span>
       </div>
