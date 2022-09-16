@@ -218,6 +218,9 @@ export const Supply = {
     const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
     const webconfig = fetchWebconfig();
 
+    const blockNumber = (await jsonRpc.getBlock("latest")).number;
+    console.log("Block", blockNumber);
+
     const supply: string = (
       webconfig.contracts?.find(
         ({ name }) => name.toLowerCase() === "api3supply"
@@ -271,5 +274,20 @@ export const Supply = {
       18
     );
     console.log("Time locked", timeLocked);
+
+    await prisma.api3Supply.create({
+      data: {
+        ts: new Date().toISOString(),
+        blockNumber,
+        circulatingSupply,
+        totalLocked,
+        totalStaked: totalStake,
+        stakingTarget: stakeTarget,
+        lockedByGovernance,
+        lockedVestings,
+        lockedRewards,
+        timeLocked,
+      },
+    });
   },
 };

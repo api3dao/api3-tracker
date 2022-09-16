@@ -59,7 +59,7 @@ export const Treasuries = {
 
     let updated = 0;
     for (const [tokenSymbol, token] of mapTokens.entries()) {
-      console.log("Reading token", token);
+      // console.log("Reading token", token);
       const tokenContract = new ethers.Contract(
         token.address,
         abiERC20,
@@ -71,8 +71,6 @@ export const Treasuries = {
         console.log(
           contractType,
           tokenSymbol,
-          token.decimals,
-          tokenBalance.toString(),
           value
         );
         await prisma.$transaction([
