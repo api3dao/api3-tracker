@@ -240,5 +240,36 @@ export const Supply = {
       10
     );
     console.log("Stake Target", stakeTarget);
+
+    const circulatingSupply = withDecimals(
+      (await supplyContract.getCirculatingSupply()).toString(),
+      18
+    );
+    console.log("Circulating Supply", circulatingSupply);
+    const totalLocked = withDecimals(
+      (await supplyContract.getTotalLocked()).toString(),
+      18
+    );
+    console.log("Total Locked", totalLocked);
+    const lockedByGovernance = withDecimals(
+      (await supplyContract.getLockedByGovernance()).toString(),
+      18
+    );
+    console.log("Locked By Governance", lockedByGovernance);
+    const lockedVestings = withDecimals(
+      (await supplyContract.getLockedVestings()).toString(),
+      18
+    );
+    console.log("Locked Vestings", lockedVestings);
+    const lockedRewards = withDecimals(
+      (await supplyContract.getLockedRewards()).toString(),
+      18
+    );
+    console.log("Locked Rewards", lockedRewards);
+    const timeLocked = withDecimals(
+      (await supplyContract.getTimelocked()).toString(),
+      18
+    );
+    console.log("Time locked", timeLocked);
   },
 };
