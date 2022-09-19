@@ -24,11 +24,52 @@ const elapsed = (since: number): string => {
 };
 
 export const BlockLoader = {
+  fromDatabase: async (blockRecord: any): Promise<BlockFullInfo> => {
+    const start = new Date().getTime();
+    const price = parseFloat(blockRecord.price.toString());
+    const block: Block = blockRecord.data as any;
+
+    const foundLogs = await prisma.cacheLogs.findMany({
+      where: { hash: blockRecord.hash },
+    });
+    if (foundLogs.length == 0) throw "no logs saved for the block";
+    const logsList: Array<Log> = foundLogs[0].logs as any;
+
+    const receipts = new Map<string, any>();
+    const logs = new Map<string, Array<Log>>();
+    for (const log of logsList) {
+      const hash = log.transactionHash;
+      const l = logs.get(log.address) || new Array<Log>();
+      l.push(log);
+      logs.set(log.address, l);
+
+      if (!receipts.has(hash)) {
+        const foundReceipt = await prisma.cacheReceipt.findMany({
+          where: { hash: Hash.asBuffer(hash) },
+        });
+        const receipt = (foundReceipt[0].receipt as any);
+        receipts.set(hash, receipt);
+      }
+    }
+
+    console.log(
+      "Processing",
+      block.number,
+      new Date(block.timestamp * 1000),
+      logsList.length + "L",
+      receipts.size + "R",
+      price.toFixed(2) + "USD",
+      "read in " + elapsed(start)
+    );
+    return { block, price, receipts, logs };
+  },
+
   fromLogs: async (
     jsonRpc: Provider,
     blockHash: string,
     logsList: Array<Log>
   ): Promise<BlockFullInfo> => {
+
     const start = new Date().getTime();
 
     const foundBlock = await prisma.cacheBlock.findMany({
@@ -176,7 +217,23 @@ export const Sync = {
     ]);
   },
   next: async (): Promise<BlockFullInfo | null> => {
-    // TODO: pick next block
+    // pick next block
+    const processed: number =
+      (
+        await prisma.syncStatus.findFirst({
+          where: { id: 1 },
+        })
+      )?.processed || 0;
+
+    const blocks = await prisma.cacheBlock.findMany({
+      where: { height: { gt: processed } },
+      orderBy: { height: "asc" },
+      take: 1,
+    });
+    if (blocks.length) {
+      const block = blocks[0];
+      return BlockLoader.fromDatabase(block);
+    }
     return null;
   },
 };
@@ -400,19 +457,18 @@ export const Events = {
     }
   },
 
-  processState: async(endpoint: string) => {
-     let total = 0;
-     do {
-       const blockInfo: BlockFullInfo  | null = await Sync.next();
-       if (blockInfo) {
-          // TODO: block handler
-
-       } else {
-         continue;
-       }
-       total ++;
-     } while (total < 5);
-     return total;
+  processState: async (endpoint: string) => {
+    let total = 0;
+    do {
+      const blockInfo: BlockFullInfo | null = await Sync.next();
+      if (blockInfo) {
+        // TODO: block handler
+      } else {
+        continue;
+      }
+      total++;
+    } while (total < 1);
+    return total;
   },
 
   download: async (endpoint: string) => {
