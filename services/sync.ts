@@ -176,6 +176,7 @@ export const Sync = {
     ]);
   },
   next: async (): Promise<BlockFullInfo | null> => {
+    // TODO: pick next block
     return null;
   },
 };
@@ -397,6 +398,21 @@ export const Events = {
         e
       );
     }
+  },
+
+  processState: async(endpoint: string) => {
+     let total = 0;
+     do {
+       const blockInfo: BlockFullInfo  | null = await Sync.next();
+       if (blockInfo) {
+          // TODO: block handler
+
+       } else {
+         continue;
+       }
+       total ++;
+     } while (total < 5);
+     return total;
   },
 
   download: async (endpoint: string) => {

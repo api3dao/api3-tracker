@@ -63,6 +63,29 @@ yargs(hideBin(process.argv))
     },
   })
   .command({
+    command: "state [sub]",
+    describe: "Operations with API3 dao state (members and votings)",
+    builder: (yargs) => {
+      return yargs.option(`sub`, {
+        choises: ["reset", "update"],
+        type: "string",
+        describe: `supply subcommand - reset or update current state based on new blocks`,
+      });
+    },
+    handler: async ({ endpoint, sub }) => {
+      if (sub == "reset") {
+        await Events.resetState();
+        console.log("Events state was reset");
+      } else if (sub == "update") {
+        const blocks = await Events.processState(endpoint);
+        console.log(`${blocks} blocks were processed`);
+      } else {
+        console.error("ERROR: Unknown sub-command");
+        process.exit(1);
+      }
+    },
+  })
+  .command({
     command: "supply [sub]",
     describe: "Operations with API3 token supply",
     builder: (yargs) => {
@@ -77,7 +100,7 @@ yargs(hideBin(process.argv))
         await Supply.resetAll();
         console.log("Supply history was reset");
       } else if (sub == "download") {
-        const total = await Supply.download(endpoint);
+        await Supply.download(endpoint);
         console.log("Supply history was updated");
       } else {
         console.error("ERROR: Unknown sub-command");
