@@ -47,7 +47,7 @@ export const BlockLoader = {
         const foundReceipt = await prisma.cacheReceipt.findMany({
           where: { hash: Hash.asBuffer(hash) },
         });
-        const receipt = (foundReceipt[0].receipt as any);
+        const receipt = foundReceipt[0].receipt as any;
         receipts.set(hash, receipt);
       }
     }
@@ -69,7 +69,6 @@ export const BlockLoader = {
     blockHash: string,
     logsList: Array<Log>
   ): Promise<BlockFullInfo> => {
-
     const start = new Date().getTime();
 
     const foundBlock = await prisma.cacheBlock.findMany({
@@ -293,17 +292,6 @@ export const Filters = {
   },
 };
 
-export const BlockTime = {
-  cache: new Map<string, number>(),
-  get: async (jsonRpc: Provider, blockHash: string): Promise<number> => {
-    const fromCache = BlockTime.cache.get(blockHash);
-    if (fromCache) return fromCache;
-    const blockTime = (await jsonRpc.getBlock(blockHash)).timestamp;
-    BlockTime.cache.set(blockHash, blockTime);
-    return blockTime;
-  },
-};
-
 export const Hash = {
   asBuffer: (str: string): Buffer => {
     return Buffer.from(str.replace("0x", ""), "hex");
@@ -399,61 +387,66 @@ export const Events = {
     console.warn("Unknown signature", signature);
     return [];
   },
-  handle: async (event: Log, jsonRpc: Provider) => {
-    const { blockNumber, transactionHash, transactionIndex, logIndex } = event;
-    try {
-      const blockTime = await BlockTime.get(jsonRpc, event.blockHash);
-      const decoded = Events.ABI.parseLog(event);
-      const blockDt = new Date(blockTime * 1000);
-      console.log(
-        "Event ",
-        blockDt,
-        "@",
-        blockNumber,
-        transactionHash,
-        decoded.signature,
-        JSON.stringify(decoded.args)
-      );
-      // get member event
-      const addresses = Events.addresses(decoded.signature, decoded.args);
-      for (const addr of addresses) {
-        await Members.ensureExists(addr, blockDt);
+  processBlock: async (blockInfo: BlockFullInfo) => {
+    const blockNumber = blockInfo.block.number;
+    const blockDt = new Date(blockInfo.block.timestamp * 1000);
 
-        const eventId =
-          event.blockNumber.toString(16) +
-          "-" +
-          transactionIndex.toString(16) +
-          "-" +
-          logIndex.toString(16) +
-          "." +
-          addr.slice(-8);
-        await prisma.memberEvent.create({
-          data: {
-            id: eventId,
-            createdAt: blockDt,
-            address: Address.asBuffer(addr),
-            chainId: 0,
-            txHash: Buffer.from(transactionHash.replace("0x", ""), "hex"),
+    for (const [contractAddress, logs] of blockInfo.logs.entries()) {
+      for (const event of logs) {
+        const { transactionHash, transactionIndex, logIndex } = event;
+        try {
+          const decoded = Events.ABI.parseLog(event);
+          console.log(
+            "Event ",
+            blockDt,
+            "@",
             blockNumber,
-            txIndex: transactionIndex,
-            logIndex: logIndex,
-            eventName: decoded.name,
-            data: decoded.args,
-            // gasPrice?: bigint | number | null
-            // gasUsed?: bigint | number | null
-            // fee?: bigint | number | null
-            // feeUsd?: Decimal | DecimalJsLike | number | string | null
-          },
-        });
+            transactionHash,
+            decoded.signature,
+            JSON.stringify(decoded.args)
+          );
+          // get member event
+          const addresses = Events.addresses(decoded.signature, decoded.args);
+          for (const addr of addresses) {
+            await Members.ensureExists(addr, blockDt);
+            const eventId =
+              event.blockNumber.toString(16) +
+              "-" +
+              transactionIndex.toString(16) +
+              "-" +
+              logIndex.toString(16) +
+              "." +
+              addr.slice(-8);
+            await prisma.memberEvent.create({
+              data: {
+                id: eventId,
+                createdAt: blockDt,
+                address: Address.asBuffer(addr),
+                chainId: 0,
+                txHash: Buffer.from(transactionHash.replace("0x", ""), "hex"),
+                blockNumber,
+                txIndex: transactionIndex,
+                logIndex: logIndex,
+                eventName: decoded.name,
+                data: decoded.args,
+                // gasPrice?: bigint | number | null
+                // gasUsed?: bigint | number | null
+                // fee?: bigint | number | null
+                // feeUsd?: Decimal | DecimalJsLike | number | string | null
+              },
+            });
+          }
+        } catch (e) {
+          console.error(
+            "Event @",
+            blockNumber,
+            transactionHash,
+            transactionIndex,
+            e
+          );
+          throw e;
+        }
       }
-    } catch (e) {
-      console.error(
-        "Event @",
-        blockNumber,
-        transactionHash,
-        transactionIndex,
-        e
-      );
     }
   },
 
@@ -462,7 +455,7 @@ export const Events = {
     do {
       const blockInfo: BlockFullInfo | null = await Sync.next();
       if (blockInfo) {
-        // TODO: block handler
+        await Events.processBlock(blockInfo);
       } else {
         continue;
       }
