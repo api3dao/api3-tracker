@@ -77,7 +77,7 @@ yargs(hideBin(process.argv))
         await Events.resetState();
         console.log("Events state was reset");
       } else if (sub == "update") {
-        const blocks = await Events.processState(endpoint);
+        const blocks = await Events.processState();
         console.log(`${blocks} blocks were processed`);
       } else {
         console.error("ERROR: Unknown sub-command");

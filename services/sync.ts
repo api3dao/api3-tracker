@@ -306,15 +306,24 @@ export const Address = {
 
 export const Members = {
   ensureExists: async (addr: string, blockDt: Date) => {
+    if (addr == "" || addr == "0x") return;
     const address = Address.asBuffer(addr);
     const members = await prisma.member.findMany({
       where: { address },
     });
     if (members.length === 0) {
+      let ensName = "";
+      const ensRecords = await prisma.cacheEns.findMany({
+        where: { address },
+      });
+      for (const ens of ensRecords) {
+        ensName = ens.name;
+      }
+
       await prisma.member.create({
         data: {
           address,
-          ensName: "",
+          ensName,
           ensUpdated: blockDt,
           badges: "",
           userShare: 0,
@@ -329,16 +338,26 @@ export const Members = {
           tags: "",
         },
       });
+      console.log("Created member", address.toString("hex"));
     }
-    console.log("Created member", address.toString("hex"));
   },
 };
 
 export const Events = {
   resetState: async () => {
-    await prisma.memberEvent.deleteMany({});
-    await prisma.votingEvent.deleteMany({});
-    await prisma.member.deleteMany({});
+    await prisma.$transaction([
+      prisma.memberEvent.deleteMany({}),
+      prisma.votingEvent.deleteMany({}),
+      prisma.member.deleteMany({}),
+      prisma.voting.deleteMany({}),
+      prisma.syncStatus.updateMany({
+        where: { id: 1 },
+        data: {
+          updatedAt: new Date().toISOString(),
+          processed: 0,
+        },
+      }),
+    ]);
   },
   resetAll: async () => {
     await Events.resetState();
@@ -390,7 +409,7 @@ export const Events = {
   processBlock: async (blockInfo: BlockFullInfo) => {
     const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
-
+    const tx = new Array();
     for (const [contractAddress, logs] of blockInfo.logs.entries()) {
       for (const event of logs) {
         const { transactionHash, transactionIndex, logIndex } = event;
@@ -416,25 +435,47 @@ export const Events = {
               "-" +
               logIndex.toString(16) +
               "." +
-              addr.slice(-8);
-            await prisma.memberEvent.create({
-              data: {
-                id: eventId,
-                createdAt: blockDt,
-                address: Address.asBuffer(addr),
-                chainId: 0,
-                txHash: Buffer.from(transactionHash.replace("0x", ""), "hex"),
+              addr +
+              "." +
+              Math.random().toString().replace("0.", "");
+            try {
+              tx.push(
+                prisma.memberEvent.create({
+                  data: {
+                    id: eventId,
+                    createdAt: blockDt,
+                    address: Address.asBuffer(addr),
+                    chainId: 0,
+                    txHash: Buffer.from(
+                      transactionHash.replace("0x", ""),
+                      "hex"
+                    ),
+                    blockNumber,
+                    txIndex: transactionIndex,
+                    logIndex: logIndex,
+                    eventName: decoded.name,
+                    data: decoded.args,
+                    // gasPrice?: bigint | number | null
+                    // gasUsed?: bigint | number | null
+                    // fee?: bigint | number | null
+                    // feeUsd?: Decimal | DecimalJsLike | number | string | null
+                  },
+                })
+              );
+            } catch (e) {
+              console.error(
+                "Event @",
                 blockNumber,
-                txIndex: transactionIndex,
-                logIndex: logIndex,
-                eventName: decoded.name,
-                data: decoded.args,
-                // gasPrice?: bigint | number | null
-                // gasUsed?: bigint | number | null
-                // fee?: bigint | number | null
-                // feeUsd?: Decimal | DecimalJsLike | number | string | null
-              },
-            });
+                transactionHash,
+                "txIndex",
+                transactionIndex,
+                "logIndex",
+                logIndex,
+                "address",
+                addr,
+                e
+              );
+            }
           }
         } catch (e) {
           console.error(
@@ -444,23 +485,31 @@ export const Events = {
             transactionIndex,
             e
           );
-          throw e;
         }
       }
     }
+    tx.push(
+      prisma.syncStatus.updateMany({
+        where: { id: 1 },
+        data: {
+          updatedAt: new Date().toISOString(),
+          processed: blockNumber,
+        },
+      })
+    );
+    await prisma.$transaction(tx);
   },
-
-  processState: async (endpoint: string) => {
+  processState: async () => {
     let total = 0;
     do {
       const blockInfo: BlockFullInfo | null = await Sync.next();
       if (blockInfo) {
         await Events.processBlock(blockInfo);
       } else {
-        continue;
+        return total;
       }
       total++;
-    } while (total < 1);
+    } while (total < 100000);
     return total;
   },
 
