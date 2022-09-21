@@ -350,6 +350,8 @@ export const Events = {
       prisma.votingEvent.deleteMany({}),
       prisma.member.deleteMany({}),
       prisma.voting.deleteMany({}),
+      prisma.memberEpoch.deleteMany({}),
+      prisma.epoch.deleteMany({}),
       prisma.syncStatus.updateMany({
         where: { id: 1 },
         data: {
@@ -406,6 +408,7 @@ export const Events = {
     console.warn("Unknown signature", signature);
     return [];
   },
+
   processBlock: async (blockInfo: BlockFullInfo) => {
     const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
@@ -499,6 +502,7 @@ export const Events = {
     );
     await prisma.$transaction(tx);
   },
+
   processState: async () => {
     let total = 0;
     do {
