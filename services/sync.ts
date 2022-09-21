@@ -366,7 +366,11 @@ export const Events = {
     await Sync.reset();
   },
   ABI: new ethers.utils.Interface(
-    fs.readFileSync("./abi/api3pool.json", "utf-8")
+    [].concat(
+      JSON.parse(fs.readFileSync("./abi/api3pool.json", "utf-8")),
+      JSON.parse(fs.readFileSync("./abi/api3timelock.json", "utf-8")),
+      JSON.parse(fs.readFileSync("./abi/api3voting.json", "utf-8"))
+    )
   ),
   addresses: (signature: string, args: any): Array<string> => {
     switch (signature) {
