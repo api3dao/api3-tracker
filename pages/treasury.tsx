@@ -54,9 +54,13 @@ const TreasuryPage: NextPage = (props: any) => {
         <div className="inner">
           <h1>API3 DAO TREASURIES</h1>
           <p className="centered darken">
-            API3 DAO currently operates {list.length || 0} treasuries. Balances
-            below are updated each hour.
+            API3 DAO currently operates {list.length || 0} treasuries.
           </p>
+          {list.length > 0 ? (
+            <p className="centered darken">
+              Balances below are updated each hour.
+            </p>
+          ) : null}
         </div>
         <div className="max-w-screen-lg lg:flex justify-center my-0 mx-auto">
           {list.map((x: any) => (

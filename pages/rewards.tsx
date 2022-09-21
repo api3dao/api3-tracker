@@ -33,6 +33,7 @@ export async function getServerSideProps() {
 
 const RewardsPage: NextPage = (props: any) => {
   const { latest, supply, lastBlock, webconfig } = props;
+  const isEmpty: boolean = !!latest;
   return (
     <div>
       <Meta webconfig={webconfig} page="rewards" />
@@ -40,12 +41,14 @@ const RewardsPage: NextPage = (props: any) => {
 
       <main>
         <h1 className="uppercase">API3 DAO Rewards</h1>
-        <RewardsSummary
+        {isEmpty ? (
+          <div className="text-color-grey text-center">No epochs data yet. Please import database.</div>
+        ) : <RewardsSummary
           totalMinted={props.totalMinted}
           latest={latest[0]}
           supply={supply}
-        />
-        <RewardsList list={latest} />
+        />}
+        {(!isEmpty) ? <RewardsList list={latest} />: null}
       </main>
 
       <Footer github={webconfig.github} blockNumber={lastBlock.blockNumber} />
