@@ -372,6 +372,14 @@ export const Events = {
       JSON.parse(fs.readFileSync("./abi/api3voting.json", "utf-8"))
     )
   ),
+  IGNORED: new Map<string, number>([
+    ["0x9dcff9d94fbfdb4622d11edb383005f95e78efb446c72d92f8e615c6025c4703", 1],
+    ["0xc59489a810a16d84f59a04fb90817354d9afac3bd0a0b6787c8ccb4ff25ed119", 1],
+    ["0x5229a5dba83a54ae8cb5b51bdd6de9474cacbe9dd332f5185f3a4f4f2e3f4ad9", 1],
+    ["0x2790b90165fd3973ad7edde4eca71b4f8808dd4857a2a3a3e8ae5642a5cb196e", 1],
+    ["0xc25cfed0b22da6a56f0e5ff784979a0b8623eddf2aee4acd33c2adefb09cbab6", 1],
+    ["0x20d5cc5c404f7bcf167ea08ea1136482041e05e5641946d3e3de6690a23fbe39", 1],
+  ]),
   addresses: (signature: string, args: any): Array<string> => {
     switch (signature) {
       case "SetDaoApps(address,address,address,address)":
@@ -420,6 +428,8 @@ export const Events = {
     for (const [contractAddress, logs] of blockInfo.logs.entries()) {
       for (const event of logs) {
         const { transactionHash, transactionIndex, logIndex } = event;
+        const topicHash: string = event.topics[0];
+        if (Events.IGNORED.get(topicHash) === 1) continue;
         try {
           const decoded = Events.ABI.parseLog(event);
           console.log(
@@ -492,6 +502,7 @@ export const Events = {
             transactionIndex,
             e
           );
+          throw e;
         }
       }
     }
