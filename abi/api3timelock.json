@@ -1,21 +1,5 @@
 [
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "api3TokenAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "timelockManagerOwner",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
     "anonymous": false,
     "inputs": [
       {
@@ -165,32 +149,6 @@
     ],
     "name": "WithdrawnToPool",
     "type": "event"
-  },
-  {
-    "inputs": [],
-    "name": "api3Pool",
-    "outputs": [
-      {
-        "internalType": "contract IApi3Pool",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "api3Token",
-    "outputs": [
-      {
-        "internalType": "contract IApi3Token",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
   },
   {
     "inputs": [
