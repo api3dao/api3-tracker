@@ -1,6 +1,8 @@
 import fs from "fs";
 import prisma from "./db";
+import { Prisma } from '@prisma/client';
 import { IBlockNumber } from "./../services/types";
+import { withDecimals } from "./../services/format";
 import { ethers } from "ethers";
 import { fetchWebconfig } from "./webconfig";
 import { IContract } from "./types";
@@ -338,7 +340,7 @@ export const Members = {
           tags: "",
         },
       });
-      console.log("Created member", address.toString("hex"));
+      // console.log("Created member", address.toString("hex"));
     }
   },
 };
@@ -400,10 +402,13 @@ export const Events = {
         return [args[0]];
       case "DepositedVesting(address,uint256,uint256,uint256,uint256,uint256)":
         return [args[0]];
-      case "DepositedByTimelockManager":
-        return [];
+      case "DepositedByTimelockManager(address,uint256,uint256)":
+        return [args[0]];
       case "VestedTimeLock(address,uint256,uint256)":
-        return [];
+      case "VestedTimelock(address,uint256,uint256)":
+        return [args[0]];
+      case "Withdrawn(address,uint256)":
+        return args[0];
       case "Withdrawn(address,uint256,uint256)":
         return args[0];
       case "WithdrawnToPool()":
@@ -416,15 +421,62 @@ export const Events = {
         return [];
       case "SetVestingAddresses()":
         return [];
+      // the actions below are not related to members
+      case "Api3PoolUpdated(address)":
+      case "MintedReward(uint256,uint256,uint256,uint256)":
+        return [];
     }
     console.warn("Unknown signature", signature);
     return [];
   },
 
-  processBlock: async (blockInfo: BlockFullInfo) => {
+  processEpoch: async (blockInfo: BlockFullInfo, event: Log, tx: any): Promise<boolean> => {
+    const { transactionHash, logIndex } = event;
+    const blockNumber = blockInfo.block.number;
+    const blockDt = new Date(blockInfo.block.timestamp * 1000);
+    const releaseDt = new Date(blockInfo.block.timestamp * 1000);
+    releaseDt.setFullYear(releaseDt.getFullYear() + 1);
+    const epoch = blockNumber;
+    const txHash = Buffer.from(transactionHash.replace("0x", ""), "hex");
+    const { epochIndex, amount, newApr, totalStake } = Events.ABI.parseLog(event).args;
+    tx.push(
+      prisma.epoch.updateMany({
+        where: {
+          blockNumber: { lt: blockNumber },
+        },
+        data: {
+          isCurrent: 0,
+        },
+      })
+    );
+    tx.push(
+      prisma.epoch.create({
+        data: {
+          epoch: parseInt(epochIndex.toString()),
+          blockNumber,
+          chainId: 0,
+          txHash,
+          apr: new Prisma.Decimal(withDecimals(newApr.toString(), 20)),
+          members: 0, // TODO:
+          totalStake: new Prisma.Decimal(withDecimals(totalStake.toString(), 18)),
+          totalShares: 0, // TODO:
+          mintedShares: 0, // TODO:
+          releaseDate: releaseDt,
+          createdAt: blockDt,
+          isCurrent: 1,
+          rewardsPct: 0, // TODO:
+          stakedRewards: 0, // TODO:
+        },
+      })
+    );
+    return true;
+  },
+
+  processBlock: async (blockInfo: BlockFullInfo): Promise<boolean> => {
     const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
     const tx = new Array();
+    let terminate: boolean = false;
     for (const [contractAddress, logs] of blockInfo.logs.entries()) {
       for (const event of logs) {
         const { transactionHash, transactionIndex, logIndex } = event;
@@ -432,15 +484,7 @@ export const Events = {
         if (Events.IGNORED.get(topicHash) === 1) continue;
         try {
           const decoded = Events.ABI.parseLog(event);
-          console.log(
-            "Event ",
-            blockDt,
-            "@",
-            blockNumber,
-            transactionHash,
-            decoded.signature,
-            JSON.stringify(decoded.args)
-          );
+          //console.log( "Event ", blockDt, "@", blockNumber, transactionHash, decoded.signature, JSON.stringify(decoded.args));
           // get member event
           const addresses = Events.addresses(decoded.signature, decoded.args);
           for (const addr of addresses) {
@@ -494,6 +538,11 @@ export const Events = {
               );
             }
           }
+          if (
+            decoded.signature == "MintedReward(uint256,uint256,uint256,uint256)"
+          ) {
+            if (await Events.processEpoch(blockInfo, event, tx)) terminate = true;
+          }
         } catch (e) {
           console.error(
             "Event @",
@@ -516,6 +565,7 @@ export const Events = {
       })
     );
     await prisma.$transaction(tx);
+    return terminate;
   },
 
   processState: async () => {
@@ -523,7 +573,8 @@ export const Events = {
     do {
       const blockInfo: BlockFullInfo | null = await Sync.next();
       if (blockInfo) {
-        await Events.processBlock(blockInfo);
+        const terminate = await Events.processBlock(blockInfo);
+        if (terminate) return ++total;
       } else {
         return total;
       }
