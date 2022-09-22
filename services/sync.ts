@@ -568,13 +568,13 @@ export const Events = {
     return terminate;
   },
 
-  processState: async () => {
+  processState: async (stopOnEpoch: boolean) => {
     let total = 0;
     do {
       const blockInfo: BlockFullInfo | null = await Sync.next();
       if (blockInfo) {
         const terminate = await Events.processBlock(blockInfo);
-        if (terminate) return ++total;
+        if (terminate && stopOnEpoch) return ++total;
       } else {
         return total;
       }

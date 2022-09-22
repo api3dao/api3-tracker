@@ -67,7 +67,7 @@ yargs(hideBin(process.argv))
     describe: "Operations with API3 dao state (members and votings)",
     builder: (yargs) => {
       return yargs.option(`sub`, {
-        choises: ["reset", "update"],
+        choises: ["reset", "update", "next"],
         type: "string",
         describe: `supply subcommand - reset or update current state based on new blocks`,
       });
@@ -76,8 +76,11 @@ yargs(hideBin(process.argv))
       if (sub == "reset") {
         await Events.resetState();
         console.log("Events state was reset");
+      } else if (sub == "next") {
+        const blocks = await Events.processState(true);
+        console.log(`${blocks} blocks were processed`);
       } else if (sub == "update") {
-        const blocks = await Events.processState();
+        const blocks = await Events.processState(false);
         console.log(`${blocks} blocks were processed`);
       } else {
         console.error("ERROR: Unknown sub-command");
