@@ -33,7 +33,7 @@ export async function getServerSideProps() {
 
 const RewardsPage: NextPage = (props: any) => {
   const { latest, supply, lastBlock, webconfig } = props;
-  const isEmpty: boolean = !!latest;
+  const isEmpty: boolean = latest.length === 0;
   return (
     <div>
       <Meta webconfig={webconfig} page="rewards" />
