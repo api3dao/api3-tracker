@@ -8,6 +8,8 @@ import { fetchWebconfig } from "./webconfig";
 import { IContract } from "./types";
 import { Filter, Block, Log, Provider } from "@ethersproject/abstract-provider";
 import { EthereumPrice } from "./../services/price";
+import { VotingReader } from "./../services/voting";
+import { VotingType } from ".prisma/client";
 
 interface BlockFullInfo {
   // Block Header information
@@ -540,7 +542,6 @@ export const Events = {
     const isSecondary =
       address.toLowerCase() === secondary.address.toLowerCase();
     const txSender = blockInfo.receipts.get(transactionHash).from;
-    console.log("SENDER ", txSender, "ADDRESS", address);
     if (!isPrimary && !isSecondary) {
       console.error(
         "expected primary or secondary voting contract, got ",
@@ -549,17 +550,40 @@ export const Events = {
       );
       process.exit(1);
     }
-    // TODO: cache this in the future
+
+    // TODO: cache this request in the future
     const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
     const conv = new ethers.Contract(
       convenience.address,
       Events.ConvenienceABI,
       jsonRpc
     );
-    console.log(
-      await conv.getStaticVoteData(isPrimary ? 0 : 1, txSender, [
-        voteId.toString(),
-      ])
+    const result = await conv.getStaticVoteData(isPrimary ? 0 : 1, txSender, [
+      voteId.toString(),
+    ]);
+    const meta = VotingReader.parseMetadata(metadata) || { title: '', description: '', targetSignature : ''};
+    const { script, votingPower, supportRequired } = result;
+    const voteInternalId = voteId * 2 + (isPrimary ? 1 : 0);
+    const scriptData = VotingReader.parseScript(script[0]);
+    tx.push(
+      prisma.voting.create({
+        data: {
+          id: voteInternalId + "",
+          vt: isPrimary ? "PRIMARY" : "SECONDARY",
+          createdAt: blockDt.toISOString(),
+          name: meta.title,  // we also have
+          status: "pending", // script.scriptType == 'invalid' ? 'invalid' : 'pending',
+          transferValue: script.amount,
+          transferToken: script.token,
+          transferAddress: script.address,
+          totalGasUsed: BigInt(0),
+          totalUsd: new Prisma.Decimal("0.0"),
+          totalFor: new Prisma.Decimal("0.0"),
+          totalAgainst: new Prisma.Decimal("0.0"),
+          totalStaked: new Prisma.Decimal(withDecimals(votingPower.toString(), 18)),
+          totalRequired: new Prisma.Decimal(withDecimals(supportRequired.toString(), 18)),
+        },
+      })
     );
     return true;
   },
@@ -567,7 +591,7 @@ export const Events = {
   processBlock: async (
     blockInfo: BlockFullInfo,
     config: IWebConfig,
-    endpoint: string,
+    endpoint: string
   ): Promise<boolean> => {
     const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
@@ -646,8 +670,8 @@ export const Events = {
                 event,
                 decoded.args,
                 config,
-endpoint,
-                tx,
+                endpoint,
+                tx
               )
             )
               terminate = true;
@@ -689,7 +713,11 @@ endpoint,
     do {
       const blockInfo: BlockFullInfo | null = await Sync.next();
       if (blockInfo) {
-        const terminate = await Events.processBlock(blockInfo, webconfig, endpoint);
+        const terminate = await Events.processBlock(
+          blockInfo,
+          webconfig,
+          endpoint
+        );
         if (terminate && stopOnEpoch) return ++total;
       } else {
         return total;
