@@ -382,10 +382,21 @@ export const Events = {
     ["0xc25cfed0b22da6a56f0e5ff784979a0b8623eddf2aee4acd33c2adefb09cbab6", 1],
     ["0x20d5cc5c404f7bcf167ea08ea1136482041e05e5641946d3e3de6690a23fbe39", 1],
   ]),
-  addresses: (signature: string, args: any): Array<string> => {
+
+  votings: (signature: string, args: any): Array<number> => {
     switch (signature) {
-      case "SetDaoApps(address,address,address,address)":
-        return [];
+      case "StartVote(uint256,address,string)":
+        return [args[0]];
+      case "CastVote(uint256,address,bool,uint256)":
+        return [args[0]];
+      case "ExecuteVote(uint256)":
+        return [args[0]];
+    }
+    return [];
+  },
+
+  addresses: (signature: string, args: any, sender: string): Array<string> => {
+    switch (signature) {
       case "Deposited(address,uint256,uint256)":
         return [args[0]];
       case "Staked(address,uint256,uint256,uint256,uint256,uint256,uint256)":
@@ -404,6 +415,8 @@ export const Events = {
         return [args[0]];
       case "DepositedByTimelockManager(address,uint256,uint256)":
         return [args[0]];
+      case "UpdatedLastProposalTimestamp(address,uint256,address)":
+        return [args[0], args[2]];
       case "VestedTimeLock(address,uint256,uint256)":
       case "VestedTimelock(address,uint256,uint256)":
         return [args[0]];
@@ -415,13 +428,17 @@ export const Events = {
         return [];
       case "PaidOutClaim()":
         return [];
-      case "StartVote()":
-        return [];
-      case "CastVote()":
-        return [];
-      case "SetVestingAddresses()":
-        return [];
+      case "TransferredAndLocked(address,address,uint256,uint256,uint256)":
+        return [args[0],args[1]];
+      case "StartVote(uint256,address,string)":
+        return [args[1]];
+      case "CastVote(uint256,address,bool,uint256)":
+        return [args[1]];
+      case "ExecuteVote(uint256)":
+        return [sender];
       // the actions below are not related to members
+      case "SetVestingAddresses()":
+      case "SetDaoApps(address,address,address,address)":
       case "Api3PoolUpdated(address)":
       case "MintedReward(uint256,uint256,uint256,uint256)":
         return [];
@@ -456,7 +473,7 @@ export const Events = {
           blockNumber,
           chainId: 0,
           txHash,
-          apr: new Prisma.Decimal(withDecimals(newApr.toString(), 20)),
+          apr: new Prisma.Decimal(withDecimals(newApr.toString(), 16)),
           members: 0, // TODO:
           totalStake: new Prisma.Decimal(withDecimals(totalStake.toString(), 18)),
           totalShares: 0, // TODO:
@@ -480,13 +497,14 @@ export const Events = {
     for (const [contractAddress, logs] of blockInfo.logs.entries()) {
       for (const event of logs) {
         const { transactionHash, transactionIndex, logIndex } = event;
+        const txSender = blockInfo.receipts.get(transactionHash).from;
         const topicHash: string = event.topics[0];
         if (Events.IGNORED.get(topicHash) === 1) continue;
         try {
           const decoded = Events.ABI.parseLog(event);
           //console.log( "Event ", blockDt, "@", blockNumber, transactionHash, decoded.signature, JSON.stringify(decoded.args));
           // get member event
-          const addresses = Events.addresses(decoded.signature, decoded.args);
+          const addresses = Events.addresses(decoded.signature, decoded.args, txSender);
           for (const addr of addresses) {
             await Members.ensureExists(addr, blockDt);
             const eventId =
