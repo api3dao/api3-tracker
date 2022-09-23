@@ -1,7 +1,7 @@
 import fs from "fs";
 import prisma from "./db";
-import { Prisma } from '@prisma/client';
-import { IBlockNumber } from "./../services/types";
+import { Prisma } from "@prisma/client";
+import { IWebConfig, IBlockNumber } from "./../services/types";
 import { withDecimals } from "./../services/format";
 import { ethers } from "ethers";
 import { fetchWebconfig } from "./webconfig";
@@ -307,7 +307,7 @@ export const Address = {
 };
 
 export const Members = {
-  ensureExists: async (addr: string, blockDt: Date) => {
+  ensureExists: async (addr: string, blockDt: Date, tx: Array<any>) => {
     if (addr == "" || addr == "0x") return;
     const address = Address.asBuffer(addr);
     const members = await prisma.member.findMany({
@@ -321,25 +321,29 @@ export const Members = {
       for (const ens of ensRecords) {
         ensName = ens.name;
       }
-
-      await prisma.member.create({
-        data: {
-          address,
-          ensName,
-          ensUpdated: blockDt,
-          badges: "",
-          userShare: 0,
-          userStake: 0,
-          userVotingPower: 0,
-          userReward: 0,
-          userLockedReward: 0,
-          userDeposited: 0,
-          userWithdrew: 0,
-          createdAt: blockDt,
-          updatedAt: blockDt,
-          tags: "",
-        },
-      });
+      tx.push(
+        prisma.member.createMany({
+          data: [
+            {
+              address,
+              ensName,
+              ensUpdated: blockDt,
+              badges: "",
+              userShare: 0,
+              userStake: 0,
+              userVotingPower: 0,
+              userReward: 0,
+              userLockedReward: 0,
+              userDeposited: 0,
+              userWithdrew: 0,
+              createdAt: blockDt,
+              updatedAt: blockDt,
+              tags: "",
+            },
+          ],
+          skipDuplicates: true,
+        })
+      );
       // console.log("Created member", address.toString("hex"));
     }
   },
@@ -373,6 +377,9 @@ export const Events = {
       JSON.parse(fs.readFileSync("./abi/api3timelock.json", "utf-8")),
       JSON.parse(fs.readFileSync("./abi/api3voting.json", "utf-8"))
     )
+  ),
+  ConvenienceABI: new ethers.utils.Interface(
+    fs.readFileSync("./abi/api3convenience.json", "utf-8")
   ),
   IGNORED: new Map<string, number>([
     ["0x9dcff9d94fbfdb4622d11edb383005f95e78efb446c72d92f8e615c6025c4703", 1],
@@ -429,7 +436,7 @@ export const Events = {
       case "PaidOutClaim()":
         return [];
       case "TransferredAndLocked(address,address,uint256,uint256,uint256)":
-        return [args[0],args[1]];
+        return [args[0], args[1]];
       case "StartVote(uint256,address,string)":
         return [args[1]];
       case "CastVote(uint256,address,bool,uint256)":
@@ -447,7 +454,11 @@ export const Events = {
     return [];
   },
 
-  processEpoch: async (blockInfo: BlockFullInfo, event: Log, tx: any): Promise<boolean> => {
+  processEpoch: async (
+    blockInfo: BlockFullInfo,
+    event: Log,
+    tx: any
+  ): Promise<boolean> => {
     const { transactionHash, logIndex } = event;
     const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
@@ -455,7 +466,8 @@ export const Events = {
     releaseDt.setFullYear(releaseDt.getFullYear() + 1);
     const epoch = blockNumber;
     const txHash = Buffer.from(transactionHash.replace("0x", ""), "hex");
-    const { epochIndex, amount, newApr, totalStake } = Events.ABI.parseLog(event).args;
+    const { epochIndex, amount, newApr, totalStake } =
+      Events.ABI.parseLog(event).args;
     tx.push(
       prisma.epoch.updateMany({
         where: {
@@ -475,7 +487,9 @@ export const Events = {
           txHash,
           apr: new Prisma.Decimal(withDecimals(newApr.toString(), 16)),
           members: 0, // TODO:
-          totalStake: new Prisma.Decimal(withDecimals(totalStake.toString(), 18)),
+          totalStake: new Prisma.Decimal(
+            withDecimals(totalStake.toString(), 18)
+          ),
           totalShares: 0, // TODO:
           mintedShares: 0, // TODO:
           releaseDate: releaseDt,
@@ -489,7 +503,72 @@ export const Events = {
     return true;
   },
 
-  processBlock: async (blockInfo: BlockFullInfo): Promise<boolean> => {
+  processVote: async (
+    blockInfo: BlockFullInfo,
+    event: Log,
+    args: any,
+    config: IWebConfig,
+    endpoint: string,
+    tx: any
+  ): Promise<boolean> => {
+    const { transactionHash, logIndex, address } = event;
+    const { voteId, caller, metadata } = args;
+    const blockNumber = blockInfo.block.number;
+    const blockDt = new Date(blockInfo.block.timestamp * 1000);
+    const convenience = config.contracts?.find(
+      (p: any) => p.name.toLowerCase() === "convenience"
+    );
+    if (!convenience) {
+      console.error("api3 convenience contract is not configured");
+      process.exit(1);
+    }
+    const primary = config.contracts?.find(
+      (p: any) => p.name.toLowerCase() === "primaryvoting"
+    );
+    if (!primary) {
+      console.error("api3 primary voting contract is not configured");
+      process.exit(1);
+    }
+    const isPrimary = address.toLowerCase() === primary.address.toLowerCase();
+    const secondary = config.contracts?.find(
+      (p: any) => p.name.toLowerCase() === "secondaryvoting"
+    );
+    if (!secondary) {
+      console.error("api3 secondary voting contract is not configured");
+      process.exit(1);
+    }
+    const isSecondary =
+      address.toLowerCase() === secondary.address.toLowerCase();
+    const txSender = blockInfo.receipts.get(transactionHash).from;
+    console.log("SENDER ", txSender, "ADDRESS", address);
+    if (!isPrimary && !isSecondary) {
+      console.error(
+        "expected primary or secondary voting contract, got ",
+        address,
+        " instead"
+      );
+      process.exit(1);
+    }
+    // TODO: cache this in the future
+    const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
+    const conv = new ethers.Contract(
+      convenience.address,
+      Events.ConvenienceABI,
+      jsonRpc
+    );
+    console.log(
+      await conv.getStaticVoteData(isPrimary ? 0 : 1, txSender, [
+        voteId.toString(),
+      ])
+    );
+    return true;
+  },
+
+  processBlock: async (
+    blockInfo: BlockFullInfo,
+    config: IWebConfig,
+    endpoint: string,
+  ): Promise<boolean> => {
     const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
     const tx = new Array();
@@ -504,9 +583,13 @@ export const Events = {
           const decoded = Events.ABI.parseLog(event);
           //console.log( "Event ", blockDt, "@", blockNumber, transactionHash, decoded.signature, JSON.stringify(decoded.args));
           // get member event
-          const addresses = Events.addresses(decoded.signature, decoded.args, txSender);
+          const addresses = Events.addresses(
+            decoded.signature,
+            decoded.args,
+            txSender
+          );
           for (const addr of addresses) {
-            await Members.ensureExists(addr, blockDt);
+            await Members.ensureExists(addr, blockDt, tx);
             const eventId =
               event.blockNumber.toString(16) +
               "-" +
@@ -556,10 +639,24 @@ export const Events = {
               );
             }
           }
+          if (decoded.signature == "StartVote(uint256,address,string)") {
+            if (
+              await Events.processVote(
+                blockInfo,
+                event,
+                decoded.args,
+                config,
+endpoint,
+                tx,
+              )
+            )
+              terminate = true;
+          }
           if (
             decoded.signature == "MintedReward(uint256,uint256,uint256,uint256)"
           ) {
-            if (await Events.processEpoch(blockInfo, event, tx)) terminate = true;
+            if (await Events.processEpoch(blockInfo, event, tx))
+              terminate = true;
           }
         } catch (e) {
           console.error(
@@ -586,12 +683,13 @@ export const Events = {
     return terminate;
   },
 
-  processState: async (stopOnEpoch: boolean) => {
+  processState: async (endpoint: string, stopOnEpoch: boolean) => {
     let total = 0;
+    const webconfig = fetchWebconfig();
     do {
       const blockInfo: BlockFullInfo | null = await Sync.next();
       if (blockInfo) {
-        const terminate = await Events.processBlock(blockInfo);
+        const terminate = await Events.processBlock(blockInfo, webconfig, endpoint);
         if (terminate && stopOnEpoch) return ++total;
       } else {
         return total;
