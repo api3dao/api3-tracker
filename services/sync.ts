@@ -551,7 +551,7 @@ export const Events = {
       process.exit(1);
     }
 
-    // TODO: cache this request in the future
+    // we can actually cache this request in the future
     const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
     const conv = new ethers.Contract(
       convenience.address,
@@ -581,11 +581,11 @@ export const Events = {
           totalFor: new Prisma.Decimal("0.0"),
           totalAgainst: new Prisma.Decimal("0.0"),
           totalStaked: new Prisma.Decimal(withDecimals(votingPower.toString(), 18)),
-          totalRequired: new Prisma.Decimal(withDecimals(supportRequired.toString(), 18)),
+          totalRequired: new Prisma.Decimal(withDecimals(supportRequired.toString(), 16)),
         },
       })
     );
-    return true;
+    return false;
   },
 
   processBlock: async (
