@@ -1,0 +1,121 @@
+import prisma from "./db";
+import { ITreasuryType } from "./api";
+import { ethers } from "ethers";
+import { fetchWebconfig } from "./webconfig";
+import { TreasuryType } from ".prisma/client";
+import { Prisma } from "@prisma/client";
+
+export const Address = {
+  asBuffer: (addr: string): Buffer => {
+    return Buffer.from(addr.replace("0x", ""), "hex");
+  },
+};
+
+const abiERC20 = [
+  // Get the account balance
+  "function balanceOf(address) view returns (uint)",
+];
+
+interface ITokenContract {
+  address: string;
+  decimals: number;
+}
+
+const withDecimals = (input: string, decimals: number): string => {
+  if (input.length > decimals) {
+    return (
+      input.substring(0, input.length - decimals) +
+      "." +
+      input.substring(input.length - decimals, input.length)
+    );
+  }
+  let pad = "";
+  while (pad.length + input.length < decimals) pad += "0";
+  return "0." + pad + input;
+};
+
+export const Treasuries = {
+  resetAll: async () => {
+    await prisma.treasury.deleteMany({});
+  },
+  download: async (endpoint: string) => {
+    const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
+
+    const webconfig = fetchWebconfig();
+    // known tokens
+    const usdc = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
+    const api3: string = (
+      webconfig.contracts?.find(
+        ({ name }) => name.toLowerCase() === "api3token"
+      ) || { address: "" }
+    ).address;
+
+    const mapTokens = new Map<string, ITokenContract>();
+    mapTokens.set("USDC", { address: usdc, decimals: 6 });
+    mapTokens.set("API3", { address: api3, decimals: 18 });
+
+    // known contracts to check
+    const v1 = webconfig.contracts?.find(
+      ({ name }) => name.toLowerCase() === "v1treasury"
+    )?.address;
+    const primary = webconfig.contracts?.find(
+      ({ name }) => name.toLowerCase() === "primaryagent"
+    )?.address;
+    const secondary = webconfig.contracts?.find(
+      ({ name }) => name.toLowerCase() === "secondaryagent"
+    )?.address;
+
+    const mapAddresses = new Map<string, ITreasuryType>();
+    if (v1) mapAddresses.set(v1, TreasuryType.V1);
+    if (primary) mapAddresses.set(primary, TreasuryType.PRIMARY);
+    if (secondary) mapAddresses.set(secondary, TreasuryType.SECONDARY);
+
+    let updated = 0;
+    for (const [tokenSymbol, token] of mapTokens.entries()) {
+      console.log("Reading token", token);
+      const tokenContract = new ethers.Contract(
+        token.address,
+        abiERC20,
+        jsonRpc
+      );
+      for (const [contractAddress, contractType] of mapAddresses.entries()) {
+        const tokenBalance = await tokenContract.balanceOf(contractAddress);
+        const value = withDecimals(tokenBalance.toString(), token.decimals);
+        console.log(
+          contractType,
+          tokenSymbol,
+          token.decimals,
+          tokenBalance.toString(),
+          value
+        );
+        await prisma.$transaction([
+          prisma.treasury.updateMany({
+            where: {
+              ttype: contractType,
+              address: Address.asBuffer(contractAddress),
+              token: tokenSymbol,
+              tokenAddress: Address.asBuffer(token.address),
+              current: 1,
+            },
+            data: {
+              current: 0,
+            }
+          }),
+          prisma.treasury.create({
+            data: {
+              ts: new Date().toISOString(),
+              ttype: contractType,
+              address: Address.asBuffer(contractAddress),
+              token: tokenSymbol,
+              tokenAddress: Address.asBuffer(token.address),
+              value,
+              current: 1,
+            },
+          }),
+        ]);
+        updated++;
+      }
+    }
+    return updated;
+  },
+};
