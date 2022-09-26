@@ -17,13 +17,15 @@ export type IVotingType = VotingType;
 export const Blocks = {
   // fetch the last block
   fetchLast: async (): Promise<IBlockNumber> => {
-    const list = (
-      await prisma.memberEvent.findMany({
-        take: 1,
-        orderBy: { createdAt: "desc" },
-      })
-    ).map((x: any) => ({ ...x }));
-    return list.length > 0 ? list[0] : {};
+    const status = await prisma.syncStatus.findMany({
+      where: { id: 1 },
+    });
+    if (status.length > 0) {
+      return {
+        blockNumber: status[0].processed,
+      };
+    }
+    return { blockNumber: 0 };
   },
 };
 
