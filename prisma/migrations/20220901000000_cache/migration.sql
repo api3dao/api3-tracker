@@ -10,6 +10,14 @@ CREATE TABLE "cache_blocks" (
 );
 
 -- CreateTable
+CREATE TABLE "cache_tx" (
+    "hash" BYTEA NOT NULL,
+    "data" JSONB NOT NULL,
+
+    CONSTRAINT "cache_tx_pkey" PRIMARY KEY ("hash")
+);
+
+-- CreateTable
 CREATE TABLE "cache_receipts" (
     "hash" BYTEA NOT NULL,
     "receipt" JSONB NOT NULL,

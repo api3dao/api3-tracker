@@ -17,7 +17,9 @@ interface BlockFullInfo {
   block: Block;
   // Price of Ethereum at this point
   price: number;
-  // Receipts list
+  // Map of transactions data
+  txs: Map<string, any>;
+  // Map of transaction receipts
   receipts: Map<string, any>;
   // Logs
   logs: Map<string, Array<Log>>;
@@ -50,6 +52,7 @@ export const BlockLoader = {
     });
 
     const receipts = new Map<string, any>();
+    const txs = new Map<string, any>();
     const logs = new Map<string, Array<Log>>();
     for (const log of logsList) {
       const hash = log.transactionHash;
@@ -57,6 +60,13 @@ export const BlockLoader = {
       l.push(log);
       logs.set(log.address, l);
 
+      if (!txs.has(hash)) {
+        const foundTx = await prisma.cacheTx.findMany({
+          where: { hash: Hash.asBuffer(hash) },
+        });
+        const transaction = foundTx[0].data as any;
+        txs.set(hash, transaction);
+      }
       if (!receipts.has(hash)) {
         const foundReceipt = await prisma.cacheReceipt.findMany({
           where: { hash: Hash.asBuffer(hash) },
@@ -75,7 +85,7 @@ export const BlockLoader = {
       price.toFixed(2) + "USD",
       "read in " + elapsed(start)
     );
-    return { block, price, receipts, logs };
+    return { block, price, txs, receipts, logs };
   },
 
   fromLogs: async (
@@ -98,10 +108,21 @@ export const BlockLoader = {
         : await EthereumPrice.at(new Date(block.timestamp * 1000));
 
     // load receipts for each transaction
+    const txs = new Map<string, any>();
     const receipts = new Map<string, any>();
     const logs = new Map<string, Array<Log>>();
     for (const log of logsList) {
       const hash = log.transactionHash;
+      if (!txs.has(hash)) {
+        const foundTx = await prisma.cacheTx.findMany({
+          where: { hash: Hash.asBuffer(hash) },
+        });
+        const t =
+          foundTx.length > 0
+            ? (foundTx[0].data as any)
+            : await jsonRpc.getTransaction(hash);
+        txs.set(hash, t);
+      }
       if (!receipts.has(hash)) {
         const foundReceipt = await prisma.cacheReceipt.findMany({
           where: { hash: Hash.asBuffer(hash) },
@@ -128,6 +149,7 @@ export const BlockLoader = {
     );
     return {
       block,
+      txs,
       receipts,
       price,
       logs,
@@ -160,7 +182,21 @@ export const Sync = {
         skipDuplicates: true,
       })
     );
-    // 2. save receipts
+    // 2. save transaction details
+    for (const [txHash, t] of b.txs.entries()) {
+      tx.push(
+        prisma.cacheTx.createMany({
+          data: [
+            {
+              hash: Hash.asBuffer(txHash),
+              data: t,
+            },
+          ],
+          skipDuplicates: true,
+        })
+      );
+    }
+    // 3. save receipts
     for (const [txHash, receipt] of b.receipts.entries()) {
       tx.push(
         prisma.cacheReceipt.createMany({
@@ -174,7 +210,7 @@ export const Sync = {
         })
       );
     }
-    // 3. save logs for every contract
+    // 4. save logs for every contract
     for (const [contract, logs] of b.logs) {
       tx.push(
         prisma.cacheLogs.createMany({
@@ -189,7 +225,7 @@ export const Sync = {
         })
       );
     }
-    // 4. update syncing status
+    // 5. update syncing status
     tx.push(
       prisma.syncStatus.updateMany({
         where: { id: 1 },
@@ -477,11 +513,7 @@ export const Events = {
     const releaseDt = new Date(blockInfo.block.timestamp * 1000);
     releaseDt.setFullYear(releaseDt.getFullYear() + 1);
     const txHash = Buffer.from(transactionHash.replace("0x", ""), "hex");
-    const {
-      epochIndex,
-      newApr,
-      totalStake,
-    } = Events.ABI.parseLog(event).args; // also: amount
+    const { epochIndex, newApr, totalStake } = Events.ABI.parseLog(event).args; // also: amount
     const totalMembers = await Wallets.total();
     tx.push(
       prisma.epoch.updateMany({
