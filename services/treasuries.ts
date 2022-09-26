@@ -3,7 +3,7 @@ import { ITreasuryType } from "./api";
 import { ethers } from "ethers";
 import { fetchWebconfig } from "./webconfig";
 import { TreasuryType } from ".prisma/client";
-import { Prisma } from "@prisma/client";
+import { withDecimals } from "./format";
 
 export const Address = {
   asBuffer: (addr: string): Buffer => {
@@ -20,19 +20,6 @@ interface ITokenContract {
   address: string;
   decimals: number;
 }
-
-const withDecimals = (input: string, decimals: number): string => {
-  if (input.length > decimals) {
-    return (
-      input.substring(0, input.length - decimals) +
-      "." +
-      input.substring(input.length - decimals, input.length)
-    );
-  }
-  let pad = "";
-  while (pad.length + input.length < decimals) pad += "0";
-  return "0." + pad + input;
-};
 
 export const Treasuries = {
   resetAll: async () => {
@@ -72,7 +59,7 @@ export const Treasuries = {
 
     let updated = 0;
     for (const [tokenSymbol, token] of mapTokens.entries()) {
-      console.log("Reading token", token);
+      // console.log("Reading token", token);
       const tokenContract = new ethers.Contract(
         token.address,
         abiERC20,
@@ -84,8 +71,6 @@ export const Treasuries = {
         console.log(
           contractType,
           tokenSymbol,
-          token.decimals,
-          tokenBalance.toString(),
           value
         );
         await prisma.$transaction([
