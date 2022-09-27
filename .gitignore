@@ -58,4 +58,4 @@ storybook-static/
 
 pgapi3dao.sql
 pgapi3dao.sql.gz
-.cache
+/.cache
