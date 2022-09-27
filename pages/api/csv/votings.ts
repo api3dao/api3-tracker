@@ -52,9 +52,12 @@ const toArray = (src: IVoting) => [
   src.totalRequired + "",
 ];
 
-const rearrange = (columns: Array<number>, full: Array<string>): Array<string> => {
-   if (columns.length === 0) return full;
-   return columns.map((ci: number) => (full[ci]));
+const rearrange = (
+  columns: Array<number>,
+  full: Array<string>
+): Array<string> => {
+  if (columns.length === 0) return full;
+  return columns.map((ci: number) => full[ci]);
 };
 
 export default async function handler(
@@ -87,4 +90,3 @@ export default async function handler(
   }
   res.status(200).send(stringify(out));
 }
-

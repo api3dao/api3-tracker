@@ -129,26 +129,6 @@ CREATE TABLE "voting" (
 );
 
 -- CreateTable
-CREATE TABLE "ens_event" (
-    "id" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL,
-    "address" BYTEA,
-    "name" TEXT NOT NULL,
-    "chainId" INTEGER NOT NULL,
-    "txHash" BYTEA NOT NULL,
-    "blockNumber" INTEGER NOT NULL,
-    "txIndex" INTEGER NOT NULL,
-    "logIndex" INTEGER NOT NULL,
-    "data" JSONB,
-    "fee" BIGINT,
-    "gasPrice" BIGINT,
-    "gasUsed" BIGINT,
-    "feeUsd" DECIMAL(10,2),
-
-    CONSTRAINT "ens_event_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "price_ethereum" (
     "ts" TIMESTAMP(3) NOT NULL,
     "usd" DECIMAL(10,2) NOT NULL,

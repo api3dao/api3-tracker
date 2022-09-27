@@ -34,9 +34,12 @@ const toArray = (src: IWallet) => [
   niceDate(src.updatedAt),
 ];
 
-const rearrange = (columns: Array<number>, full: Array<string>): Array<string> => {
-   if (columns.length === 0) return full;
-   return columns.map((ci: number) => (full[ci]));
+const rearrange = (
+  columns: Array<number>,
+  full: Array<string>
+): Array<string> => {
+  if (columns.length === 0) return full;
+  return columns.map((ci: number) => full[ci]);
 };
 
 export default async function handler(
@@ -57,10 +60,10 @@ export default async function handler(
   }
 
   const out = [rearrange(columns, NAMES)];
-  const q: string = req.query.q as string || "";
+  const q: string = (req.query.q as string) || "";
   const list: Array<IWallet> = await Wallets.fetchList(q);
   for (let index = 0; index < list.length; index++) {
-    out.push(rearrange(columns, toArray(list[index])))
+    out.push(rearrange(columns, toArray(list[index])));
   }
   if (req.query.filename) {
     res.setHeader(

@@ -2,11 +2,7 @@
   "compilerOptions": {
     "target": "es5",
     "downlevelIteration": true,
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -21,10 +17,6 @@
     "isolatedModules": false,
     "incremental": true
   },
-  "include": [
-    "cli.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["cli.ts"],
+  "exclude": ["node_modules"]
 }

@@ -68,11 +68,7 @@ export const Treasuries = {
       for (const [contractAddress, contractType] of mapAddresses.entries()) {
         const tokenBalance = await tokenContract.balanceOf(contractAddress);
         const value = withDecimals(tokenBalance.toString(), token.decimals);
-        console.log(
-          contractType,
-          tokenSymbol,
-          value
-        );
+        console.log(contractType, tokenSymbol, value);
         await prisma.$transaction([
           prisma.treasury.updateMany({
             where: {
@@ -84,7 +80,7 @@ export const Treasuries = {
             },
             data: {
               current: 0,
-            }
+            },
           }),
           prisma.treasury.create({
             data: {

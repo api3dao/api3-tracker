@@ -16,12 +16,12 @@ const Template: ComponentStory<typeof WalletsSearch> = (args) => (
 
 export const NoValue = Template.bind({});
 NoValue.args = {
-   value: "",
-   onChange: () => {},
+  value: "",
+  onChange: () => {},
 };
 
 export const WithValue = Template.bind({});
 WithValue.args = {
-   value: "some-ens-name.eth",
-   onChange: () => {},
+  value: "some-ens-name.eth",
+  onChange: () => {},
 };
