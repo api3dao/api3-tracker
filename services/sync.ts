@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";
 import { IWebConfig, IBlockNumber } from "./../services/types";
 import { Wallets } from "./../services/api";
 import { noDecimals, withDecimals } from "./../services/format";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { fetchWebconfig } from "./webconfig";
 import { IContract } from "./types";
 import { Filter, Block, Log, Provider } from "@ethersproject/abstract-provider";
@@ -722,7 +722,14 @@ export const Events = {
     for (const [_contractAddress, logs] of blockInfo.logs.entries()) {
       for (const event of logs) {
         const { transactionHash, transactionIndex, logIndex } = event;
-        const txSender = blockInfo.receipts.get(transactionHash).from;
+        const { from, gasUsed } = blockInfo.receipts.get(transactionHash);
+        const { gasPrice } = blockInfo.txs.get(transactionHash);
+        const fee = BigNumber.from(gasUsed).mul(BigNumber.from(gasPrice));
+        const priceDec = new Prisma.Decimal(blockInfo.price).mul(fee.toString());
+        const feeUsd = parseFloat(withDecimals(priceDec.toString(), 18));
+        // console.log(
+         // 'gasUsed', BigNumber.from(gasUsed).toString(), 'gasPrice', BigNumber.from(gasPrice).toString(),
+         // 'fee', fee, 'feeUsd', feeUsd);
         const topicHash: string = event.topics[0];
         if (Events.IGNORED.get(topicHash) === 1) continue;
         try {
@@ -732,7 +739,7 @@ export const Events = {
           const addresses = Events.addresses(
             decoded.signature,
             decoded.args,
-            txSender
+            from
           );
           for (const addr of addresses) {
             await Members.ensureExists(addr, blockDt, tx);
@@ -759,10 +766,10 @@ export const Events = {
                     logIndex: logIndex,
                     eventName: decoded.name,
                     data: decoded.args,
-                    // gasPrice?: bigint | number | null
-                    // gasUsed?: bigint | number | null
-                    // fee?: bigint | number | null
-                    // feeUsd?: Decimal | DecimalJsLike | number | string | null
+                    gasPrice: BigNumber.from(gasPrice).toNumber(),
+                    gasUsed: BigNumber.from(gasUsed).toNumber(),
+                    fee: BigInt(fee.toString()),
+                    feeUsd: feeUsd.toString(),
                   },
                 })
               );
@@ -823,11 +830,11 @@ export const Events = {
                   logIndex: logIndex,
                   eventName: decoded.name,
                   data: decoded.args,
-                  // gasPrice?: bigint | number | null
-                  // gasUsed?: bigint | number | null
-                  // fee?: bigint | number | null
-                  // feeUsd?: Decimal | DecimalJsLike | number | string | null
-                  address: Address.asBuffer(txSender),
+                  gasPrice: BigNumber.from(gasPrice).toNumber(),
+                  gasUsed: BigNumber.from(gasUsed).toNumber(),
+                  fee: BigInt(fee.toString()),
+                  feeUsd: feeUsd.toString(),
+                  address: Address.asBuffer(from),
                   supports: -1,
                   userShare: new Prisma.Decimal(0.0),
                   userVotingPower: new Prisma.Decimal(0.0),
