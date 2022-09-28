@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { withDecimals } from "./format";
+import { IWebConfig } from "./types";
 
 interface IVotingScriptDetails {
   scriptType: string; // "transfer" | "invalid" | "unknown";
@@ -42,37 +43,51 @@ const METADATA_SCHEME_VERSION = "1";
 export const METADATA_DELIMETER = String.fromCharCode(31);
 
 export const VotingReader = {
+  isPrimary: (config: IWebConfig, address: string): boolean => {
+    const primary = config.contracts?.find(
+      (p: any) => p.name.toLowerCase() === "primaryvoting"
+    );
+    if (!primary) {
+      throw "api3 primary voting contract is not configured";
+    }
+    const secondary = config.contracts?.find(
+      (p: any) => p.name.toLowerCase() === "secondaryvoting"
+    );
+    if (!secondary) {
+      throw "api3 secondary voting contract is not configured";
+    }
+    const isPrimary = address.toLowerCase() === primary.address.toLowerCase();
+    const isSecondary =
+      address.toLowerCase() === secondary.address.toLowerCase();
+    if (!isPrimary && !isSecondary) {
+      throw "expected primary or secondary voting contract, got " + address + " instead";
+    }
+    return isPrimary;
+  },
+
   parseScript: (data: string): IVotingScriptDetails => {
-    const buf = Buffer.from(data, "hex");
-    // const bufSignature = Buffer.alloc(4);
-    // buf.copy(bufSignature, 0, 160, 160 + 4);
+    const buf = Buffer.from(data.replace("0x", ""), "hex");
     const bufSignature = buf.slice(160, 160+ 4);
     const signature = bufSignature.toString("hex").toLowerCase();
     let scriptType = "unknown";
-    if (signature === "0xa9059cbb") {
+    if (signature === "a9059cbb") {
       scriptType = "transfer";
-    } else if (signature === "0x9d61d234") {
+    } else if (signature === "9d61d234") {
       scriptType = "invalid";
     }
-    // const bufToken = Buffer.alloc(20);
-    // buf.copy(bufToken, 0, 32 + 12, 32 + 12 + 20);
     const bufToken = buf.slice( 32 + 12, 32+12 + 20);
     const tokenAddress = bufToken.toString("hex").toLowerCase();
     let tokenName = "";
     const decimals = 6;
-    if (tokenAddress == "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48") {
+    if (tokenAddress == "a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48") {
       tokenName = "USDC";
     }
     const offset = 32 + 32 + 32 + 32 + 32 + 4 + 12;
     const bufTo = buf.slice(offset, offset + 20);
-    // const bufTo = Buffer.alloc(20);
-    // buf.copy(bufTo, 0, offset, offset + 20);
 
     let offsetAmt = offset + 20 + 16;
-    // const bufAmt = Buffer.alloc(16);
-    // buf.copy(bufAmt, 0, offsetAmt, offsetAmt + 16);
     const bufAmt = buf.slice( offsetAmt, offsetAmt + 16);
-    const amt = BigInt(bufAmt.toString("hex")).toString(10);
+    const amt = BigInt("0x" + bufAmt.toString("hex")).toString(10);
 
     return {
       scriptType,

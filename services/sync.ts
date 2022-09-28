@@ -436,6 +436,8 @@ export const Events = {
         return args[0];
       case "WithdrawnToPool()":
         return [];
+      case "OwnershipTransferred(address,address)":
+        return [args[0], args[1]];
       case "PaidOutClaim()":
         return [];
       case "TransferredAndLocked(address,address,uint256,uint256,uint256)":
@@ -526,32 +528,8 @@ export const Events = {
       console.error("api3 convenience contract is not configured");
       process.exit(1);
     }
-    const primary = config.contracts?.find(
-      (p: any) => p.name.toLowerCase() === "primaryvoting"
-    );
-    if (!primary) {
-      console.error("api3 primary voting contract is not configured");
-      process.exit(1);
-    }
-    const isPrimary = address.toLowerCase() === primary.address.toLowerCase();
-    const secondary = config.contracts?.find(
-      (p: any) => p.name.toLowerCase() === "secondaryvoting"
-    );
-    if (!secondary) {
-      console.error("api3 secondary voting contract is not configured");
-      process.exit(1);
-    }
-    const isSecondary =
-      address.toLowerCase() === secondary.address.toLowerCase();
-    const txSender = blockInfo.receipts.get(transactionHash).from;
-    if (!isPrimary && !isSecondary) {
-      console.error(
-        "expected primary or secondary voting contract, got ",
-        address,
-        " instead"
-      );
-      process.exit(1);
-    }
+    const isPrimary = VotingReader.isPrimary(config, address);
+    const txSender: string = blockInfo.receipts.get(transactionHash).from;
 
     // we can actually cache this request in the future
     const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
@@ -563,18 +541,23 @@ export const Events = {
     const result = await conv.getStaticVoteData(isPrimary ? 0 : 1, txSender, [
       voteId.toString(),
     ]);
-    const meta = VotingReader.parseMetadata(metadata) || { title: '', description: '', targetSignature : ''};
+    const meta = VotingReader.parseMetadata(metadata) || {
+      title: "",
+      description: "",
+      targetSignature: "",
+    };
     const { script, votingPower, supportRequired } = result;
     const voteInternalId = voteId * 2 + (isPrimary ? 1 : 0);
+
     const scriptData = VotingReader.parseScript(script[0]);
-console.log(meta.title, meta.targetSignature, scriptData);
+    // console.log(meta.title, meta.targetSignature, scriptData);
     tx.push(
       prisma.voting.create({
         data: {
           id: voteInternalId + "",
           vt: isPrimary ? "PRIMARY" : "SECONDARY",
           createdAt: blockDt.toISOString(),
-          name: meta.title,  // we also have
+          name: meta.title, // we also have
           status: "pending", // script.scriptType == 'invalid' ? 'invalid' : 'pending',
           transferValue: scriptData.amount,
           transferToken: scriptData.token,
@@ -583,8 +566,12 @@ console.log(meta.title, meta.targetSignature, scriptData);
           totalUsd: new Prisma.Decimal("0.0"),
           totalFor: new Prisma.Decimal("0.0"),
           totalAgainst: new Prisma.Decimal("0.0"),
-          totalStaked: new Prisma.Decimal(withDecimals(votingPower.toString(), 18)),
-          totalRequired: new Prisma.Decimal(withDecimals(supportRequired.toString(), 16)),
+          totalStaked: new Prisma.Decimal(
+            withDecimals(votingPower.toString(), 18)
+          ),
+          totalRequired: new Prisma.Decimal(
+            withDecimals(supportRequired.toString(), 16)
+          ),
         },
       })
     );
@@ -679,6 +666,44 @@ console.log(meta.title, meta.targetSignature, scriptData);
             )
               terminate = true;
           }
+          const votings = Events.votings(decoded.signature, decoded.args);
+          const eventId =
+            event.blockNumber.toString(16) +
+            "-" +
+            transactionIndex.toString(16) +
+            "-" +
+            logIndex.toString(16) +
+            "." +
+            Math.random().toString().replace("0.", "");
+          for (const vId of votings) {
+            const voteInternalId =
+              vId * 2 + (VotingReader.isPrimary(config, event.address) ? 1 : 0);
+            tx.push(
+              prisma.votingEvent.create({
+                data: {
+                  id: eventId,
+                  createdAt: blockDt,
+                  chainId: 0,
+                  txHash: Buffer.from(transactionHash.replace("0x", ""), "hex"),
+                  blockNumber,
+                  txIndex: transactionIndex,
+                  logIndex: logIndex,
+                  eventName: decoded.name,
+                  data: decoded.args,
+                  // gasPrice?: bigint | number | null
+                  // gasUsed?: bigint | number | null
+                  // fee?: bigint | number | null
+                  // feeUsd?: Decimal | DecimalJsLike | number | string | null
+                  address: Address.asBuffer(txSender),
+                  supports: -1,
+                  userShare: new Prisma.Decimal(0.0),
+                  userVotingPower: new Prisma.Decimal(0.0),
+                  votingId: voteInternalId + "",
+                },
+              })
+            );
+          }
+
           if (
             decoded.signature == "MintedReward(uint256,uint256,uint256,uint256)"
           ) {
