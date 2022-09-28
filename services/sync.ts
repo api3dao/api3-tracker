@@ -38,7 +38,16 @@ export const BlockLoader = {
       where: { hash: blockRecord.hash },
     });
     if (foundLogs.length == 0) throw "no logs saved for the block";
-    const logsList: Array<Log> = foundLogs[0].logs as any;
+    const logsList = new Array<Log>();
+    for (const found of foundLogs) {
+      const logs = found.logs as any;
+      for (const l of logs) logsList.push(l);
+    }
+    logsList.sort((a, b) => {
+      const diff1 = a.transactionIndex - b.transactionIndex;
+      if (diff1 != 0) return diff1;
+      return a.logIndex - b.logIndex;
+    });
 
     const receipts = new Map<string, any>();
     const logs = new Map<string, Array<Log>>();
@@ -434,12 +443,8 @@ export const Events = {
         return args[0];
       case "Withdrawn(address,uint256,uint256)":
         return args[0];
-      case "WithdrawnToPool()":
-        return [];
       case "OwnershipTransferred(address,address)":
         return [args[0], args[1]];
-      case "PaidOutClaim()":
-        return [];
       case "TransferredAndLocked(address,address,uint256,uint256,uint256)":
         return [args[0], args[1]];
       case "StartVote(uint256,address,string)":
@@ -525,10 +530,9 @@ export const Events = {
       (p: any) => p.name.toLowerCase() === "convenience"
     );
     if (!convenience) {
-      console.error("api3 convenience contract is not configured");
-      process.exit(1);
+      throw "api3 convenience contract is not configured";
     }
-    const isPrimary = VotingReader.isPrimary(config, address);
+    const isPrimary = VotingReader.isPrimary(config, event.address);
     const txSender: string = blockInfo.receipts.get(transactionHash).from;
 
     // we can actually cache this request in the future
@@ -595,7 +599,20 @@ export const Events = {
         if (Events.IGNORED.get(topicHash) === 1) continue;
         try {
           const decoded = Events.ABI.parseLog(event);
-          //console.log( "Event ", blockDt, "@", blockNumber, transactionHash, decoded.signature, JSON.stringify(decoded.args));
+          if (
+            event.address.toLowerCase() ==
+            "0xdb6c812e439ce5c740570578681ea7aadba5170b"
+          ) {
+            console.log(
+              "Event ",
+              blockDt,
+              "@",
+              blockNumber,
+              transactionHash,
+              decoded.signature,
+              JSON.stringify(decoded.args)
+            );
+          }
           // get member event
           const addresses = Events.addresses(
             decoded.signature,
@@ -607,11 +624,7 @@ export const Events = {
             const eventId =
               event.blockNumber.toString(16) +
               "-" +
-              transactionIndex.toString(16) +
-              "-" +
               logIndex.toString(16) +
-              "." +
-              addr +
               "." +
               Math.random().toString().replace("0.", "");
             try {
@@ -669,8 +682,6 @@ export const Events = {
           const votings = Events.votings(decoded.signature, decoded.args);
           const eventId =
             event.blockNumber.toString(16) +
-            "-" +
-            transactionIndex.toString(16) +
             "-" +
             logIndex.toString(16) +
             "." +
