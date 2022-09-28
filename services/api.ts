@@ -108,7 +108,7 @@ export const Votings = {
     return (
       await prisma.voting.findMany({
         where: { status },
-        orderBy: { createdAt: "asc" },
+        orderBy: { createdAt: "desc" },
       })
     ).map((x: any) => ({ ...x }));
   },
@@ -116,7 +116,7 @@ export const Votings = {
   fetchAll: async (): Promise<Array<IVoting>> => {
     return (
       await prisma.voting.findMany({
-        orderBy: { createdAt: "asc" },
+        orderBy: { createdAt: "desc" },
       })
     ).map((x: any) => ({ ...x }));
   },

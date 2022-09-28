@@ -2,6 +2,7 @@ import fs from "fs";
 import prisma from "./db";
 import { Prisma } from "@prisma/client";
 import { IWebConfig, IBlockNumber } from "./../services/types";
+import { Wallets } from "./../services/api";
 import { withDecimals } from "./../services/format";
 import { ethers } from "ethers";
 import { fetchWebconfig } from "./webconfig";
@@ -470,6 +471,7 @@ export const Events = {
     const txHash = Buffer.from(transactionHash.replace("0x", ""), "hex");
     const { epochIndex, amount, newApr, totalStake } =
       Events.ABI.parseLog(event).args;
+    const totalMembers = await Wallets.total();
     tx.push(
       prisma.epoch.updateMany({
         where: {
@@ -488,7 +490,7 @@ export const Events = {
           chainId: 0,
           txHash,
           apr: new Prisma.Decimal(withDecimals(newApr.toString(), 16)),
-          members: 0, // TODO:
+          members: totalMembers,
           totalStake: new Prisma.Decimal(
             withDecimals(totalStake.toString(), 18)
           ),
@@ -565,6 +567,7 @@ export const Events = {
     const { script, votingPower, supportRequired } = result;
     const voteInternalId = voteId * 2 + (isPrimary ? 1 : 0);
     const scriptData = VotingReader.parseScript(script[0]);
+console.log(meta.title, meta.targetSignature, scriptData);
     tx.push(
       prisma.voting.create({
         data: {
@@ -573,9 +576,9 @@ export const Events = {
           createdAt: blockDt.toISOString(),
           name: meta.title,  // we also have
           status: "pending", // script.scriptType == 'invalid' ? 'invalid' : 'pending',
-          transferValue: script.amount,
-          transferToken: script.token,
-          transferAddress: script.address,
+          transferValue: scriptData.amount,
+          transferToken: scriptData.token,
+          transferAddress: scriptData.address,
           totalGasUsed: BigInt(0),
           totalUsd: new Prisma.Decimal("0.0"),
           totalFor: new Prisma.Decimal("0.0"),

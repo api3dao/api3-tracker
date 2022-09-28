@@ -8,24 +8,27 @@ import { StakingTrend } from "../components/StakingTrend";
 import { ContractsList } from "../components/ContractsList";
 import { fetchWebconfig } from "../services/webconfig";
 import { IBlockNumber, ISupply, IEpoch } from "../services/types";
-import { Epochs, Supply, Votings, Blocks } from "../services/api";
+import { Epochs, Supply, Votings, Wallets, Blocks } from "../services/api";
 import { serializable } from "../services/format";
 
 export async function getServerSideProps() {
   const results = await Promise.all([
     Epochs.fetchLatest(3),
     Supply.fetch(),
+    Wallets.total(),
     Votings.total(),
     Blocks.fetchLast(),
   ]);
   const latest: Array<IEpoch> = results[0];
   const supply: ISupply | null = results[1];
-  const totalVotings: number = results[2];
-  const lastBlock: IBlockNumber = results[3];
+  const totalWallets: number = results[2];
+  const totalVotings: number = results[3];
+  const lastBlock: IBlockNumber = results[4];
   const current: IEpoch = latest[0];
   return {
     props: {
       webconfig: fetchWebconfig(),
+      totalWallets,
       totalVotings,
       latest: serializable(latest),
       supply: serializable(supply),
@@ -36,7 +39,7 @@ export async function getServerSideProps() {
 }
 
 const HomePage: NextPage = (props: any) => {
-  const { latest, lastBlock, current, supply, totalVotings, webconfig } = props;
+  const { latest, lastBlock, current, supply, totalWallets, totalVotings, webconfig } = props;
   const isEmpty: boolean = !current;
   const noSupply: boolean = !supply;
   return (
@@ -54,7 +57,7 @@ const HomePage: NextPage = (props: any) => {
             <div>
               <p className="mb-8 text-center">
                 API3 DAO currently involves{" "}
-                <a href="./wallets">{current.members} members</a> participated
+                <a href="./wallets">{totalWallets} members</a> participated
                 in{" "}
                 <a href="./votings">
                   {totalVotings} voting{totalVotings > 1 ? "s" : ""}
