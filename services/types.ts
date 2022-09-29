@@ -139,6 +139,7 @@ export interface IWalletEvent {
 
 export interface IVotingEvent {
   id: string;
+  index?: number;
   createdAt: string;
   txHash: string;
   blockNumber: number;

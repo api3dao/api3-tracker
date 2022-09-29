@@ -1,7 +1,8 @@
 import React from "react";
 import { IVoting } from "./../services/types";
 import Link from "next/link";
-import { niceDateTime, toPct } from "./../services/format";
+import { niceDateTime, niceDate, toPct } from "./../services/format";
+import { Address } from "./Ethscan";
 
 export interface IVotingListProps {
   list: Array<IVoting>;
@@ -21,6 +22,23 @@ export const VotingsListThead = () => (
   </thead>
 );
 
+interface ITransferProps {
+  transferValue: string | number;
+  transferToken: string;
+  transferAddress: Buffer;
+}
+
+export const TransferDetails = (props: ITransferProps) => {
+  return (
+    <div className="text-sm">
+      <span className="darken">Transfer</span>{" "}
+      <span className="text-color-grey font-bold">{props.transferToken}</span>{" "}
+      <span className="darken">to</span>{" "}
+      <Address inline={true} className="font-bold text-color-grey" address={props.transferAddress} />
+    </div>
+  );
+};
+
 interface IVotingItem {
   index: number;
   item: IVoting;
@@ -31,11 +49,11 @@ export const VotingsListTr = (props: IVotingItem) => {
   return (
     <tr>
       <td className="text-center">{1 + index}.</td>
-      <td className="text-center">{niceDateTime(item.createdAt)}</td>
+      <td className="text-center text-sm darken">{niceDate(item.createdAt)}</td>
       <td className="text-center">
         <span
           className={
-            item.vt == "Primary"
+            item.vt.toUpperCase() == "PRIMARY"
               ? "badge badge-primary"
               : "badge badge-secondary"
           }
@@ -47,6 +65,8 @@ export const VotingsListTr = (props: IVotingItem) => {
         <Link href={`/votings/${item.id}`} className="text-bold">
           {item.name}
         </Link>
+        {item.transferValue ? <TransferDetails {...item} /> : null}
+        <div>{/*JSON.stringify(item, null, 2)*/}</div>
       </td>
       <td className="text-right accent">
         {item.totalFor.toNumber() > 0 ? (

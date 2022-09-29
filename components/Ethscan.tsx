@@ -1,11 +1,14 @@
 import React from "react";
+import Link from "next/link";
 
 interface IEthscanProps {
   txId: string;
 }
 
 interface IAddress {
-  address: string;
+  address?: Buffer | string;
+  inline?: boolean;
+  className?: string;
 }
 
 export const TxIcon = (props: IEthscanProps) => (
@@ -48,16 +51,37 @@ export const TxIcon = (props: IEthscanProps) => (
   </a>
 );
 
+const addressHex = (a: Buffer | string | undefined): string => {
+  if (typeof a === "undefined") return "";
+  if (typeof a === "string") return a;
+  if (typeof a.toString === "function") return "0x" + a.toString("hex");
+  return "";
+};
+
+export const InternalAddress = (props: IAddress) => (
+  <div
+    className="eth-address"
+    style={props.inline ? { display: "inline" } : {}}
+  >
+    <Link href={`/wallets/${addressHex(props.address)}`}>
+      {addressHex(props.address)}
+    </Link>
+  </div>
+);
+
 export const Address = (props: IAddress) => (
-  <div className="eth-address">
+  <div
+    className="eth-address"
+    style={props.inline ? { display: "inline" } : {}}
+  >
     <a
-      href={`https://etherscan.io/address/${props.address}`}
-      className="icon"
+      href={`https://etherscan.io/address/${addressHex(props.address)}`}
+      className={`icon ${props.className}`}
       title="View on Etherscan"
       rel="nofollow noopener noreferrer"
       target="_blank"
     >
-      {props.address}
+      {addressHex(props.address)}
     </a>
   </div>
 );

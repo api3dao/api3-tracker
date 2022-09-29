@@ -1,7 +1,8 @@
 import React from "react";
 import { BorderedPanel } from "./BorderedPanel";
-import { toCurrency } from "../services/format";
+import { noDecimals, toCurrency } from "../services/format";
 import { IVoting } from "../services/types";
+import { Address } from "./Ethscan";
 
 export const VotingSummary = (props: IVoting) => {
   const title = `API3 DAO ${props.status} Proposal Voting`;
@@ -29,15 +30,14 @@ export const VotingSummary = (props: IVoting) => {
         {props.description}
       </p>
       {props.transferToken ? (
-        <div className="my-8 text-sm">
+        <div className="my-8 text-sm text-color-grey">
           Transfer{" "}
-          <span className="font-bold text-color-panel-title">
-            {toCurrency(props.transferValue)}
+          <span className="font-bold text-color-grey">
+            {noDecimals(toCurrency(props.transferValue))}
           </span>{" "}
-          {props.transferToken} to{" "}
-          <span className="font-bold text-color-panel-title">
-            {props.transferAddress}
-          </span>
+          {props.transferToken}{" "}
+           to{" "}
+          <Address inline={true} className="font-bold text-color-grey" address={props.transferAddress} />
         </div>
       ) : null}
       {statusText ? <div className={statusClass}>{statusText}</div> : null}
@@ -58,7 +58,7 @@ export const VotingSummary = (props: IVoting) => {
                 </div>
               </div>
             ) : (
-              <div className="my-20 mt-12 text-color-gray">
+              <div className="my-20 mt-12 text-sm darken">
                 Nobody voted for
               </div>
             )}
@@ -89,11 +89,11 @@ export const VotingSummary = (props: IVoting) => {
       <div className="my-4 text-sm text-color-grey">
         At the time of the voting DAO had{" "}
         <span className="font-bold text-color-panel-title">
-          {toCurrency(props.totalStaked)}
+          {noDecimals(toCurrency(props.totalStaked))}
         </span>{" "}
         shares staked,{" "}
         <span className="font-bold text-color-panel-title">
-          {toCurrency(props.totalRequired)}
+          {noDecimals(toCurrency(props.totalRequired))}
         </span>{" "}
         shares are required for this proposal to be accepted
       </div>

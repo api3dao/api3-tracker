@@ -136,7 +136,8 @@ export const Votings = {
     const totalAgainst = new Decimal(input.totalAgainst);
     const totalRequired = new Decimal(input.totalRequired);
     const totalStaked = new Decimal(input.totalStaked);
-    return { ...input, totalFor, totalAgainst, totalRequired, totalStaked };
+    const transferAddress = Buffer.from(input.transferAddress, 'hex');
+    return { ...input, totalFor, totalAgainst, totalRequired, totalStaked, transferAddress };
   },
   // list mapper
   fromList: (src: Array<any>): Array<IVoting> => {
@@ -187,7 +188,8 @@ export const Wallets = {
   },
   // object mapper
   from: (input: any): IWallet => {
-    return { ...input };
+    const badges = new Array();
+    return { ...input, badges };
   },
   // list mapper
   fromList: (src: Array<any>): Array<IWallet> => {
