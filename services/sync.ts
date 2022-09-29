@@ -3,7 +3,7 @@ import prisma from "./db";
 import { Prisma } from "@prisma/client";
 import { IWebConfig, IBlockNumber } from "./../services/types";
 import { Wallets } from "./../services/api";
-import { withDecimals } from "./../services/format";
+import { noDecimals, withDecimals } from "./../services/format";
 import { ethers } from "ethers";
 import { fetchWebconfig } from "./webconfig";
 import { IContract } from "./types";
@@ -440,9 +440,11 @@ export const Events = {
       case "VestedTimelock(address,uint256,uint256)":
         return [args[0]];
       case "Withdrawn(address,uint256)":
-        return args[0];
+        return [args[0]];
       case "Withdrawn(address,uint256,uint256)":
-        return args[0];
+        return [args[0]];
+      case "WithdrawnToPool(address,address,address)":
+        return [args[0], args[1], args[2]];
       case "OwnershipTransferred(address,address)":
         return [args[0], args[1]];
       case "TransferredAndLocked(address,address,uint256,uint256,uint256)":
@@ -522,9 +524,9 @@ export const Events = {
     endpoint: string,
     tx: any
   ): Promise<boolean> => {
-    const { transactionHash, logIndex, address } = event;
-    const { voteId, caller, metadata } = args;
-    const blockNumber = blockInfo.block.number;
+    const { transactionHash } = event;
+    const { voteId, metadata } = args;
+    // const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
     const convenience = config.contracts?.find(
       (p: any) => p.name.toLowerCase() === "convenience"
@@ -535,25 +537,38 @@ export const Events = {
     const isPrimary = VotingReader.isPrimary(config, event.address);
     const txSender: string = blockInfo.receipts.get(transactionHash).from;
 
-    // we can actually cache this request in the future
-    const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
-    const conv = new ethers.Contract(
-      convenience.address,
-      Events.ConvenienceABI,
-      jsonRpc
-    );
-    const result = await conv.getStaticVoteData(isPrimary ? 0 : 1, txSender, [
-      voteId.toString(),
-    ]);
+    let scriptData = { amount: new Prisma.Decimal(0), token: '', address: Buffer.from([])};
+    let totalStaked = new Prisma.Decimal(0);
+    let totalRequired = new Prisma.Decimal(0);
+
+    if (endpoint != "none") { // option to ignore voting details for offline state processing
+      // we can actually cache this request in the future
+      const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
+      const conv = new ethers.Contract(
+        convenience.address,
+        Events.ConvenienceABI,
+        jsonRpc
+      );
+      const result = await conv.getStaticVoteData(isPrimary ? 0 : 1, txSender, [
+        voteId.toString(),
+      ]);
+      const { script, votingPower, supportRequired } = result;
+      scriptData = VotingReader.parseScript(script[0]);
+      totalStaked = new Prisma.Decimal( withDecimals(votingPower.toString(), 18));
+
+      // multiply totalStaked by supportRequired. can round up wildly
+      const pctRequired = parseFloat(withDecimals(supportRequired.toString(), 18)); /// i.e. 0.5 as result
+      const absRequired = parseFloat(noDecimals(withDecimals(votingPower.toString(), 18))) * pctRequired;
+      totalRequired = new Prisma.Decimal(absRequired);
+    }
+    
     const meta = VotingReader.parseMetadata(metadata) || {
       title: "",
       description: "",
       targetSignature: "",
     };
-    const { script, votingPower, supportRequired } = result;
     const voteInternalId = voteId * 2 + (isPrimary ? 1 : 0);
 
-    const scriptData = VotingReader.parseScript(script[0]);
     // console.log(meta.title, meta.targetSignature, scriptData);
     tx.push(
       prisma.voting.create({
@@ -570,12 +585,8 @@ export const Events = {
           totalUsd: new Prisma.Decimal("0.0"),
           totalFor: new Prisma.Decimal("0.0"),
           totalAgainst: new Prisma.Decimal("0.0"),
-          totalStaked: new Prisma.Decimal(
-            withDecimals(votingPower.toString(), 18)
-          ),
-          totalRequired: new Prisma.Decimal(
-            withDecimals(supportRequired.toString(), 16)
-          ),
+          totalStaked,
+          totalRequired,
         },
       })
     );
@@ -591,7 +602,7 @@ export const Events = {
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
     const tx = new Array();
     let terminate: boolean = false;
-    for (const [contractAddress, logs] of blockInfo.logs.entries()) {
+    for (const [_contractAddress, logs] of blockInfo.logs.entries()) {
       for (const event of logs) {
         const { transactionHash, transactionIndex, logIndex } = event;
         const txSender = blockInfo.receipts.get(transactionHash).from;
@@ -599,20 +610,7 @@ export const Events = {
         if (Events.IGNORED.get(topicHash) === 1) continue;
         try {
           const decoded = Events.ABI.parseLog(event);
-          if (
-            event.address.toLowerCase() ==
-            "0xdb6c812e439ce5c740570578681ea7aadba5170b"
-          ) {
-            console.log(
-              "Event ",
-              blockDt,
-              "@",
-              blockNumber,
-              transactionHash,
-              decoded.signature,
-              JSON.stringify(decoded.args)
-            );
-          }
+          // console.log( "Event ", blockDt, "@", blockNumber, transactionHash, decoded.signature, JSON.stringify(decoded.args));
           // get member event
           const addresses = Events.addresses(
             decoded.signature,
