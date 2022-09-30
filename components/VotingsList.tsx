@@ -2,7 +2,7 @@ import React from "react";
 import { Prisma } from "@prisma/client";
 import { IVoting } from "./../services/types";
 import Link from "next/link";
-import { niceDate, toPct } from "./../services/format";
+import { withDecimals, niceDate, toPct } from "./../services/format";
 import { Address } from "./Ethscan";
 
 export interface IVotingListProps {
@@ -26,17 +26,21 @@ export const VotingsListThead = () => (
 interface ITransferProps {
   transferValue?: string | number | Prisma.Decimal | undefined;
   transferToken?: string | undefined;
-  transferAddress?: string | Buffer 
+  transferAddress?: string | Buffer;
 }
 
 export const TransferDetails = (props: ITransferProps) => {
-  if (!props.transferToken ||!props.transferValue) return null;
+  if (!props.transferToken || !props.transferValue) return null;
   return (
     <div className="text-sm">
       <span className="darken">Transfer</span>{" "}
       <span className="text-color-grey font-bold">{props.transferToken}</span>{" "}
       <span className="darken">to</span>{" "}
-      <Address inline={true} className="font-bold text-color-grey" address={props.transferAddress} />
+      <Address
+        inline={true}
+        className="font-bold text-color-grey"
+        address={props.transferAddress}
+      />
     </div>
   );
 };
@@ -45,6 +49,20 @@ interface IVotingItem {
   index: number;
   item: IVoting;
 }
+
+interface IVotingGasTotals {
+  totalGasUsed: number;
+  totalUsd: number;
+}
+
+const VotingGasTotals = (props: IVotingGasTotals) => {
+  return (<div className="text-xs text-color-grey">
+    Spent{" "}
+    <span className="text-color-panel-title">{withDecimals(props.totalGasUsed + '', 7)}</span>{" "}
+    ETH in fees, Est.{" "}
+    <span className="text-color-panel-title">${parseFloat(props.totalUsd + '').toFixed(2)}</span>{" "}
+  </div>);
+};
 
 export const VotingsListTr = (props: IVotingItem) => {
   const { index, item } = props;
@@ -68,7 +86,8 @@ export const VotingsListTr = (props: IVotingItem) => {
           {item.name}
         </Link>
         {item.transferValue ? <TransferDetails {...item} /> : null}
-        <div>{/*JSON.stringify(item, null, 2)*/}</div>
+        <VotingGasTotals {...item} />
+        {/*<div>{JSON.stringify(item, null, 2)}</div>*/}
       </td>
       <td className="text-right accent">
         {item.totalFor.toNumber() > 0 ? (
