@@ -471,14 +471,13 @@ export const Events = {
     event: Log,
     tx: any
   ): Promise<boolean> => {
-    const { transactionHash, logIndex } = event;
+    const { transactionHash } = event;
     const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
     const releaseDt = new Date(blockInfo.block.timestamp * 1000);
     releaseDt.setFullYear(releaseDt.getFullYear() + 1);
-    const epoch = blockNumber;
     const txHash = Buffer.from(transactionHash.replace("0x", ""), "hex");
-    const { epochIndex, amount, newApr, totalStake } =
+    const { epochIndex, newApr, totalStake } = // also: amount
       Events.ABI.parseLog(event).args;
     const totalMembers = await Wallets.total();
     tx.push(
@@ -540,6 +539,7 @@ export const Events = {
     let scriptData = { amount: new Prisma.Decimal(0), token: '', address: Buffer.from([])};
     let totalStaked = new Prisma.Decimal(0);
     let totalRequired = new Prisma.Decimal(0);
+    let status = 'pending';
 
     if (endpoint != "none") { // option to ignore voting details for offline state processing
       // we can actually cache this request in the future
@@ -560,7 +560,8 @@ export const Events = {
       const pctRequired = parseFloat(withDecimals(supportRequired.toString(), 18)); /// i.e. 0.5 as result
       const absRequired = parseFloat(noDecimals(withDecimals(votingPower.toString(), 18))) * pctRequired;
       totalRequired = new Prisma.Decimal(absRequired);
-    }
+      if (script.scriptType == 'invalid') status = "invalid";
+    } 
     
     const meta = VotingReader.parseMetadata(metadata) || {
       title: "",
@@ -568,8 +569,10 @@ export const Events = {
       targetSignature: "",
     };
     const voteInternalId = voteId * 2 + (isPrimary ? 1 : 0);
-
     // console.log(meta.title, meta.targetSignature, scriptData);
+    if (meta.targetSignature.indexOf(" ") > -1) { // Typical error in the signature is putting space
+      status = "invalid";
+    }
     tx.push(
       prisma.voting.create({
         data: {
@@ -577,7 +580,7 @@ export const Events = {
           vt: isPrimary ? "PRIMARY" : "SECONDARY",
           createdAt: blockDt.toISOString(),
           name: meta.title, // we also have
-          status: "pending", // script.scriptType == 'invalid' ? 'invalid' : 'pending',
+          status,
           transferValue: scriptData.amount,
           transferToken: scriptData.token,
           transferAddress: scriptData.address,

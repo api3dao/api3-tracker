@@ -29,6 +29,7 @@ interface ITransferProps {
 }
 
 export const TransferDetails = (props: ITransferProps) => {
+  if (!props.transferToken) return null;
   return (
     <div className="text-sm">
       <span className="darken">Transfer</span>{" "}
