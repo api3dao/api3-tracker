@@ -1,7 +1,8 @@
 import React from "react";
+import { Prisma } from "@prisma/client";
 import { IVoting } from "./../services/types";
 import Link from "next/link";
-import { niceDateTime, niceDate, toPct } from "./../services/format";
+import { niceDate, toPct } from "./../services/format";
 import { Address } from "./Ethscan";
 
 export interface IVotingListProps {
@@ -23,13 +24,13 @@ export const VotingsListThead = () => (
 );
 
 interface ITransferProps {
-  transferValue: string | number;
-  transferToken: string;
-  transferAddress: Buffer;
+  transferValue?: string | number | Prisma.Decimal | undefined;
+  transferToken?: string | undefined;
+  transferAddress?: string | Buffer 
 }
 
 export const TransferDetails = (props: ITransferProps) => {
-  if (!props.transferToken) return null;
+  if (!props.transferToken ||!props.transferValue) return null;
   return (
     <div className="text-sm">
       <span className="darken">Transfer</span>{" "}

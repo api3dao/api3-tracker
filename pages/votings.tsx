@@ -49,9 +49,6 @@ const VotingsPage: NextPage = (props: any) => {
           <div>
             {pending.length > 0 ? (
               <section className="max-w-screen-lg mx-auto">
-                <div className="text-center text-xl">
-                  {pending.length} Pending Proposals
-                </div>
                 <VotingsList list={Votings.fromList(pending)} />
               </section>
             ) : null}

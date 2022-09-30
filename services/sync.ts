@@ -527,13 +527,15 @@ export const Events = {
     const { voteId, metadata } = args;
     // const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
+    const isPrimary = VotingReader.isPrimary(config, event.address);
+    const voteInternalId = voteId * 2 + (isPrimary ? 1 : 0);
+
     const convenience = config.contracts?.find(
       (p: any) => p.name.toLowerCase() === "convenience"
     );
     if (!convenience) {
       throw "api3 convenience contract is not configured";
     }
-    const isPrimary = VotingReader.isPrimary(config, event.address);
     const txSender: string = blockInfo.receipts.get(transactionHash).from;
 
     let scriptData = { amount: new Prisma.Decimal(0), token: '', address: Buffer.from([])};
@@ -568,7 +570,6 @@ export const Events = {
       description: "",
       targetSignature: "",
     };
-    const voteInternalId = voteId * 2 + (isPrimary ? 1 : 0);
     // console.log(meta.title, meta.targetSignature, scriptData);
     if (meta.targetSignature.indexOf(" ") > -1) { // Typical error in the signature is putting space
       status = "invalid";
@@ -594,6 +595,59 @@ export const Events = {
       })
     );
     return false;
+  },
+
+  castVote: async (
+    blockInfo: BlockFullInfo,
+    event: Log,
+    args: any,
+    config: IWebConfig,
+    tx: any
+  ) => {
+    const { voteId, supports, stake } = args;
+    const isPrimary = VotingReader.isPrimary(config, event.address);
+    const voteInternalId = voteId * 2 + (isPrimary ? 1 : 0);
+
+    let totalFor = new Prisma.Decimal(supports ? withDecimals(stake.toString(),18) : 0);
+    let totalAgainst = new Prisma.Decimal(!supports ? withDecimals(stake.toString(),18): 0);
+    const foundVote = await prisma.voting.findMany({
+      where: { id: voteInternalId + '' },
+    });
+    // console.log(foundVote, 'FOR', totalFor, 'AGAINST', totalAgainst);
+    if (foundVote.length > 0) {
+    	if (supports)  totalFor.add(foundVote[0].totalFor);
+    	else  totalAgainst.add(foundVote[0].totalAgainst);
+    }
+    console.log("===", 'FOR', totalFor, 'AGAINST', totalAgainst);
+    tx.push(prisma.voting.updateMany({
+      where: { id: voteInternalId + '' },
+      data: { totalFor, totalAgainst }
+// TODO: gas used
+    }));
+  },
+
+  execVote: async (
+    blockInfo: BlockFullInfo,
+    event: Log,
+    args: any,
+    config: IWebConfig,
+    tx: any
+  ) => {
+    const { voteId } = args;
+    const isPrimary = VotingReader.isPrimary(config, event.address);
+    const voteInternalId = voteId * 2 + (isPrimary ? 1 : 0);
+    // const receipt = blockInfo.receipts.get(event.transactionHash);
+    tx.push(
+      prisma.voting.updateMany({
+        where: {
+          id: voteInternalId + "",
+        },
+        data: {
+          status: "executed",
+          // TODO: gas used
+        }
+      })
+    );
   },
 
   processBlock: async (
@@ -679,7 +733,24 @@ export const Events = {
               )
             )
               terminate = true;
+          } else if (decoded.signature == "CastVote(uint256,address,bool,uint256)") {
+              await Events.castVote(
+		blockInfo,
+                event,
+                decoded.args,
+                config,
+                tx
+              );
+          } else if (decoded.signature == "ExecuteVote(uint256)") {
+              await Events.execVote(
+                blockInfo,
+                event,
+                decoded.args,
+                config,
+                tx
+              );
           }
+
           const votings = Events.votings(decoded.signature, decoded.args);
           const eventId =
             event.blockNumber.toString(16) +
