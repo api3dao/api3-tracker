@@ -48,7 +48,7 @@ export const VotingSummary = (props: IVoting) => {
               <div className="my-10 mt-3">
                 {" "}
                 <div className="font-bold text-4xl">
-                  {toCurrency(props.totalFor)}
+                  {noDecimals(toCurrency(props.totalFor))}
                 </div>
                 <div className="text-sm text-color-grey my-2">
                   votes supported this proposal

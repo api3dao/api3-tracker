@@ -24,7 +24,7 @@ export const VotingEventsListThead = () => (
 
 export const VotingEventsListTr = (row: IVotingEvent) => (
   <tr>
-    <td className="text-center">{row.index}.</td>
+    <td className="text-center">{(row.index || 0)+ 1}.</td>
     <td className="text-center text-sm darken"> {niceDateTime(row.createdAt)} </td>
     <td className="text-center">{toCurrency(row.blockNumber)} </td>
     <td className="text-center">{row.eventName} </td>
