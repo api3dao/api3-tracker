@@ -108,6 +108,7 @@ export interface IVoting {
 
 export interface IWallet {
   address: string;
+  index?: number; // row index
   ensName: string; // ENS domain name
   ensUpdated: string;
   badges: string;

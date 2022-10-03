@@ -172,7 +172,8 @@ export const Wallets = {
     return (
       await prisma.member.findMany({
         where,
-        orderBy: { createdAt: "asc" },
+        orderBy: { createdAt: "asc" }, // TODO: order by rewards
+        take: 100,
       })
     ).map((x: any) => ({ ...x }));
   },

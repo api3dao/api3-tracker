@@ -13,6 +13,12 @@ import { VotingReader } from "./../services/voting";
 import { VoteGas } from "./../services/gas";
 import { VotingType } from ".prisma/client";
 
+interface SyncVerbosity {
+  blocks: boolean;
+  epochs: boolean;
+  votings: boolean;
+}
+
 interface BlockFullInfo {
   // Block Header information
   block: Block;
@@ -32,7 +38,10 @@ const elapsed = (since: number): string => {
 };
 
 export const BlockLoader = {
-  fromDatabase: async (blockRecord: any): Promise<BlockFullInfo> => {
+  fromDatabase: async (
+    blockRecord: any,
+    verboseBlock: boolean
+  ): Promise<BlockFullInfo> => {
     const start = new Date().getTime();
     const price = parseFloat(blockRecord.price.toString());
     const block: Block = blockRecord.data as any;
@@ -77,15 +86,17 @@ export const BlockLoader = {
       }
     }
 
-    console.log(
-      "Processing",
-      block.number,
-      new Date(block.timestamp * 1000),
-      logsList.length + "L",
-      receipts.size + "R",
-      price.toFixed(2) + "USD",
-      "read in " + elapsed(start)
-    );
+    if (verboseBlock) {
+      console.log(
+        "Processing",
+        block.number,
+        new Date(block.timestamp * 1000),
+        logsList.length + "L",
+        receipts.size + "R",
+        price.toFixed(2) + "USD",
+        "read in " + elapsed(start)
+      );
+    }
     return { block, price, txs, receipts, logs };
   },
 
@@ -266,7 +277,7 @@ export const Sync = {
       }),
     ]);
   },
-  next: async (): Promise<BlockFullInfo | null> => {
+  next: async (verboseBlock: boolean): Promise<BlockFullInfo | null> => {
     // pick next block
     const processed: number =
       (
@@ -282,7 +293,7 @@ export const Sync = {
     });
     if (blocks.length) {
       const block = blocks[0];
-      return BlockLoader.fromDatabase(block);
+      return BlockLoader.fromDatabase(block, verboseBlock);
     }
     return null;
   },
@@ -564,6 +575,7 @@ export const Events = {
     args: any,
     config: IWebConfig,
     endpoint: string,
+    verbose: boolean,
     tx: any
   ): Promise<boolean> => {
     const { transactionHash } = event;
@@ -624,6 +636,13 @@ export const Events = {
       description: "",
       targetSignature: "",
     };
+    console.log(
+      blockDt,
+      voteInternalId,
+      isPrimary ? "PRIMARY" : "SECONDARY",
+      "META.TITLE",
+      meta.title
+    );
     // console.log(meta.title, meta.targetSignature, scriptData);
     if (meta.targetSignature.indexOf(" ") > -1) {
       // Typical error in the signature is putting space
@@ -712,7 +731,8 @@ export const Events = {
   processBlock: async (
     blockInfo: BlockFullInfo,
     config: IWebConfig,
-    endpoint: string
+    endpoint: string,
+    verbose: SyncVerbosity
   ): Promise<boolean> => {
     VoteGas.reset(); // gas accumulator for the block
 
@@ -797,6 +817,7 @@ export const Events = {
                 decoded.args,
                 config,
                 endpoint,
+                verbose.votings,
                 tx
               )
             )
@@ -895,16 +916,21 @@ export const Events = {
     return terminate;
   },
 
-  processState: async (endpoint: string, stopOnEpoch: boolean) => {
+  processState: async (
+    endpoint: string,
+    stopOnEpoch: boolean,
+    verbose: SyncVerbosity
+  ) => {
     let total = 0;
     const webconfig = fetchWebconfig();
     do {
-      const blockInfo: BlockFullInfo | null = await Sync.next();
+      const blockInfo: BlockFullInfo | null = await Sync.next(verbose.blocks);
       if (blockInfo) {
         const terminate = await Events.processBlock(
           blockInfo,
           webconfig,
-          endpoint
+          endpoint,
+          verbose
         );
         if (terminate && stopOnEpoch) return ++total;
       } else {
