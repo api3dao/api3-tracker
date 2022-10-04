@@ -37,10 +37,8 @@ export const Supply = {
       ) || { address: "" }
     ).address;
     const tokenContract = new ethers.Contract(token, TokenABI, jsonRpc);
-    const api3Supply = withDecimals(
-     (await tokenContract.totalSupply()).toString(),
-     18
-    );
+    const totalSupply = await tokenContract.totalSupply();
+    const api3Supply = withDecimals(totalSupply.toString(), 18);
     console.log("API3 Supply", api3Supply);
 
     const supply: string = (
@@ -60,11 +58,11 @@ export const Supply = {
       18
     );
     console.log("Total Stake", totalStake);
-    const stakeTarget = withDecimals(
-      (await poolContract.stakeTarget()).toString(),
-      10
-    );
-    console.log("Stake Target", stakeTarget);
+    const stakeTarget = await poolContract.stakeTarget();
+    const stakeTargetPct = parseFloat(withDecimals(stakeTarget.toString(), 18));
+    console.log("Stake Target %", stakeTargetPct);
+    const stakingTarget = new Prisma.Decimal(withDecimals(totalSupply.toString(), 18)).mul(stakeTargetPct);
+    console.log("Staking Target", stakingTarget);
 
     const circulatingSupply = withDecimals(
       (await supplyContract.getCirculatingSupply()).toString(),
@@ -104,7 +102,7 @@ export const Supply = {
         circulatingSupply,
         totalLocked,
         totalStaked: totalStake,
-        stakingTarget: stakeTarget,
+        stakingTarget,
         lockedByGovernance,
         lockedVestings,
         lockedRewards,
