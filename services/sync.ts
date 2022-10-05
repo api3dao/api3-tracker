@@ -621,9 +621,7 @@ export const Events = {
       );
 
       // multiply totalStaked by supportRequired. can round up wildly
-      const pctRequired = parseFloat(
-        withDecimals(supportRequired.toString(), 18)
-      ); /// i.e. 0.5 as result
+      const pctRequired = isPrimary ? 0.5 : 0.15;
       const absRequired =
         parseFloat(noDecimals(withDecimals(votingPower.toString(), 18))) *
         pctRequired;
@@ -681,21 +679,22 @@ export const Events = {
     const { voteId, supports, stake } = args;
     const isPrimary = VotingReader.isPrimary(config, event.address);
     const voteInternalId = voteId * 2 + (isPrimary ? 1 : 0);
+    const supported: boolean = (supports === "true" || supports === true);
 
     let totalFor = new Prisma.Decimal(
-      supports ? withDecimals(stake.toString(), 18) : 0
+      supported ? withDecimals(stake.toString(), 18) : 0
     );
     let totalAgainst = new Prisma.Decimal(
-      !supports ? withDecimals(stake.toString(), 18) : 0
+      !supported ? withDecimals(stake.toString(), 18) : 0
     );
     const foundVote = await prisma.voting.findMany({
       where: { id: voteInternalId + "" },
     });
-    // console.log(foundVote, 'FOR', totalFor, 'AGAINST', totalAgainst);
     if (foundVote.length > 0) {
-      if (supports) totalFor.add(foundVote[0].totalFor);
-      else totalAgainst.add(foundVote[0].totalAgainst);
+      if (supported) totalFor = totalFor.add(foundVote[0].totalFor);
+      else totalAgainst = totalAgainst.add(foundVote[0].totalAgainst);
     }
+    console.log(voteInternalId, "SUPPORTED", supported, 'FOR', totalFor, 'AGAINST', totalAgainst);
     tx.push(
       prisma.voting.updateMany({
         where: { id: voteInternalId + "" },
@@ -751,9 +750,14 @@ export const Events = {
           fee.toString()
         );
         const feeUsd = parseFloat(withDecimals(priceDec.toString(), 18));
-        // console.log(
-        // 'gasUsed', BigNumber.from(gasUsed).toString(), 'gasPrice', BigNumber.from(gasPrice).toString(),
-        // 'fee', fee, 'feeUsd', feeUsd);
+        if (txHash == Buffer.from("5dd64a8084d5c6c933aef681e5725ec1a41a8823d6cd4706fa7e6e7ee020fc29", "hex")) {
+          console.log(
+           'gasUsed', BigNumber.from(gasUsed).toString(),
+           'gasPrice', BigNumber.from(gasPrice).toString(),
+           "ethPrice", new Prisma.Decimal(blockInfo.price),
+           'fee', fee.toString(),
+           'feeUsd', feeUsd);
+        }
         const topicHash: string = event.topics[0];
         if (Events.IGNORED.get(topicHash) === 1) continue;
         try {
