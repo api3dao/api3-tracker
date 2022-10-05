@@ -85,7 +85,7 @@ export const VotingEvents = {
     return (
       await prisma.votingEvent.findMany({
         where: { votingId },
-        orderBy: { createdAt: "asc" },
+        orderBy: [{ createdAt: "desc" }, { logIndex: "desc" }]
       })
     ).map((x: any) => ({ ...x }));
   },
@@ -151,7 +151,7 @@ export const WalletEvents = {
     return (
       await prisma.memberEvent.findMany({
         where: { address },
-        orderBy: { createdAt: "asc" },
+        orderBy: [{ createdAt: "desc" }, { logIndex: "desc" }]
       })
     ).map((x: any) => ({ ...x }));
   },
