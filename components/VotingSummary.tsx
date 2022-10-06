@@ -69,7 +69,7 @@ export const VotingSummary = (props: IVoting) => {
             {props.totalAgainst.toNumber() > 0 ? (
               <div className="my-10 mt-3">
                 <div className="font-bold text-4xl">
-                  {toCurrency(props.totalAgainst)}
+                  {noDecimals(toCurrency(props.totalAgainst))}
                 </div>
                 <div className="text-sm text-color-grey my-2">
                   votes against this proposal

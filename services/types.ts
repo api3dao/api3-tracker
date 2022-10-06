@@ -156,6 +156,7 @@ export interface IVotingEvent {
   address?: string;
   ensName?: string;
   supports?: number;
+  totalStake?: number;
   userShare?: Prisma.Decimal;
   userVotingPower?: Prisma.Decimal;
 }
