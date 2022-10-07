@@ -9,7 +9,7 @@ locals {
     entrypoint = var.zone.entrypoint
     route = local.shortname
     service_port = 80
-    host = var.zone.https == 1 ? var.zone.host : "localhost"
+    host_rule = var.zone.host_rule
     scheme = var.zone.https == 1 ? "https" : "http"
 
     path = "/storybook/"
@@ -33,7 +33,7 @@ locals {
     labels_entrypoint = [
         {
             label = "traefik.http.routers.${local.shortname}.rule"
-            value = "Host(`${local.host}`) && PathPrefix(`${local.path}`)"
+            value = "${local.host_rule} && PathPrefix(`${local.path}`)"
         },
         {
             label = "traefik.http.routers.${local.route}.entrypoints"

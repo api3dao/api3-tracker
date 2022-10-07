@@ -9,7 +9,7 @@ locals {
     entrypoint = var.zone.entrypoint
     route = local.shortname
     service_port = 3000
-    host = var.zone.https == 1 ? var.zone.host : "localhost"
+    host_rule = var.zone.host_rule
     scheme = var.zone.https == 1 ? "https" : "http"
     middlewares = var.restricted == 1 ? "compress,trusted" : "compress"
 }
@@ -29,7 +29,7 @@ locals {
     labels_entrypoint = [
         {
             label = "traefik.http.routers.${local.shortname}.rule"
-            value = "Host(`${local.host}`)"
+            value = local.host_rule
         },
         {
             label = "traefik.http.routers.${local.route}.entrypoints"

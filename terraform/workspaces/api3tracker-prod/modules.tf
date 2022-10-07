@@ -1,3 +1,7 @@
+variable api3tracker_endpoint {
+  type = string
+}
+
 module "api3tracker" {
   source = "../../app/api3tracker"
   trusted_ips = []
@@ -10,7 +14,7 @@ module "api3tracker" {
     # Default hosted zone of the website
     "default" = {
       name = "default"
-      host = "api3-tracker.api3.org"
+      hosts = ["api3-tracker.api3.org", "dao-tracker.api3.org", "tracker.api3.org"]
       local_port = 0
     }
   }
@@ -18,6 +22,11 @@ module "api3tracker" {
   env = "prod"
 
   certificates = [
+    {
+       name = "tracker",
+       certificate = file(pathexpand("/home/ubuntu/origin-certificates/tracker.api3.org.crt")),
+       private_key = file(pathexpand("/home/ubuntu/origin-certificates/tracker.api3.org.key")),
+    },
     {
        name = "api3-tracker",
        certificate = file(pathexpand("/home/ubuntu/origin-certificates/api3-tracker.api3.org.crt")),

@@ -9,7 +9,7 @@ locals {
     metrics_service_port = 9187
     middleware_rewrite = "${local.metrics_shortname}-rewrite"
     middlewares = local.middleware_rewrite
-    metrics_host = var.zone.https == 1 ? var.zone.host : "localhost"
+    metrics_host_rule = var.zone.host_rule
     metrics_path = "/stats/postgres/metrics"
     metrics_rewrite_path = "/stats/postgres/"
 }
@@ -37,7 +37,7 @@ locals {
     labels_entrypoint = [
         {
             label = "traefik.http.routers.${local.route}.rule"
-            value = "Host(`${local.metrics_host}`) && PathPrefix(`${local.metrics_path}`)"
+            value = "${local.metrics_host_rule} && PathPrefix(`${local.metrics_path}`)"
         },
         {
             label = "traefik.http.routers.${local.route}.entrypoints"

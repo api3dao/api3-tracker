@@ -1,6 +1,7 @@
 variable zone {
     type = object({
-        host = string
+        hosts = list(string)
+        host_rule = string
         https = number
         labels = list(object({
             label = string
