@@ -1,7 +1,7 @@
 import React from "react";
 import { Prisma } from "@prisma/client";
 import { IEpoch, ISupply } from "./../services/types";
-import { niceDate, toCurrency, toPct } from "./../services/format";
+import { noDecimals, niceDate, toCurrency, toPct } from "./../services/format";
 import { StakingTrend } from "../components/StakingTrend";
 import { BorderedPanel } from "../components/BorderedPanel";
 
@@ -129,8 +129,8 @@ export const RewardsListTr = (epoch: IEpoch) => (
     <td className="text-center darken">{toPct(epoch.apr)}</td>
     <td className="text-center accent">{toPct(epoch.rewardsPct)}</td>
     <td className="text-right darken">{toCurrency(epoch.members)}</td>
-    <td className="text-right darken">{toCurrency(epoch.totalStake)}</td>
-    <td className="text-right accent">{toCurrency(epoch.mintedShares)}</td>
+    <td className="text-right darken">{noDecimals(toCurrency(epoch.totalStake))}</td>
+    <td className="text-right accent">{noDecimals(toCurrency(epoch.mintedShares))}</td>
     <td className="text-center">{niceDate(epoch.releaseDate)}</td>
   </tr>
 );

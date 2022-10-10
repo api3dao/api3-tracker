@@ -1,21 +1,5 @@
 [
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "api3TokenAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "timelockManagerAddress",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
     "anonymous": false,
     "inputs": [
       {
@@ -658,15 +642,6 @@
     "inputs": [],
     "name": "agentAppSecondary",
     "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "api3Token",
-    "outputs": [
-      { "internalType": "contract IApi3Token", "name": "", "type": "address" }
-    ],
     "stateMutability": "view",
     "type": "function"
   },

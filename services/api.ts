@@ -91,7 +91,7 @@ export const VotingEvents = {
   },
   // object mapper
   from: (input: any): IVotingEvent => {
-    const feeUsd = new Decimal(input.feeUsd);
+    const feeUsd = new Decimal(input.feeUsd || 0);
     const userShare = new Decimal(input.userShare);
     const userVotingPower = new Decimal(input.userVotingPower);
     return { ...input, feeUsd, userShare, userVotingPower };
@@ -108,7 +108,7 @@ export const Votings = {
     return (
       await prisma.voting.findMany({
         where: { status },
-        orderBy: { createdAt: "asc" },
+        orderBy: { createdAt: "desc" },
       })
     ).map((x: any) => ({ ...x }));
   },
@@ -116,7 +116,7 @@ export const Votings = {
   fetchAll: async (): Promise<Array<IVoting>> => {
     return (
       await prisma.voting.findMany({
-        orderBy: { createdAt: "asc" },
+        orderBy: { createdAt: "desc" },
       })
     ).map((x: any) => ({ ...x }));
   },
@@ -136,7 +136,8 @@ export const Votings = {
     const totalAgainst = new Decimal(input.totalAgainst);
     const totalRequired = new Decimal(input.totalRequired);
     const totalStaked = new Decimal(input.totalStaked);
-    return { ...input, totalFor, totalAgainst, totalRequired, totalStaked };
+    const transferAddress = Buffer.from(input.transferAddress, 'hex');
+    return { ...input, totalFor, totalAgainst, totalRequired, totalStaked, transferAddress };
   },
   // list mapper
   fromList: (src: Array<any>): Array<IVoting> => {
@@ -187,7 +188,8 @@ export const Wallets = {
   },
   // object mapper
   from: (input: any): IWallet => {
-    return { ...input };
+    const badges = new Array();
+    return { ...input, badges };
   },
   // list mapper
   fromList: (src: Array<any>): Array<IWallet> => {

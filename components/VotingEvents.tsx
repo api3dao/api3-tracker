@@ -1,7 +1,7 @@
 import React from "react";
 import { IVotingEvent } from "./../services/types";
 import Link from "next/link";
-import { niceDate, toHex, toCurrency } from "./../services/format";
+import { niceDate, niceDateTime, toHex, toCurrency } from "./../services/format";
 
 export interface IVotingEventsListProps {
   list: Array<IVotingEvent>;
@@ -24,8 +24,8 @@ export const VotingEventsListThead = () => (
 
 export const VotingEventsListTr = (row: IVotingEvent) => (
   <tr>
-    <td className="text-center">{row.id}.</td>
-    <td className="text-center"> {niceDate(row.createdAt)} </td>
+    <td className="text-center">{row.index}.</td>
+    <td className="text-center text-sm darken"> {niceDateTime(row.createdAt)} </td>
     <td className="text-center">{toCurrency(row.blockNumber)} </td>
     <td className="text-center">{row.eventName} </td>
     <td className="text-left">
@@ -59,8 +59,8 @@ export const VotingEventsList = (props: IVotingEventsListProps) => {
       <table className="table invisible lg:visible">
         <VotingEventsListThead />
         <tbody>
-          {props.list.map((row) => (
-            <VotingEventsListTr key={row.id} {...row} />
+          {props.list.map((row, index) => (
+            <VotingEventsListTr key={row.id} {...row} index={index} />
           ))}
         </tbody>
       </table>

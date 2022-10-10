@@ -34,7 +34,8 @@ export async function getServerSideProps() {
 
 const VotingsPage: NextPage = (props: any) => {
   const { pending, executed, invalid, rejected, lastBlock, webconfig } = props;
-
+  const isEmpty =
+    pending.length + executed.length + rejected.length + invalid.length === 0;
   return (
     <div>
       <Meta webconfig={webconfig} page="votings" />
@@ -42,38 +43,41 @@ const VotingsPage: NextPage = (props: any) => {
 
       <main>
         <h1 className="uppercase">API3 DAO Votings</h1>
-        {pending.length > 0 ? (
-          <section className="max-w-screen-lg mx-auto">
-            <div className="text-center text-xl">
-              {pending.length} Pending Proposals
-            </div>
-            <VotingsList list={Votings.fromList(pending)} />
-          </section>
-        ) : null}
-        {executed.length > 0 ? (
-          <section className="max-w-screen-lg mx-auto">
-            <div className="text-center text-xl">
-              {executed.length} Executed Proposals
-            </div>
-            <VotingsList list={Votings.fromList(executed)} />
-          </section>
-        ) : null}
-        {invalid.length > 0 ? (
-          <section className="max-w-screen-lg mx-auto">
-            <div className="text-center text-xl">
-              {invalid.length} Invalid Proposals
-            </div>
-            <VotingsList list={Votings.fromList(invalid)} />
-          </section>
-        ) : null}
-        {rejected.length > 0 ? (
-          <section className="max-w-screen-lg mx-auto">
-            <div className="text-center text-xl">
-              {rejected.length} Rejected Proposals
-            </div>
-            <VotingsList list={Votings.fromList(rejected)} />
-          </section>
-        ) : null}
+        {isEmpty ? (
+          <div className="text-color-grey text-center">No votings yet</div>
+        ) : (
+          <div>
+            {pending.length > 0 ? (
+              <section className="max-w-screen-lg mx-auto">
+                <VotingsList list={Votings.fromList(pending)} />
+              </section>
+            ) : null}
+            {executed.length > 0 ? (
+              <section className="max-w-screen-lg mx-auto">
+                <div className="text-center text-xl">
+                  {executed.length} Executed Proposals
+                </div>
+                <VotingsList list={Votings.fromList(executed)} />
+              </section>
+            ) : null}
+            {invalid.length > 0 ? (
+              <section className="max-w-screen-lg mx-auto">
+                <div className="text-center text-xl">
+                  {invalid.length} Invalid Proposals
+                </div>
+                <VotingsList list={Votings.fromList(invalid)} />
+              </section>
+            ) : null}
+            {rejected.length > 0 ? (
+              <section className="max-w-screen-lg mx-auto">
+                <div className="text-center text-xl">
+                  {rejected.length} Rejected Proposals
+                </div>
+                <VotingsList list={Votings.fromList(rejected)} />
+              </section>
+            ) : null}
+          </div>
+        )}
       </main>
 
       <Footer github={webconfig.github} blockNumber={lastBlock.blockNumber} />
