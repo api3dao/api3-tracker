@@ -1,6 +1,7 @@
 import React from "react";
 import { IWalletEvent } from "./../services/types";
-import { niceDate, toCurrency } from "./../services/format";
+import { toHex, niceDate, toCurrency } from "./../services/format";
+import { BlockNumber } from "./../components/Ethscan";
 
 export interface IWalletEventsListProps {
   list: Array<IWalletEvent>;
@@ -21,7 +22,9 @@ export const WalletEventsListTr = (row: IWalletEvent) => (
   <tr>
     <td className="text-center">{row.id}.</td>
     <td className="text-center">{niceDate(row.createdAt)}</td>
-    <td className="text-center">{toCurrency(row.blockNumber)} </td>
+    <td className="text-center">
+      <BlockNumber blockNumber={row.blockNumber} txId={toHex(row.txHash)} />
+    </td>
     <td className="text-left">
       <div className="px-5">
         <strong>Staked </strong>

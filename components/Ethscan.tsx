@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { toCurrency } from "./../services/format";
 
 interface IEthscanProps {
   txId: string;
@@ -51,7 +52,7 @@ export const TxIcon = (props: IEthscanProps) => (
   </a>
 );
 
-const addressHex = (a: Buffer | string | undefined): string => {
+export const addressHex = (a: Buffer | string | undefined): string => {
   if (typeof a === "undefined") return "";
   if (typeof a === "string") return a;
   if (typeof a.toString === "function") return "0x" + a.toString("hex");
@@ -84,4 +85,22 @@ export const Address = (props: IAddress) => (
       {addressHex(props.address)}
     </a>
   </div>
+);
+
+interface IBlockNumber {
+  blockNumber: number;
+  txId: Buffer | string;
+  className?: string;
+}
+
+export const BlockNumber = (props: IBlockNumber) => (
+    <a
+      href={`https://etherscan.io/tx/${props.txId}#eventlog`}
+      className={`icon ${props.className}`}
+      title="View on Etherscan"
+      rel="nofollow noopener noreferrer"
+      target="_blank"
+    >
+      {toCurrency(props.blockNumber)}
+    </a>
 );

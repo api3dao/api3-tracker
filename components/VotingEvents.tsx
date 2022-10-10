@@ -1,7 +1,13 @@
 import React from "react";
 import { IVotingEvent } from "./../services/types";
 import Link from "next/link";
-import { niceDate, niceDateTime, toHex, toCurrency } from "./../services/format";
+import { BlockNumber, Address } from "./../components/Ethscan";
+import {
+  niceDate,
+  niceDateTime,
+  toHex,
+  toCurrency,
+} from "./../services/format";
 
 export interface IVotingEventsListProps {
   list: Array<IVotingEvent>;
@@ -24,9 +30,14 @@ export const VotingEventsListThead = () => (
 
 export const VotingEventsListTr = (row: IVotingEvent) => (
   <tr>
-    <td className="text-center">{row.index}.</td>
-    <td className="text-center text-sm darken"> {niceDateTime(row.createdAt)} </td>
-    <td className="text-center">{toCurrency(row.blockNumber)} </td>
+    <td className="text-center">{(row.index || 0) + 1}.</td>
+    <td className="text-center text-sm darken">
+      {" "}
+      {niceDateTime(row.createdAt)}{" "}
+    </td>
+    <td className="text-center">
+      <BlockNumber txId={toHex(row.txHash)} blockNumber={row.blockNumber} />
+    </td>
     <td className="text-center">{row.eventName} </td>
     <td className="text-left">
       <Link href={`/wallets/${toHex(row.address)}`} className="text-bold">
@@ -40,11 +51,10 @@ export const VotingEventsListTr = (row: IVotingEvent) => (
               ]
             : null}
           <div className="accent">{toHex(row.address)}</div>
-          <div className="darken">
-            Gas Used: 473402, Gas Price: 33 GWei, Est $39.7
-          </div>
+          <div className="darken"></div>
         </div>
       </Link>
+<pre>{JSON.stringify(row.data, null, 2)}</pre>
     </td>
     <td className="text-right">Supports</td>
     <td className="text-right">{toCurrency(row.userShare)}</td>

@@ -477,8 +477,11 @@ export const Events = {
     const releaseDt = new Date(blockInfo.block.timestamp * 1000);
     releaseDt.setFullYear(releaseDt.getFullYear() + 1);
     const txHash = Buffer.from(transactionHash.replace("0x", ""), "hex");
-    const { epochIndex, newApr, totalStake } = // also: amount
-      Events.ABI.parseLog(event).args;
+    const {
+      epochIndex,
+      newApr,
+      totalStake,
+    } = Events.ABI.parseLog(event).args; // also: amount
     const totalMembers = await Wallets.total();
     tx.push(
       prisma.epoch.updateMany({
@@ -512,6 +515,13 @@ export const Events = {
         },
       })
     );
+    const expireDt = new Date(blockInfo.block.timestamp * 1000 - 12096e5); // minus 2 weeks
+    tx.push(
+      prisma.voting.updateMany({
+        where: { status: "pending", createdAt: { lt: expireDt.toISOString() } },
+        data: { status: "rejected" },
+      })
+    );
     return true;
   },
 
@@ -538,12 +548,17 @@ export const Events = {
     }
     const txSender: string = blockInfo.receipts.get(transactionHash).from;
 
-    let scriptData = { amount: new Prisma.Decimal(0), token: '', address: Buffer.from([])};
+    let scriptData = {
+      amount: new Prisma.Decimal(0),
+      token: "",
+      address: Buffer.from([]),
+    };
     let totalStaked = new Prisma.Decimal(0);
     let totalRequired = new Prisma.Decimal(0);
-    let status = 'pending';
+    let status = "pending";
 
-    if (endpoint != "none") { // option to ignore voting details for offline state processing
+    if (endpoint != "none") {
+      // option to ignore voting details for offline state processing
       // we can actually cache this request in the future
       const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
       const conv = new ethers.Contract(
@@ -556,22 +571,29 @@ export const Events = {
       ]);
       const { script, votingPower, supportRequired } = result;
       scriptData = VotingReader.parseScript(script[0]);
-      totalStaked = new Prisma.Decimal( withDecimals(votingPower.toString(), 18));
+      totalStaked = new Prisma.Decimal(
+        withDecimals(votingPower.toString(), 18)
+      );
 
       // multiply totalStaked by supportRequired. can round up wildly
-      const pctRequired = parseFloat(withDecimals(supportRequired.toString(), 18)); /// i.e. 0.5 as result
-      const absRequired = parseFloat(noDecimals(withDecimals(votingPower.toString(), 18))) * pctRequired;
+      const pctRequired = parseFloat(
+        withDecimals(supportRequired.toString(), 18)
+      ); /// i.e. 0.5 as result
+      const absRequired =
+        parseFloat(noDecimals(withDecimals(votingPower.toString(), 18))) *
+        pctRequired;
       totalRequired = new Prisma.Decimal(absRequired);
-      if (script.scriptType == 'invalid') status = "invalid";
-    } 
-    
+      if (script.scriptType == "invalid") status = "invalid";
+    }
+
     const meta = VotingReader.parseMetadata(metadata) || {
       title: "",
       description: "",
       targetSignature: "",
     };
     // console.log(meta.title, meta.targetSignature, scriptData);
-    if (meta.targetSignature.indexOf(" ") > -1) { // Typical error in the signature is putting space
+    if (meta.targetSignature.indexOf(" ") > -1) {
+      // Typical error in the signature is putting space
       status = "invalid";
     }
     tx.push(
@@ -608,22 +630,28 @@ export const Events = {
     const isPrimary = VotingReader.isPrimary(config, event.address);
     const voteInternalId = voteId * 2 + (isPrimary ? 1 : 0);
 
-    let totalFor = new Prisma.Decimal(supports ? withDecimals(stake.toString(),18) : 0);
-    let totalAgainst = new Prisma.Decimal(!supports ? withDecimals(stake.toString(),18): 0);
+    let totalFor = new Prisma.Decimal(
+      supports ? withDecimals(stake.toString(), 18) : 0
+    );
+    let totalAgainst = new Prisma.Decimal(
+      !supports ? withDecimals(stake.toString(), 18) : 0
+    );
     const foundVote = await prisma.voting.findMany({
-      where: { id: voteInternalId + '' },
+      where: { id: voteInternalId + "" },
     });
     // console.log(foundVote, 'FOR', totalFor, 'AGAINST', totalAgainst);
     if (foundVote.length > 0) {
-    	if (supports)  totalFor.add(foundVote[0].totalFor);
-    	else  totalAgainst.add(foundVote[0].totalAgainst);
+      if (supports) totalFor.add(foundVote[0].totalFor);
+      else totalAgainst.add(foundVote[0].totalAgainst);
     }
-    console.log("===", 'FOR', totalFor, 'AGAINST', totalAgainst);
-    tx.push(prisma.voting.updateMany({
-      where: { id: voteInternalId + '' },
-      data: { totalFor, totalAgainst }
-// TODO: gas used
-    }));
+    // console.log("===", "FOR", totalFor, "AGAINST", totalAgainst);
+    tx.push(
+      prisma.voting.updateMany({
+        where: { id: voteInternalId + "" },
+        data: { totalFor, totalAgainst },
+        // TODO: gas used
+      })
+    );
   },
 
   execVote: async (
@@ -645,7 +673,7 @@ export const Events = {
         data: {
           status: "executed",
           // TODO: gas used
-        }
+        },
       })
     );
   },
@@ -733,22 +761,12 @@ export const Events = {
               )
             )
               terminate = true;
-          } else if (decoded.signature == "CastVote(uint256,address,bool,uint256)") {
-              await Events.castVote(
-		blockInfo,
-                event,
-                decoded.args,
-                config,
-                tx
-              );
+          } else if (
+            decoded.signature == "CastVote(uint256,address,bool,uint256)"
+          ) {
+            await Events.castVote(blockInfo, event, decoded.args, config, tx);
           } else if (decoded.signature == "ExecuteVote(uint256)") {
-              await Events.execVote(
-                blockInfo,
-                event,
-                decoded.args,
-                config,
-                tx
-              );
+            await Events.execVote(blockInfo, event, decoded.args, config, tx);
           }
 
           const votings = Events.votings(decoded.signature, decoded.args);

@@ -46,7 +46,7 @@ const VotingsPage: NextPage = (props: any) => {
         {isEmpty ? (
           <div className="text-color-grey text-center">No votings yet</div>
         ) : (
-          <div>
+          <div className="pb-10">
             {pending.length > 0 ? (
               <section className="max-w-screen-lg mx-auto">
                 <VotingsList list={Votings.fromList(pending)} />
