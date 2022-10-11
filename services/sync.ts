@@ -4,12 +4,13 @@ import { Prisma } from "@prisma/client";
 import { IWebConfig, IBlockNumber } from "./../services/types";
 import { Wallets } from "./../services/api";
 import { noDecimals, withDecimals } from "./../services/format";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { fetchWebconfig } from "./webconfig";
 import { IContract } from "./types";
 import { Filter, Block, Log, Provider } from "@ethersproject/abstract-provider";
 import { EthereumPrice } from "./../services/price";
 import { VotingReader } from "./../services/voting";
+import { VoteGas } from "./../services/gas";
 import { VotingType } from ".prisma/client";
 
 interface BlockFullInfo {
@@ -17,7 +18,9 @@ interface BlockFullInfo {
   block: Block;
   // Price of Ethereum at this point
   price: number;
-  // Receipts list
+  // Map of transactions data
+  txs: Map<string, any>;
+  // Map of transaction receipts
   receipts: Map<string, any>;
   // Logs
   logs: Map<string, Array<Log>>;
@@ -50,6 +53,7 @@ export const BlockLoader = {
     });
 
     const receipts = new Map<string, any>();
+    const txs = new Map<string, any>();
     const logs = new Map<string, Array<Log>>();
     for (const log of logsList) {
       const hash = log.transactionHash;
@@ -57,6 +61,13 @@ export const BlockLoader = {
       l.push(log);
       logs.set(log.address, l);
 
+      if (!txs.has(hash)) {
+        const foundTx = await prisma.cacheTx.findMany({
+          where: { hash: Hash.asBuffer(hash) },
+        });
+        const transaction = foundTx[0].data as any;
+        txs.set(hash, transaction);
+      }
       if (!receipts.has(hash)) {
         const foundReceipt = await prisma.cacheReceipt.findMany({
           where: { hash: Hash.asBuffer(hash) },
@@ -75,7 +86,7 @@ export const BlockLoader = {
       price.toFixed(2) + "USD",
       "read in " + elapsed(start)
     );
-    return { block, price, receipts, logs };
+    return { block, price, txs, receipts, logs };
   },
 
   fromLogs: async (
@@ -98,10 +109,21 @@ export const BlockLoader = {
         : await EthereumPrice.at(new Date(block.timestamp * 1000));
 
     // load receipts for each transaction
+    const txs = new Map<string, any>();
     const receipts = new Map<string, any>();
     const logs = new Map<string, Array<Log>>();
     for (const log of logsList) {
       const hash = log.transactionHash;
+      if (!txs.has(hash)) {
+        const foundTx = await prisma.cacheTx.findMany({
+          where: { hash: Hash.asBuffer(hash) },
+        });
+        const t =
+          foundTx.length > 0
+            ? (foundTx[0].data as any)
+            : await jsonRpc.getTransaction(hash);
+        txs.set(hash, t);
+      }
       if (!receipts.has(hash)) {
         const foundReceipt = await prisma.cacheReceipt.findMany({
           where: { hash: Hash.asBuffer(hash) },
@@ -128,6 +150,7 @@ export const BlockLoader = {
     );
     return {
       block,
+      txs,
       receipts,
       price,
       logs,
@@ -160,7 +183,21 @@ export const Sync = {
         skipDuplicates: true,
       })
     );
-    // 2. save receipts
+    // 2. save transaction details
+    for (const [txHash, t] of b.txs.entries()) {
+      tx.push(
+        prisma.cacheTx.createMany({
+          data: [
+            {
+              hash: Hash.asBuffer(txHash),
+              data: t,
+            },
+          ],
+          skipDuplicates: true,
+        })
+      );
+    }
+    // 3. save receipts
     for (const [txHash, receipt] of b.receipts.entries()) {
       tx.push(
         prisma.cacheReceipt.createMany({
@@ -174,7 +211,7 @@ export const Sync = {
         })
       );
     }
-    // 3. save logs for every contract
+    // 4. save logs for every contract
     for (const [contract, logs] of b.logs) {
       tx.push(
         prisma.cacheLogs.createMany({
@@ -189,7 +226,7 @@ export const Sync = {
         })
       );
     }
-    // 4. update syncing status
+    // 5. update syncing status
     tx.push(
       prisma.syncStatus.updateMany({
         where: { id: 1 },
@@ -477,11 +514,7 @@ export const Events = {
     const releaseDt = new Date(blockInfo.block.timestamp * 1000);
     releaseDt.setFullYear(releaseDt.getFullYear() + 1);
     const txHash = Buffer.from(transactionHash.replace("0x", ""), "hex");
-    const {
-      epochIndex,
-      newApr,
-      totalStake,
-    } = Events.ABI.parseLog(event).args; // also: amount
+    const { epochIndex, newApr, totalStake } = Events.ABI.parseLog(event).args; // also: amount
     const totalMembers = await Wallets.total();
     tx.push(
       prisma.epoch.updateMany({
@@ -644,12 +677,10 @@ export const Events = {
       if (supports) totalFor.add(foundVote[0].totalFor);
       else totalAgainst.add(foundVote[0].totalAgainst);
     }
-    // console.log("===", "FOR", totalFor, "AGAINST", totalAgainst);
     tx.push(
       prisma.voting.updateMany({
         where: { id: voteInternalId + "" },
         data: { totalFor, totalAgainst },
-        // TODO: gas used
       })
     );
   },
@@ -683,6 +714,8 @@ export const Events = {
     config: IWebConfig,
     endpoint: string
   ): Promise<boolean> => {
+    VoteGas.reset(); // gas accumulator for the block
+
     const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
     const tx = new Array();
@@ -690,7 +723,17 @@ export const Events = {
     for (const [_contractAddress, logs] of blockInfo.logs.entries()) {
       for (const event of logs) {
         const { transactionHash, transactionIndex, logIndex } = event;
-        const txSender = blockInfo.receipts.get(transactionHash).from;
+        const txHash = Buffer.from(transactionHash.replace("0x", ""), "hex");
+        const { from, gasUsed } = blockInfo.receipts.get(transactionHash);
+        const { gasPrice } = blockInfo.txs.get(transactionHash);
+        const fee = BigNumber.from(gasUsed).mul(BigNumber.from(gasPrice));
+        const priceDec = new Prisma.Decimal(blockInfo.price).mul(
+          fee.toString()
+        );
+        const feeUsd = parseFloat(withDecimals(priceDec.toString(), 18));
+        // console.log(
+        // 'gasUsed', BigNumber.from(gasUsed).toString(), 'gasPrice', BigNumber.from(gasPrice).toString(),
+        // 'fee', fee, 'feeUsd', feeUsd);
         const topicHash: string = event.topics[0];
         if (Events.IGNORED.get(topicHash) === 1) continue;
         try {
@@ -700,7 +743,7 @@ export const Events = {
           const addresses = Events.addresses(
             decoded.signature,
             decoded.args,
-            txSender
+            from
           );
           for (const addr of addresses) {
             await Members.ensureExists(addr, blockDt, tx);
@@ -718,19 +761,16 @@ export const Events = {
                     createdAt: blockDt,
                     address: Address.asBuffer(addr),
                     chainId: 0,
-                    txHash: Buffer.from(
-                      transactionHash.replace("0x", ""),
-                      "hex"
-                    ),
+                    txHash,
                     blockNumber,
                     txIndex: transactionIndex,
                     logIndex: logIndex,
                     eventName: decoded.name,
                     data: decoded.args,
-                    // gasPrice?: bigint | number | null
-                    // gasUsed?: bigint | number | null
-                    // fee?: bigint | number | null
-                    // feeUsd?: Decimal | DecimalJsLike | number | string | null
+                    gasPrice: BigNumber.from(gasPrice).toNumber(),
+                    gasUsed: BigNumber.from(gasUsed).toNumber(),
+                    fee: BigInt(fee.toString()),
+                    feeUsd: feeUsd.toString(),
                   },
                 })
               );
@@ -779,23 +819,30 @@ export const Events = {
           for (const vId of votings) {
             const voteInternalId =
               vId * 2 + (VotingReader.isPrimary(config, event.address) ? 1 : 0);
+
+            await VoteGas.add(
+              voteInternalId,
+              txHash.toString("hex"),
+              BigNumber.from(gasUsed),
+              feeUsd
+            );
             tx.push(
               prisma.votingEvent.create({
                 data: {
                   id: eventId,
                   createdAt: blockDt,
                   chainId: 0,
-                  txHash: Buffer.from(transactionHash.replace("0x", ""), "hex"),
+                  txHash,
                   blockNumber,
                   txIndex: transactionIndex,
                   logIndex: logIndex,
                   eventName: decoded.name,
                   data: decoded.args,
-                  // gasPrice?: bigint | number | null
-                  // gasUsed?: bigint | number | null
-                  // fee?: bigint | number | null
-                  // feeUsd?: Decimal | DecimalJsLike | number | string | null
-                  address: Address.asBuffer(txSender),
+                  gasPrice: BigNumber.from(gasPrice).toNumber(),
+                  gasUsed: BigNumber.from(gasUsed).toNumber(),
+                  fee: BigInt(fee.toString()),
+                  feeUsd: feeUsd.toString(),
+                  address: Address.asBuffer(from),
                   supports: -1,
                   userShare: new Prisma.Decimal(0.0),
                   userVotingPower: new Prisma.Decimal(0.0),
@@ -823,6 +870,18 @@ export const Events = {
         }
       }
     }
+    for (const [voteId, usage] of VoteGas.totals()) {
+      tx.push(
+        prisma.voting.updateMany({
+          where: { id: voteId + "" },
+          data: {
+            totalGasUsed: usage.gasUsed.toNumber(),
+            totalUsd: usage.feeUsd.toString(),
+          },
+        })
+      );
+    }
+
     tx.push(
       prisma.syncStatus.updateMany({
         where: { id: 1 },

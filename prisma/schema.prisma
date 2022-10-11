@@ -222,6 +222,14 @@ model CacheBlock {
   @@map("cache_blocks")
 }
 
+model CacheTx {
+  hash    Bytes // Hash of the transaction
+  data    Json // JSON Data of the transaction
+
+  @@id([hash])
+  @@map("cache_tx")
+}
+
 model CacheReceipt {
   hash    Bytes // Hash of the transaction
   receipt Json // JSON Data of the receipt

@@ -5,6 +5,7 @@ import { BlockNumber, Address } from "./../components/Ethscan";
 import {
   niceDate,
   niceDateTime,
+  withDecimals,
   toHex,
   toCurrency,
 } from "./../services/format";
@@ -27,6 +28,21 @@ export const VotingEventsListThead = () => (
     </tr>
   </thead>
 );
+
+interface IEventGasTotals {
+  gasUsed: number | undefined;
+  feeUsd: number | undefined;
+}
+
+const EventGasTotals = (props: IEventGasTotals) => {
+  return (<div className="text-xs text-color-grey">
+    Spent{" "}
+    <span className="text-color-panel-title">{withDecimals(props.gasUsed + '', 7)}</span>{" "}
+    ETH in fees, Est.{" "}
+    <span className="text-color-panel-title">${parseFloat(props.feeUsd + '').toFixed(2)}</span>{" "}
+  </div>);
+};
+
 
 export const VotingEventsListTr = (row: IVotingEvent) => (
   <tr>
@@ -54,7 +70,7 @@ export const VotingEventsListTr = (row: IVotingEvent) => (
           <div className="darken"></div>
         </div>
       </Link>
-<pre>{JSON.stringify(row.data, null, 2)}</pre>
+      <EventGasTotals gasUsed={row.gasUsed} feeUsd={parseFloat(row.feeUsd + '')} />
     </td>
     <td className="text-right">Supports</td>
     <td className="text-right">{toCurrency(row.userShare)}</td>
