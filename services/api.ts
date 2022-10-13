@@ -35,6 +35,7 @@ export const Epochs = {
     return (
       await prisma.epoch.findMany({
         take: limit,
+        where: { NOT: { blockNumber: 0 }},
         orderBy: { epoch: "desc" },
       })
     ).map((x: any) => ({ ...x }));

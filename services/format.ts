@@ -79,11 +79,11 @@ export const niceDate = (strIso: string): string => {
   if (typeof strIso === "string") {
     const parts: Array<string> = strIso.replace(/T.+$/, "").split("-");
     let out = "";
-    if (parts[0] != ('' + new Date().getUTCFullYear()) ) {
-       out = parts[0] + ", "
+    if (parts[0] != "" + new Date().getUTCFullYear()) {
+      out = parts[0] + ", ";
     }
-  const _month = months[parseInt(parts[1])];
-  const _day = parts[2];
+    const _month = months[parseInt(parts[1])];
+    const _day = parts[2];
     return out + _month + " " + _day;
   }
 

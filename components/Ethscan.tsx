@@ -93,7 +93,7 @@ interface IBlockNumber {
   className?: string;
 }
 
-export const BlockNumber = (props: IBlockNumber) => (
+export const BlockNumber = (props: IBlockNumber) => props.blockNumber ? (
     <a
       href={`https://etherscan.io/tx/${props.txId}#eventlog`}
       className={`icon ${props.className}`}
@@ -103,4 +103,4 @@ export const BlockNumber = (props: IBlockNumber) => (
     >
       {toCurrency(props.blockNumber)}
     </a>
-);
+) : null;

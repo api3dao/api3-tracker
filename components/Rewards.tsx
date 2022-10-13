@@ -117,21 +117,31 @@ export const RewardsListTr = (epoch: IEpoch) => (
   <tr>
     <td className="text-center">{toCurrency(epoch.epoch)}</td>
     <td className="text-center">
-      <a
-        href={`https://etherscan.io/tx/${epoch.blockTx}#eventlog`}
-        rel="nofollow noopener noreferrer"
-        target="_blank"
-      >
-        {toCurrency(epoch.blockNumber)}
-      </a>
+      {epoch.blockNumber ? (
+        <a
+          href={`https://etherscan.io/tx/${epoch.blockTx}#eventlog`}
+          rel="nofollow noopener noreferrer"
+          target="_blank"
+        >
+          {toCurrency(epoch.blockNumber)}
+        </a>
+      ) : null}
     </td>
     <td className="text-center">{niceDate(epoch.createdAt)}</td>
     <td className="text-center darken">{toPct(epoch.apr)}</td>
     <td className="text-center accent">{toPct(epoch.rewardsPct)}</td>
     <td className="text-right darken">{toCurrency(epoch.members)}</td>
-    <td className="text-right darken">{noDecimals(toCurrency(epoch.totalStake))}</td>
-    <td className="text-right accent">{noDecimals(toCurrency(epoch.mintedShares))}</td>
-    <td className="text-center">{niceDate(epoch.releaseDate)}</td>
+    <td className="text-right darken">
+      {noDecimals(toCurrency(epoch.totalStake))}
+    </td>
+    <td className="text-right accent">
+      {noDecimals(toCurrency(epoch.mintedShares))}
+    </td>
+    <td className="text-center">
+      {new Date().toISOString() < epoch.releaseDate
+        ? niceDate(epoch.releaseDate)
+        : <span className="text-sm darken">released</span>}
+    </td>
   </tr>
 );
 

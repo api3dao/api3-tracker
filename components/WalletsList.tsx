@@ -48,7 +48,7 @@ export const WalletsListTr = (row: IWallet) => (
       </Link>
     </td>
     <td className="text-right">{toCurrency(row.userVotingPower)}</td>
-    <td className="text-right">12%</td>
+    <td className="text-right">0%</td>
     <td className="text-right">{toCurrency(row.userShare)}</td>
     <td className="text-right">{toCurrency(row.userReward)}</td>
   </tr>
@@ -65,6 +65,7 @@ export const WalletsList = (props: IWalletsListProps) => {
           ))}
         </tbody>
       </table>
+      <div className="pb-20">&nbsp;</div>
     </div>
   );
 };
