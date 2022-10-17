@@ -385,8 +385,11 @@ export const Members = {
       const ensRecords = await prisma.cacheEns.findMany({
         where: { address },
       });
+      const tags = new Array<String>();
+      tags.push(addr);
       for (const ens of ensRecords) {
         ensName = ens.name;
+        tags.push(ensName);
       }
       tx.push(
         prisma.member.createMany({
@@ -405,7 +408,7 @@ export const Members = {
               userWithdrew: 0,
               createdAt: blockDt,
               updatedAt: blockDt,
-              tags: "",
+              tags: tags.join(",")
             },
           ],
           skipDuplicates: true,
