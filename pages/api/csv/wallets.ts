@@ -4,6 +4,11 @@ import { niceDate, toHex } from "../../../services/format";
 import { Wallets } from "../../../services/api";
 import { stringify } from "csv-stringify/sync";
 
+const numericQuery = (input: any, defaultValue: number): number => {
+  if (typeof input === "undefined") return defaultValue;
+  return input as number;
+};
+
 const NAMES = [
   "ADDRESS",
   "ENS",
@@ -61,9 +66,12 @@ export default async function handler(
 
   const out = [rearrange(columns, NAMES)];
   const q: string = (req.query.q as string) || "";
-  const list: Array<IWallet> = await Wallets.fetchList(q);
-  for (let index = 0; index < list.length; index++) {
-    out.push(rearrange(columns, toArray(list[index])));
+  const take = numericQuery(req.query.take, 100);
+  const skip = numericQuery(req.query.skip, 0);
+
+  const response = await Wallets.fetchList(q, { take, skip });
+  for (let index = 0; index < response.list.length; index++) {
+    out.push(rearrange(columns, toArray(response.list[index])));
   }
   if (req.query.filename) {
     res.setHeader(

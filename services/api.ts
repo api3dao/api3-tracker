@@ -35,10 +35,10 @@ export const Epochs = {
     return (
       await prisma.epoch.findMany({
         take: limit,
-        where: { NOT: { blockNumber: 0 }},
+        where: { NOT: { blockNumber: 0 } },
         orderBy: { epoch: "desc" },
       })
-    ).map((x: any) => (Epochs.from(x)));
+    ).map((x: any) => Epochs.from(x));
   },
   // fetch one epoch by its ID
   fetch: async (epoch: number) => {
@@ -49,7 +49,7 @@ export const Epochs = {
   from: (input: any): IEpoch => {
     const txHash = "0x" + input.txHash.toString("hex");
     return { ...input, txHash };
-  }
+  },
 };
 
 export const Supply = {
@@ -89,7 +89,7 @@ export const VotingEvents = {
     return (
       await prisma.votingEvent.findMany({
         where: { votingId },
-        orderBy: [{ createdAt: "desc" }, { logIndex: "desc" }]
+        orderBy: [{ createdAt: "desc" }, { logIndex: "desc" }],
       })
     ).map((x: any) => ({ ...x }));
   },
@@ -140,8 +140,15 @@ export const Votings = {
     const totalAgainst = new Decimal(input.totalAgainst);
     const totalRequired = new Decimal(input.totalRequired);
     const totalStaked = new Decimal(input.totalStaked);
-    const transferAddress = Buffer.from(input.transferAddress, 'hex');
-    return { ...input, totalFor, totalAgainst, totalRequired, totalStaked, transferAddress };
+    const transferAddress = Buffer.from(input.transferAddress, "hex");
+    return {
+      ...input,
+      totalFor,
+      totalAgainst,
+      totalRequired,
+      totalStaked,
+      transferAddress,
+    };
   },
   // list mapper
   fromList: (src: Array<any>): Array<IVoting> => {
@@ -155,7 +162,7 @@ export const WalletEvents = {
     return (
       await prisma.memberEvent.findMany({
         where: { address },
-        orderBy: [{ createdAt: "desc" }, { logIndex: "desc" }]
+        orderBy: [{ createdAt: "desc" }, { logIndex: "desc" }],
       })
     ).map((x: any) => ({ ...x }));
   },
@@ -169,17 +176,34 @@ export const WalletEvents = {
   },
 };
 
+export interface ICursor {
+  take?: number;
+  skip?: number;
+}
+
+export interface IPage {
+  total: number;
+}
+
+export interface WalletsList {
+  list: Array<IWallet>;
+  page: IPage;
+}
+
 export const Wallets = {
   // fetch a list of votings for the certain status
-  fetchList: async (q: string): Promise<Array<IWallet>> => {
+  fetchList: async (q: string, cursor: ICursor): Promise<WalletsList> => {
     const where = q.length > 0 ? { tags: { search: q } } : {};
-    return (
-      await prisma.member.findMany({
+    const [list, total] = await prisma.$transaction([
+      prisma.member.findMany({
         where,
         orderBy: { createdAt: "asc" }, // TODO: order by rewards
-        take: 100,
-      })
-    ).map((x: any) => ({ ...x }));
+        take: cursor.take || 100,
+        skip: cursor.skip || 0,
+      }),
+      prisma.member.count({ where }),
+    ]);
+    return { list: list.map((x: any) => ({ ...x })), page: { total } };
   },
   // fetch one voting by its ID
   fetch: async (address: Buffer): Promise<IWallet | null> => {
