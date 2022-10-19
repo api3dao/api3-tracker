@@ -65,7 +65,6 @@ export const WalletsList = (props: IWalletsListProps) => {
           ))}
         </tbody>
       </table>
-      <div className="pb-20">&nbsp;</div>
     </div>
   );
 };
