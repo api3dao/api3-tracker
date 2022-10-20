@@ -51,11 +51,12 @@ interface IVotingItem {
 }
 
 interface IVotingGasTotals {
-  totalGasUsed: number;
-  totalUsd: number;
+  totalGasUsed?: number;
+  totalUsd?: number;
 }
 
 const VotingGasTotals = (props: IVotingGasTotals) => {
+  if (!props.totalGasUsed || !props.totalUsd) return null;
   return (<div className="text-xs text-color-grey">
     Spent{" "}
     <span className="text-color-panel-title">{withDecimals(props.totalGasUsed + '', 7)}</span>{" "}
