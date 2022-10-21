@@ -1,3 +1,7 @@
+variable aws_profile {
+  type = string
+}
+
 variable api3tracker_endpoint {
   type = string
 }
@@ -36,6 +40,14 @@ module "api3tracker" {
 
   // Hint: use TF_VAR_api3tracker_endpoint to set this up, pointing to Infura or Alchemy JSON+RPC provider
   endpoint = var.api3tracker_endpoint
+
+  // backups s3 configuration
+  aws_backup = {
+    profile = "default"
+    bucket = "dao-tracker-backups"
+    path = "tracker"
+    exchange_dir = "${path.cwd}/exchange"
+  }
 }
 
 
