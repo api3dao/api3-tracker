@@ -7,8 +7,10 @@ module "traefik" {
   hosted_zones = {
       for name, z in var.hosted_zones : name => {
             name = z.name
-            host = z.host
+            hosts = z.hosts
             local_port = z.local_port
+            host_rule = var.https == 1 ? format("(%s)", join(" || ", formatlist("Host(`%s`)", z.hosts))) : "Host(`localhost`)"
+            www_rule = var.https == 1 ? format("(%s)", join(" || ", formatlist("Host(`www.%s`)", z.hosts))) : ""
       }
   }
   certificates = var.certificates

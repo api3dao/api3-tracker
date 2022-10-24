@@ -14,7 +14,7 @@ locals {
     },
     {
       label = "traefik.http.routers.${local.www}.rule"
-      value = "Host(`www.${local.default_host}`)"
+      value = local.default_www_rule
     },
     {
       label = "traefik.http.routers.${local.www}.entrypoints"

@@ -5,7 +5,9 @@ locals {
 
   shortname = "api"
   hostname = "traefik-${local.postfix}"
-  default_host = var.hosted_zones["default"].host
+
+  default_host_rule = var.hosted_zones["default"].host_rule
+  default_www_rule = var.hosted_zones["default"].www_rule
   default_entrypoint = var.hosted_zones["default"].name
 
   www = "www"
@@ -84,7 +86,9 @@ locals {
       "postfix" = local.postfix
       "project" = local.project
       "name" = z.name
-      "host" = var.https == 1 ? z.host : "localhost"
+      "hosts" = var.https == 1 ? z.hosts : ["localhost"]
+      "host_rule" = var.https == 1 ? z.host_rule : "Host(`localhost`)"
+      "www_rule" = var.https == 1 ? z.www_rule : ""
       "entrypoint" = var.https == 1 ? "https" : z.name
       "local_port" = z.local_port
       "https" = var.https
@@ -116,7 +120,7 @@ locals {
     local.labels_middleware_trusted,
     local.labels_middleware_compress,
     local.labels_route_dashboard,
-    var.https == 1 ? local.labels_route_www : [],
+    local.default_www_rule != "" ? local.labels_route_www : [],
     var.geoip_url == "" ? [] : local.labels_middleware_geo,
   )
   entrypoints_localhost = flatten([

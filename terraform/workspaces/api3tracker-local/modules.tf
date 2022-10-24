@@ -12,13 +12,13 @@ module "api3tracker" {
     # Default hosted zone of the website
     "default" = {
       name = "default"
-      host = "localhost"
+      hosts = ["localhost", "127.0.0.1"]
       local_port = 7040
     }
     # Optional - ingress configuration for Traefik dashboard
     "traefik" = {
       name = "traefik"
-      host = "localhost"
+      hosts = ["localhost", "127.0.0.1"]
       local_port = 7041
     }
   }
