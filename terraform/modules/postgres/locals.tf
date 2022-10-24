@@ -12,6 +12,10 @@ locals {
   database = "${var.network_params.project}${var.network_params.postfix}"
 
   connection = "postgres://${local.root_user}:${local.root_password}@${local.host}:${local.port}/${local.database}?sslmode=disable"
+  aws_profile = var.aws_backup.profile
+  aws_backup_bucket = var.aws_backup.bucket
+  aws_backup_path = var.aws_backup.path
+  volume_exchange = var.aws_backup.exchange_dir
 }
 
 locals {
@@ -25,6 +29,7 @@ locals {
 
   labels = [
     { "label": "host", "value": local.host },
+    { "label": "project", "value": local.project },
     { "label": "role", "value": "postgres" }
   ]
 }
