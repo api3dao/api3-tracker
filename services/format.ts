@@ -47,6 +47,7 @@ export const toHex = (x: any): string => {
 };
 
 export const months = [
+  "",
   "Jan",
   "Feb",
   "Mar",
@@ -75,13 +76,18 @@ export const niceDate = (strIso: string): string => {
   ) {
     return niceDate((strIso as Date).toISOString());
   }
-  const date =
-    typeof strIso === "number"
-      ? new Date(strIso)
-      : new Date(
-          strIso.replace(/\-/g, "/").replace("T", " ").replace(/\..+$/, "")
-        );
+  if (typeof strIso === "string") {
+    const parts: Array<string> = strIso.replace(/T.+$/, "").split("-");
+    let out = "";
+    if (parts[0] != "" + new Date().getUTCFullYear()) {
+      out = parts[0] + ", ";
+    }
+    const _month = months[parseInt(parts[1])];
+    const _day = parts[2];
+    return out + _month + " " + _day;
+  }
 
+  const date = new Date(strIso); // from unix number
   const _day = date.getUTCDate();
   const _month = months[date.getUTCMonth()];
   let out = "";

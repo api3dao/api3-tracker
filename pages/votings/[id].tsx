@@ -40,7 +40,7 @@ const VotingDetailsPage: NextPage = (props: any) => {
         <h1 className="text-center uppercase">API3 DAO Voting</h1>
         <VotingSummary {...Votings.from(voting)} />
         <div className="max-w-screen-lg mx-auto">
-          <VotingEventsList list={VotingEvents.fromList(events)} />
+          <VotingEventsList list={VotingEvents.fromList(events)} totalStake={voting.totalStaked} />
         </div>
       </main>
 

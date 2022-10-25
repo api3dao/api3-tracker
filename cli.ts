@@ -66,21 +66,52 @@ yargs(hideBin(process.argv))
     command: "state [sub]",
     describe: "Operations with API3 dao state (members and votings)",
     builder: (yargs) => {
-      return yargs.option(`sub`, {
-        choises: ["reset", "update", "next"],
-        type: "string",
-        describe: `supply subcommand - reset or update current state based on new blocks`,
-      });
+      return yargs
+        .option(`sub`, {
+          choises: ["reset", "update", "next"],
+          type: "string",
+          describe: `supply subcommand - reset or update current state based on new blocks`,
+        })
+        .option("verbose-epochs", {
+          type: "boolean",
+          description: "Run with verbose epochs logging",
+        })
+        .option("verbose-votings", {
+          type: "boolean",
+          description: "Run with verbose votings logging",
+        })
+        .option("verbose-blocks", {
+          alias: "v",
+          type: "boolean",
+          default: true,
+          description: "Run with verbose block logging",
+        });
     },
-    handler: async ({ endpoint, sub }) => {
+    handler: async ({
+      endpoint,
+      sub,
+      verboseBlocks,
+      verboseEpochs,
+      verboseVotings,
+    }) => {
       if (sub == "reset") {
         await Events.resetState();
         console.log("Events state was reset");
       } else if (sub == "next") {
-        const blocks = await Events.processState(endpoint, true);
+        const verbose = {
+          blocks: verboseBlocks || false,
+          epochs: verboseEpochs || false,
+          votings: verboseVotings || false,
+        };
+        const blocks = await Events.processState(endpoint, true, verbose);
         console.log(`${blocks} blocks were processed`);
       } else if (sub == "update") {
-        const blocks = await Events.processState(endpoint, false);
+        const verbose = {
+          blocks: verboseBlocks || false,
+          epochs: verboseEpochs || false,
+          votings: verboseVotings || false,
+        };
+        const blocks = await Events.processState(endpoint, false, verbose);
         console.log(`${blocks} blocks were processed`);
       } else {
         console.error("ERROR: Unknown sub-command");

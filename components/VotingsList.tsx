@@ -32,7 +32,7 @@ interface ITransferProps {
 export const TransferDetails = (props: ITransferProps) => {
   if (!props.transferToken || !props.transferValue) return null;
   return (
-    <div className="text-sm">
+    <div className="text-sm leading-6">
       <span className="darken">Transfer</span>{" "}
       <span className="text-color-grey font-bold">{props.transferToken}</span>{" "}
       <span className="darken">to</span>{" "}
@@ -57,12 +57,18 @@ interface IVotingGasTotals {
 
 const VotingGasTotals = (props: IVotingGasTotals) => {
   if (!props.totalGasUsed || !props.totalUsd) return null;
-  return (<div className="text-xs text-color-grey">
-    Spent{" "}
-    <span className="text-color-panel-title">{withDecimals(props.totalGasUsed + '', 7)}</span>{" "}
-    ETH in fees, Est.{" "}
-    <span className="text-color-panel-title">${parseFloat(props.totalUsd + '').toFixed(2)}</span>{" "}
-  </div>);
+  return (
+    <div className="text-xs text-color-grey leading-6">
+      Spent{" "}
+      <span className="text-color-panel-title">
+        {withDecimals(props.totalGasUsed + "", 7)}
+      </span>{" "}
+      ETH in fees, Est.{" "}
+      <span className="text-color-panel-title">
+        ${parseFloat(props.totalUsd + "").toFixed(2)}
+      </span>{" "}
+    </div>
+  );
 };
 
 export const VotingsListTr = (props: IVotingItem) => {
@@ -93,14 +99,14 @@ export const VotingsListTr = (props: IVotingItem) => {
       <td className="text-right accent">
         {item.totalFor.toNumber() > 0 ? (
           <span>
-            {toPct(item.totalFor.mul(100).div(item.totalStaked).round())}
+            {toPct(item.totalFor.mul(100).div(item.totalStaked).toFixed(2))}
           </span>
         ) : null}
       </td>
       <td className="text-right danger">
         {item.totalAgainst.toNumber() > 0 ? (
           <span>
-            {toPct(item.totalAgainst.mul(100).div(item.totalStaked).round())}
+            {toPct(item.totalAgainst.mul(100).div(item.totalStaked).toFixed(2))}
           </span>
         ) : null}
       </td>
@@ -123,6 +129,7 @@ export const VotingsList = (props: IVotingListProps) => {
             ))}
           </tbody>
         </table>
+        <div className="mb-100">&nbsp;</div>
       </div>
     </div>
   );

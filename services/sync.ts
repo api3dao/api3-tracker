@@ -13,6 +13,19 @@ import { VotingReader } from "./../services/voting";
 import { VoteGas } from "./../services/gas";
 import { VotingType } from ".prisma/client";
 
+const rewardsPct = (newApr: number): number => {
+  const epochLength = 604800.0;
+  const week = epochLength / 3600.0 / 24.0;
+  const aprCoeff = (52.0 * week) / 365.0;
+  return (newApr * 100 * aprCoeff) / 52.0;
+};
+
+interface SyncVerbosity {
+  blocks: boolean;
+  epochs: boolean;
+  votings: boolean;
+}
+
 interface BlockFullInfo {
   // Block Header information
   block: Block;
@@ -32,7 +45,10 @@ const elapsed = (since: number): string => {
 };
 
 export const BlockLoader = {
-  fromDatabase: async (blockRecord: any): Promise<BlockFullInfo> => {
+  fromDatabase: async (
+    blockRecord: any,
+    verboseBlock: boolean
+  ): Promise<BlockFullInfo> => {
     const start = new Date().getTime();
     const price = parseFloat(blockRecord.price.toString());
     const block: Block = blockRecord.data as any;
@@ -77,15 +93,17 @@ export const BlockLoader = {
       }
     }
 
-    console.log(
-      "Processing",
-      block.number,
-      new Date(block.timestamp * 1000),
-      logsList.length + "L",
-      receipts.size + "R",
-      price.toFixed(2) + "USD",
-      "read in " + elapsed(start)
-    );
+    if (verboseBlock) {
+      console.log(
+        "Processing",
+        block.number,
+        new Date(block.timestamp * 1000),
+        logsList.length + "L",
+        receipts.size + "R",
+        price.toFixed(2) + "USD",
+        "read in " + elapsed(start)
+      );
+    }
     return { block, price, txs, receipts, logs };
   },
 
@@ -266,7 +284,7 @@ export const Sync = {
       }),
     ]);
   },
-  next: async (): Promise<BlockFullInfo | null> => {
+  next: async (verboseBlock: boolean): Promise<BlockFullInfo | null> => {
     // pick next block
     const processed: number =
       (
@@ -282,7 +300,7 @@ export const Sync = {
     });
     if (blocks.length) {
       const block = blocks[0];
-      return BlockLoader.fromDatabase(block);
+      return BlockLoader.fromDatabase(block, verboseBlock);
     }
     return null;
   },
@@ -511,21 +529,66 @@ export const Events = {
     const { transactionHash } = event;
     const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
+
     const releaseDt = new Date(blockInfo.block.timestamp * 1000);
     releaseDt.setFullYear(releaseDt.getFullYear() + 1);
     const txHash = Buffer.from(transactionHash.replace("0x", ""), "hex");
-    const { epochIndex, newApr, totalStake } = Events.ABI.parseLog(event).args; // also: amount
+
+    const { epochIndex, amount, newApr, totalStake } =
+      Events.ABI.parseLog(event).args;
     const totalMembers = await Wallets.total();
-    tx.push(
-      prisma.epoch.updateMany({
-        where: {
-          blockNumber: { lt: blockNumber },
-        },
-        data: {
-          isCurrent: 0,
-        },
-      })
+    const total = totalStake.sub(amount);
+    const minted = amount;
+    const currentEpoch = await prisma.epoch.findMany({
+      where: { isCurrent: 1 },
+    });
+
+    // todo: members distribution: save snapshots
+    const oldApr = currentEpoch.length > 0 ? currentEpoch[0].apr : 38.75;
+    const newAprPct = parseFloat(
+      new Prisma.Decimal(withDecimals(newApr.toString(), 18)).toString()
     );
+
+    if (currentEpoch.length == 0) {
+      const prevDt = new Date(blockInfo.block.timestamp * 1000);
+      prevDt.setDate(prevDt.getDate() - 7);
+      const prevReleaseDt = new Date(blockInfo.block.timestamp * 1000);
+      prevReleaseDt.setFullYear(prevReleaseDt.getFullYear() + 1);
+      prevReleaseDt.setDate(prevReleaseDt.getDate() - 7);
+      // for the very first epoch
+      tx.push(
+        prisma.epoch.create({
+          data: {
+            epoch: parseInt(epochIndex.toString()) - 1,
+            blockNumber: 0,
+            chainId: 0,
+            txHash,
+            apr: oldApr,
+            rewardsPct: rewardsPct(parseFloat(oldApr + "")),
+            members: 0,
+            totalStake: 0,
+            totalShares: 0,
+            mintedShares: 0,
+            releaseDate: prevReleaseDt,
+            createdAt: prevDt,
+            isCurrent: 1,
+            stakedRewards: 0,
+          },
+        })
+      );
+    } else {
+      tx.push(
+        prisma.epoch.updateMany({
+          where: {
+            blockNumber: { lt: blockNumber },
+            isCurrent: 1,
+          },
+          data: {
+            isCurrent: 0,
+          },
+        })
+      );
+    }
     tx.push(
       prisma.epoch.create({
         data: {
@@ -534,20 +597,23 @@ export const Events = {
           chainId: 0,
           txHash,
           apr: new Prisma.Decimal(withDecimals(newApr.toString(), 16)),
+          rewardsPct: rewardsPct(newAprPct),
           members: totalMembers,
           totalStake: new Prisma.Decimal(
-            withDecimals(totalStake.toString(), 18)
+            noDecimals(withDecimals(total.toString(), 18))
           ),
-          totalShares: 0, // TODO:
-          mintedShares: 0, // TODO:
+          totalShares: 0,
+          mintedShares: new Prisma.Decimal(
+            noDecimals(withDecimals(minted.toString(), 18))
+          ),
           releaseDate: releaseDt,
           createdAt: blockDt,
           isCurrent: 1,
-          rewardsPct: 0, // TODO:
-          stakedRewards: 0, // TODO:
+          stakedRewards: 0,
         },
       })
     );
+
     const expireDt = new Date(blockInfo.block.timestamp * 1000 - 12096e5); // minus 2 weeks
     tx.push(
       prisma.voting.updateMany({
@@ -564,6 +630,7 @@ export const Events = {
     args: any,
     config: IWebConfig,
     endpoint: string,
+    verbose: boolean,
     tx: any
   ): Promise<boolean> => {
     const { transactionHash } = event;
@@ -609,9 +676,7 @@ export const Events = {
       );
 
       // multiply totalStaked by supportRequired. can round up wildly
-      const pctRequired = parseFloat(
-        withDecimals(supportRequired.toString(), 18)
-      ); /// i.e. 0.5 as result
+      const pctRequired = isPrimary ? 0.5 : 0.15;
       const absRequired =
         parseFloat(noDecimals(withDecimals(votingPower.toString(), 18))) *
         pctRequired;
@@ -624,7 +689,7 @@ export const Events = {
       description: "",
       targetSignature: "",
     };
-    // console.log(meta.title, meta.targetSignature, scriptData);
+    // console.log( blockDt, voteInternalId, isPrimary ? "PRIMARY" : "SECONDARY", "META.TITLE", meta.title);
     if (meta.targetSignature.indexOf(" ") > -1) {
       // Typical error in the signature is putting space
       status = "invalid";
@@ -662,21 +727,30 @@ export const Events = {
     const { voteId, supports, stake } = args;
     const isPrimary = VotingReader.isPrimary(config, event.address);
     const voteInternalId = voteId * 2 + (isPrimary ? 1 : 0);
+    const supported: boolean = supports === "true" || supports === true;
 
     let totalFor = new Prisma.Decimal(
-      supports ? withDecimals(stake.toString(), 18) : 0
+      supported ? withDecimals(stake.toString(), 18) : 0
     );
     let totalAgainst = new Prisma.Decimal(
-      !supports ? withDecimals(stake.toString(), 18) : 0
+      !supported ? withDecimals(stake.toString(), 18) : 0
     );
     const foundVote = await prisma.voting.findMany({
       where: { id: voteInternalId + "" },
     });
-    // console.log(foundVote, 'FOR', totalFor, 'AGAINST', totalAgainst);
     if (foundVote.length > 0) {
-      if (supports) totalFor.add(foundVote[0].totalFor);
-      else totalAgainst.add(foundVote[0].totalAgainst);
+      if (supported) totalFor = totalFor.add(foundVote[0].totalFor);
+      else totalAgainst = totalAgainst.add(foundVote[0].totalAgainst);
     }
+    console.log(
+      voteInternalId,
+      "SUPPORTED",
+      supported,
+      "FOR",
+      totalFor,
+      "AGAINST",
+      totalAgainst
+    );
     tx.push(
       prisma.voting.updateMany({
         where: { id: voteInternalId + "" },
@@ -712,7 +786,8 @@ export const Events = {
   processBlock: async (
     blockInfo: BlockFullInfo,
     config: IWebConfig,
-    endpoint: string
+    endpoint: string,
+    verbose: SyncVerbosity
   ): Promise<boolean> => {
     VoteGas.reset(); // gas accumulator for the block
 
@@ -731,9 +806,26 @@ export const Events = {
           fee.toString()
         );
         const feeUsd = parseFloat(withDecimals(priceDec.toString(), 18));
-        // console.log(
-        // 'gasUsed', BigNumber.from(gasUsed).toString(), 'gasPrice', BigNumber.from(gasPrice).toString(),
-        // 'fee', fee, 'feeUsd', feeUsd);
+        if (
+          txHash ==
+          Buffer.from(
+            "5dd64a8084d5c6c933aef681e5725ec1a41a8823d6cd4706fa7e6e7ee020fc29",
+            "hex"
+          )
+        ) {
+          console.log(
+            "gasUsed",
+            BigNumber.from(gasUsed).toString(),
+            "gasPrice",
+            BigNumber.from(gasPrice).toString(),
+            "ethPrice",
+            new Prisma.Decimal(blockInfo.price),
+            "fee",
+            fee.toString(),
+            "feeUsd",
+            feeUsd
+          );
+        }
         const topicHash: string = event.topics[0];
         if (Events.IGNORED.get(topicHash) === 1) continue;
         try {
@@ -797,6 +889,7 @@ export const Events = {
                 decoded.args,
                 config,
                 endpoint,
+                verbose.votings,
                 tx
               )
             )
@@ -895,16 +988,21 @@ export const Events = {
     return terminate;
   },
 
-  processState: async (endpoint: string, stopOnEpoch: boolean) => {
+  processState: async (
+    endpoint: string,
+    stopOnEpoch: boolean,
+    verbose: SyncVerbosity
+  ) => {
     let total = 0;
     const webconfig = fetchWebconfig();
     do {
-      const blockInfo: BlockFullInfo | null = await Sync.next();
+      const blockInfo: BlockFullInfo | null = await Sync.next(verbose.blocks);
       if (blockInfo) {
         const terminate = await Events.processBlock(
           blockInfo,
           webconfig,
-          endpoint
+          endpoint,
+          verbose
         );
         if (terminate && stopOnEpoch) return ++total;
       } else {

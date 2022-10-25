@@ -35,6 +35,7 @@ export const Epochs = {
     return (
       await prisma.epoch.findMany({
         take: limit,
+        where: { NOT: { blockNumber: 0 }},
         orderBy: { epoch: "desc" },
       })
     ).map((x: any) => ({ ...x }));
@@ -85,7 +86,7 @@ export const VotingEvents = {
     return (
       await prisma.votingEvent.findMany({
         where: { votingId },
-        orderBy: { createdAt: "asc" },
+        orderBy: [{ createdAt: "desc" }, { logIndex: "desc" }]
       })
     ).map((x: any) => ({ ...x }));
   },
@@ -151,7 +152,7 @@ export const WalletEvents = {
     return (
       await prisma.memberEvent.findMany({
         where: { address },
-        orderBy: { createdAt: "asc" },
+        orderBy: [{ createdAt: "desc" }, { logIndex: "desc" }]
       })
     ).map((x: any) => ({ ...x }));
   },
@@ -172,7 +173,8 @@ export const Wallets = {
     return (
       await prisma.member.findMany({
         where,
-        orderBy: { createdAt: "asc" },
+        orderBy: { createdAt: "asc" }, // TODO: order by rewards
+        take: 100,
       })
     ).map((x: any) => ({ ...x }));
   },

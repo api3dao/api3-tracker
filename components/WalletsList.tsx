@@ -1,7 +1,12 @@
 import React from "react";
 import { IWallet } from "./../services/types";
 import Link from "next/link";
-import { toHex, niceDateTime, toCurrency } from "./../services/format";
+import {
+  toHex,
+  niceDate,
+  niceDateTime,
+  toCurrency,
+} from "./../services/format";
 
 export interface IWalletsListProps {
   list: Array<IWallet>;
@@ -24,8 +29,8 @@ export const WalletsListThead = () => (
 
 export const WalletsListTr = (row: IWallet) => (
   <tr>
-    <td className="text-center">1.</td>
-    <td className="text-center max-w-3">{niceDateTime(row.createdAt)}</td>
+    <td className="text-center">{1 + (row.index || 0)}.</td>
+    <td className="text-center max-w-3">{niceDate(row.createdAt)}</td>
     <td className="text-center max-w-3">{niceDateTime(row.updatedAt)}</td>
     <td className="text-left">
       <Link href={`/wallets/${toHex(row.address)}`} className="text-bold">
@@ -43,7 +48,7 @@ export const WalletsListTr = (row: IWallet) => (
       </Link>
     </td>
     <td className="text-right">{toCurrency(row.userVotingPower)}</td>
-    <td className="text-right">12%</td>
+    <td className="text-right">0%</td>
     <td className="text-right">{toCurrency(row.userShare)}</td>
     <td className="text-right">{toCurrency(row.userReward)}</td>
   </tr>
@@ -56,10 +61,11 @@ export const WalletsList = (props: IWalletsListProps) => {
         <WalletsListThead />
         <tbody>
           {props.list.map((row, index) => (
-            <WalletsListTr key={index} {...row} />
+            <WalletsListTr key={index} {...row} index={index} />
           ))}
         </tbody>
       </table>
+      <div className="pb-20">&nbsp;</div>
     </div>
   );
 };

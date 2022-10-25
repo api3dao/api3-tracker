@@ -108,6 +108,7 @@ export interface IVoting {
 
 export interface IWallet {
   address: string;
+  index?: number; // row index
   ensName: string; // ENS domain name
   ensUpdated: string;
   badges: string;
@@ -155,6 +156,7 @@ export interface IVotingEvent {
   address?: string;
   ensName?: string;
   supports?: number;
+  totalStake?: number;
   userShare?: Prisma.Decimal;
   userVotingPower?: Prisma.Decimal;
 }
