@@ -74,7 +74,6 @@ export const Treasuries = {
       await prisma.treasury.findMany({
         where: { ttype, current: 1 },
         orderBy: { ts: "desc" },
-        take: 1,
       })
     ).map((x: any) => ({ ...x }));
   },
