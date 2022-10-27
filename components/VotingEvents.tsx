@@ -2,9 +2,8 @@ import React from "react";
 import { ethers } from "ethers";
 import { IVotingEvent } from "./../services/types";
 import Link from "next/link";
-import { BlockNumber, Address } from "./../components/Ethscan";
+import { BlockNumber } from "./../components/Ethscan";
 import {
-  niceDate,
   niceDateTime,
   noDecimals,
   withDecimals,

@@ -124,6 +124,7 @@ export interface IWallet {
 }
 
 export interface IWalletEvent {
+  index?: number; // row index
   id: string;
   createdAt: string;
   txHash: string;

@@ -40,7 +40,7 @@ const WalletDetailsPage: NextPage = (props: any) => {
       <main>
         <h1>API3 DAO WALLET</h1>
         <WalletSummary {...Wallets.from(wallet)} />
-        <WalletEventsList list={WalletEvents.fromList(events)} />
+        <WalletEventsList wallet={wallet} list={WalletEvents.fromList(events)} />
       </main>
 
       <Footer github={webconfig.github} blockNumber={lastBlock.blockNumber} />

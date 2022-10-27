@@ -17,7 +17,7 @@ export const WalletsListThead = () => (
     <tr>
       <th className="text-center">#</th>
       <th className="text-center">Joined</th>
-      <th className="text-center">Update</th>
+      <th className="text-center">Updated</th>
       <th className="text-left">Wallet</th>
       <th className="text-right">Voting Power</th>
       <th className="text-right">%</th>
@@ -30,19 +30,19 @@ export const WalletsListThead = () => (
 export const WalletsListTr = (row: IWallet) => (
   <tr>
     <td className="text-center">{1 + (row.index || 0)}.</td>
-    <td className="text-center max-w-3">{niceDate(row.createdAt)}</td>
-    <td className="text-center max-w-3">{niceDateTime(row.updatedAt)}</td>
+    <td className="text-center text-xs max-w-3">{niceDate(row.createdAt)}</td>
+    <td className="text-center text-xs darken max-w-3">{niceDateTime(row.updatedAt)}</td>
     <td className="text-left">
       <Link href={`/wallets/${toHex(row.address)}`} className="text-bold">
         {row.ensName ? (
           <div>
             <span className="font-bold">{row.ensName}</span>
             <br />
-            <span className="accent">{toHex(row.address)}</span>
+            <span className="accent" style={{ fontFamily: "monospace", cursor:"pointer" }}>{toHex(row.address)}</span>
           </div>
         ) : (
           <div>
-            <span className="accent">{toHex(row.address)}</span>
+            <span className="accent" style={{ fontFamily: "monospace", cursor:"pointer" }}>{toHex(row.address)}</span>
           </div>
         )}
       </Link>
