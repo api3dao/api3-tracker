@@ -3,12 +3,13 @@ import { ethers } from "ethers";
 import { IWallet, IWalletEvent } from "./../services/types";
 import {
   toHex,
+  niceDate,
   niceDateTime,
   toCurrency,
   noDecimals,
   withDecimals,
 } from "./../services/format";
-import { InternalAddress, BlockNumber } from "./../components/Ethscan";
+import { Address, InternalAddress, BlockNumber } from "./../components/Ethscan";
 
 export interface IWalletEventsListProps {
   wallet: IWallet;
@@ -26,6 +27,33 @@ interface IEventDetails {
 const EventDetails = (props: IEventDetails) => {
   const thisWallet = props.wallet.address;
   switch (props.eventName) {
+    case "TransferredAndLocked": {
+      // source, recipient, amount, release start, release end
+      const source: string = props.data[0];
+      const amount = noDecimals(
+        withDecimals(ethers.BigNumber.from(props.data[2]).toString(), 18)
+      );
+      const tmStart = parseInt(ethers.BigNumber.from(props.data[3]).toString());
+      const dtStart = new Date(tmStart * 1000);
+      const tmEnd = parseInt(ethers.BigNumber.from(props.data[4]).toString());
+      const dtEnd = new Date(tmEnd * 1000);
+      return (
+        <div className="text-xs darken leading-4">
+          source:{" "}
+          <Address className="text-xs" inline={true} address={source} />{" "}
+          <span className="text-color-panel-title">{toCurrency(amount)}</span>{" "}
+          tokens.{" "}
+          Release start:{" "}
+          <span className="text-color-panel-title">
+            {niceDate(dtStart.toISOString())}
+          </span>{", "}
+          end:{" "}
+          <span className="text-color-panel-title">
+            {niceDate(dtEnd.toISOString())}
+          </span>{" "}
+        </div>
+      );
+    }
     case "Delegated": {
       // from, to, shares, total
       const from: string = props.data[0];
