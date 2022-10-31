@@ -152,7 +152,6 @@ label.cell-title {
 
 .eth-address,
 * .eth-address {
-  font-size: 10px;
   font-family: monospace !important;
   font-weight: normal;
   color: var(--color-grey);
@@ -162,16 +161,6 @@ label.cell-title {
   color: var(--color-text);
   font-weight: bold;
   text-decoration: none !important;
-}
-@media (min-width: 480px) {
-  .eth-address {
-    font-size: 12px;
-  }
-}
-@media (min-width: 640px) {
-  .eth-address {
-    font-size: 14px;
-  }
 }
 
 table.table {

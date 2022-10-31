@@ -8,7 +8,7 @@ import {
   noDecimals,
   withDecimals,
 } from "./../services/format";
-import { BlockNumber } from "./../components/Ethscan";
+import { InternalAddress, BlockNumber } from "./../components/Ethscan";
 
 export interface IWalletEventsListProps {
   wallet: IWallet;
@@ -28,8 +28,8 @@ const EventDetails = (props: IEventDetails) => {
   switch (props.eventName) {
     case "Delegated": {
       // from, to, shares, total
-      const from: String = props.data[0];
-      const to: String = props.data[1];
+      const from: string = props.data[0];
+      const to: string = props.data[1];
       const shares = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[2]).toString(), 18)
       );
@@ -38,7 +38,8 @@ const EventDetails = (props: IEventDetails) => {
       );
       return (
         <div className="text-xs darken leading-4">
-          {from == thisWallet ? " to " + to : " from " + from}{" "}
+          {from == thisWallet ? " to " : " from "}
+          <InternalAddress className="text-xs" inline={true} address={from == thisWallet ? to : from} />{" "}
           <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
           shares. Total:{" "}
           <span className="text-color-panel-title">{toCurrency(total)}</span>{" "}
@@ -48,8 +49,8 @@ const EventDetails = (props: IEventDetails) => {
     }
     case "UpdatedDelegation": {
       // from, to, delta, shares, total
-      const from: String = props.data[0];
-      const to: String = props.data[1];
+      const from: string = props.data[0];
+      const to: string = props.data[1];
       const delta = props.data[2];
       const shares = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[3]).toString(), 18)
@@ -59,7 +60,8 @@ const EventDetails = (props: IEventDetails) => {
       );
       return (
         <div className="text-xs darken leading-4">
-          {from == thisWallet ? " to " + to : " from " + from}{" "}
+          {from == thisWallet ? " to " : " from " }{" "}
+          <InternalAddress className="text-xs" inline={true} address={from == thisWallet ? to : from} />{" "}
           <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
           shares. Delta: <span className="text-color-panel-title">{JSON.stringify(delta)}</span>{" "}
           Total:{" "}
@@ -70,8 +72,8 @@ const EventDetails = (props: IEventDetails) => {
     }
     case "Undelegated": {
       // from, to, shares, total
-      const from: String = props.data[0];
-      const to: String = props.data[1];
+      const from: string = props.data[0];
+      const to: string = props.data[1];
       const shares = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[2]).toString(), 18)
       );
@@ -80,7 +82,8 @@ const EventDetails = (props: IEventDetails) => {
       );
       return (
         <div className="text-xs darken leading-4">
-          {from == thisWallet ? " to " + to : " from " + from}{" "}
+          {from == thisWallet ? " to " : " from "}{" "}
+          <InternalAddress className="text-xs" inline={true} address={from == thisWallet ? to : from} />{" "}
           <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
           shares. Total:{" "}
           <span className="text-color-panel-title">{toCurrency(total)}</span>{" "}
