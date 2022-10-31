@@ -24,54 +24,107 @@ interface IEventDetails {
 }
 
 const EventDetails = (props: IEventDetails) => {
-   // const thisWallet = props.wallet.address;
-  /*
-      case "Delegated(address,address,uint256,uint256)":
-      case "UpdatedDelegation(address,address,bool,uint256,uint256)": // from, to, delta, shared, total
-      case "Undelegated(address,address,uint256,uint256)":
-
-      case "TransferredAndLocked(address,address,uint256,uint256,uint256)":
-  */
+  const thisWallet = props.wallet.address;
   switch (props.eventName) {
-    case "Staked" : { // user, amount, minted_shares, user_unstaked, user_shares, total_shares, total_stake
+    case "Delegated": {
+      // from, to, shares, total
+      const from: String = props.data[0];
+      const to: String = props.data[1];
+      const shares = noDecimals(
+        withDecimals(ethers.BigNumber.from(props.data[2]).toString(), 18)
+      );
+      const total = noDecimals(
+        withDecimals(ethers.BigNumber.from(props.data[3]).toString(), 18)
+      );
+      return (
+        <div className="text-xs darken leading-4">
+          {from == thisWallet ? " to " + to : " from " + from}{" "}
+          <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
+          shares. Total:{" "}
+          <span className="text-color-panel-title">{toCurrency(total)}</span>{" "}
+          shares.{" "}
+        </div>
+      );
+    }
+    case "UpdatedDelegation": {
+      // from, to, delta, shares, total
+      const from: String = props.data[0];
+      const to: String = props.data[1];
+      const delta = props.data[2];
+      const shares = noDecimals(
+        withDecimals(ethers.BigNumber.from(props.data[3]).toString(), 18)
+      );
+      const total = noDecimals(
+        withDecimals(ethers.BigNumber.from(props.data[4]).toString(), 18)
+      );
+      return (
+        <div className="text-xs darken leading-4">
+          {from == thisWallet ? " to " + to : " from " + from}{" "}
+          <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
+          shares. Delta: <span className="text-color-panel-title">{JSON.stringify(delta)}</span>{" "}
+          Total:{" "}
+          <span className="text-color-panel-title">{toCurrency(total)}</span>{" "}
+          shares.{" "}
+        </div>
+      );
+    }
+    case "Undelegated": {
+      // from, to, shares, total
+      const from: String = props.data[0];
+      const to: String = props.data[1];
+      const shares = noDecimals(
+        withDecimals(ethers.BigNumber.from(props.data[2]).toString(), 18)
+      );
+      const total = noDecimals(
+        withDecimals(ethers.BigNumber.from(props.data[3]).toString(), 18)
+      );
+      return (
+        <div className="text-xs darken leading-4">
+          {from == thisWallet ? " to " + to : " from " + from}{" "}
+          <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
+          shares. Total:{" "}
+          <span className="text-color-panel-title">{toCurrency(total)}</span>{" "}
+          shares.{" "}
+        </div>
+      );
+    }
+
+    case "Staked": {
+      // user, amount, minted_shares, user_unstaked, user_shares, total_shares, total_stake
       const amount = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[1]).toString(), 18)
       );
-      const mintedShares  = noDecimals(
+      const mintedShares = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[2]).toString(), 18)
       );
-      const userUnstaked  = noDecimals(
+      const userUnstaked = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[3]).toString(), 18)
       );
-      const userShares  = noDecimals(
+      const userShares = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[4]).toString(), 18)
       );
-      const totalShares  = noDecimals(
+      const totalShares = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[5]).toString(), 18)
       );
-      const totalStake  = noDecimals(
+      const totalStake = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[6]).toString(), 18)
       );
       return (
         <div className="text-xs darken leading-4">
           <span className="text-color-panel-title">{toCurrency(amount)}</span>{" "}
-          tokens. {" "}
-          Minted{" "}
+          tokens. Minted{" "}
           <span className="text-color-panel-title">
             {toCurrency(mintedShares)}
           </span>{" "}
-          shares.{" "}
-          Unstaked{" "}
+          shares. Unstaked{" "}
           <span className="text-color-panel-title">
             {toCurrency(userUnstaked)}
           </span>{" "}
-          tokens.{" "}
-          User has{" "}
+          tokens. User has{" "}
           <span className="text-color-panel-title">
             {toCurrency(userShares)}
           </span>{" "}
-          shares.{" "}
-          Total:{" "}
+          shares. Total:{" "}
           <span className="text-color-panel-title">
             {toCurrency(totalStake)}
           </span>{" "}
@@ -88,25 +141,23 @@ const EventDetails = (props: IEventDetails) => {
       const amount = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[1]).toString(), 18)
       );
-      const userUnstaked  = noDecimals(
+      const userUnstaked = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[2]).toString(), 18)
       );
-      const totalShares  = noDecimals(
+      const totalShares = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[3]).toString(), 18)
       );
-      const totalStake  = noDecimals(
+      const totalStake = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[4]).toString(), 18)
       );
       return (
         <div className="text-xs darken leading-4">
           <span className="text-color-panel-title">{toCurrency(amount)}</span>{" "}
-          tokens. {" "}
-          Unstaked{" "}
+          tokens. Unstaked{" "}
           <span className="text-color-panel-title">
             {toCurrency(userUnstaked)}
           </span>{" "}
-          tokens.{" "}
-          Total:{" "}
+          tokens. Total:{" "}
           <span className="text-color-panel-title">
             {toCurrency(totalStake)}
           </span>{" "}
@@ -127,8 +178,8 @@ const EventDetails = (props: IEventDetails) => {
         withDecimals(ethers.BigNumber.from(props.data[2]).toString(), 18)
       );
       const tm = parseInt(ethers.BigNumber.from(props.data[3]).toString());
-      const dt = new Date(tm* 1000);
-      const userShares  = noDecimals(
+      const dt = new Date(tm * 1000);
+      const userShares = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[4]).toString(), 18)
       );
       return (
@@ -138,13 +189,10 @@ const EventDetails = (props: IEventDetails) => {
           <span className="text-color-panel-title">
             {toCurrency(shares)}
           </span>{" "}
-          shares.{" "}
-
-          Scheduled for{" "}
+          shares. Scheduled for{" "}
           <span className="text-color-panel-title">
             {niceDateTime(dt.toISOString())}
           </span>{" "}
-
           User:{" "}
           <span className="text-color-panel-title">
             {toCurrency(userShares)}
@@ -161,8 +209,8 @@ const EventDetails = (props: IEventDetails) => {
       const tmStart = parseInt(ethers.BigNumber.from(props.data[2]).toString());
       const dtStart = new Date(tmStart * 1000);
       const tmEnd = parseInt(ethers.BigNumber.from(props.data[3]).toString());
-      const dtEnd= new Date(tmEnd * 1000);
-      const userUnstaked  = noDecimals(
+      const dtEnd = new Date(tmEnd * 1000);
+      const userUnstaked = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[4]).toString(), 18)
       );
       const userVesting = noDecimals(
@@ -171,8 +219,7 @@ const EventDetails = (props: IEventDetails) => {
       return (
         <div className="text-xs darken leading-4">
           <span className="text-color-panel-title">{toCurrency(amount)}</span>{" "}
-          tokens. {" "}
-          Starts{" "}
+          tokens. Starts{" "}
           <span className="text-color-panel-title">
             {niceDateTime(dtStart.toISOString())}
           </span>{" "}
@@ -184,8 +231,7 @@ const EventDetails = (props: IEventDetails) => {
           <span className="text-color-panel-title">
             {toCurrency(userUnstaked)}
           </span>{" "}
-          tokens.{" "}
-          Vesting{" "}
+          tokens. Vesting{" "}
           <span className="text-color-panel-title">
             {toCurrency(userVesting)}
           </span>{" "}
@@ -193,7 +239,7 @@ const EventDetails = (props: IEventDetails) => {
         </div>
       );
     }
-    
+
     case "VestedTimelock": {
       // user, amount, userVesting
       const amount = noDecimals(
@@ -249,7 +295,11 @@ const EventDetails = (props: IEventDetails) => {
     case "UpdatedLastProposalTimestamp": {
       const tm = parseInt(ethers.BigNumber.from(props.data[1]).toString());
       const dt = new Date(tm * 1000);
-      return <div className="text-xs darken leading-4">{niceDateTime(dt.toISOString())}</div>;
+      return (
+        <div className="text-xs darken leading-4">
+          {niceDateTime(dt.toISOString())}
+        </div>
+      );
     }
     case "WithdrawnToPool":
       return null;
