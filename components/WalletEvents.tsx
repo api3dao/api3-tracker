@@ -1,6 +1,12 @@
 import React from "react";
+import Link from "next/link";
 import { ethers } from "ethers";
-import { IWallet, IWalletEvent } from "./../services/types";
+import {
+  IWallet,
+  IVoting,
+  IWebConfig,
+  IWalletEvent,
+} from "./../services/types";
 import {
   toHex,
   niceDate,
@@ -14,14 +20,25 @@ import { Address, InternalAddress, BlockNumber } from "./../components/Ethscan";
 export interface IWalletEventsListProps {
   wallet: IWallet;
   list: Array<IWalletEvent>;
-  // TODO: map of votings
+  votings: Array<IVoting>;
+  webconfig: IWebConfig;
 }
 
 interface IEventDetails {
   wallet: IWallet;
   eventName: string;
+  address: string;
   data: any;
-  // TODO: map of votings
+  votings: Array<IVoting>;
+  webconfig: IWebConfig;
+}
+
+interface IWalletEventsRowProps {
+  row: IWalletEvent;
+  wallet: IWallet;
+  index: number;
+  votings: Array<IVoting>;
+  webconfig: IWebConfig;
 }
 
 interface IEventGasTotals {
@@ -44,6 +61,25 @@ const EventGasTotals = (props: IEventGasTotals) => {
   );
 };
 
+interface IVotingLinkProps {
+  id: number;
+  address: string;
+  votings: Array<IVoting>;
+  webconfig: IWebConfig;
+}
+
+const VotingLink = (props: IVotingLinkProps) => {
+  const isSecondary = true;
+  const id = props.id * (isSecondary ? 2 : 1) + "";
+  const href = `/votings/${id}`;
+  let title = `#${props.id}`;
+  for (const v of props.votings) {
+    if (v.id == id) {
+      return <Link href={href}>{v.name}</Link>;
+    }
+  }
+  return <span> {title}</span>;
+};
 
 const EventDetails = (props: IEventDetails) => {
   const thisWallet = props.wallet.address;
@@ -60,14 +96,13 @@ const EventDetails = (props: IEventDetails) => {
       const dtEnd = new Date(tmEnd * 1000);
       return (
         <div className="text-xs darken leading-4">
-          source:{" "}
-          <Address className="text-xs" inline={true} address={source} />{" "}
+          source: <Address className="text-xs" inline={true} address={source} />{" "}
           <span className="text-color-panel-title">{toCurrency(amount)}</span>{" "}
-          tokens.{" "}
-          Release start:{" "}
+          tokens. Release start:{" "}
           <span className="text-color-panel-title">
             {niceDate(dtStart.toISOString())}
-          </span>{", "}
+          </span>
+          {", "}
           end:{" "}
           <span className="text-color-panel-title">
             {niceDate(dtEnd.toISOString())}
@@ -88,7 +123,11 @@ const EventDetails = (props: IEventDetails) => {
       return (
         <div className="text-xs darken leading-4">
           {from == thisWallet ? " to " : " from "}
-          <InternalAddress className="text-xs" inline={true} address={from == thisWallet ? to : from} />{" "}
+          <InternalAddress
+            className="text-xs"
+            inline={true}
+            address={from == thisWallet ? to : from}
+          />{" "}
           <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
           shares. Total:{" "}
           <span className="text-color-panel-title">{toCurrency(total)}</span>{" "}
@@ -109,10 +148,17 @@ const EventDetails = (props: IEventDetails) => {
       );
       return (
         <div className="text-xs darken leading-4">
-          {from == thisWallet ? " to " : " from " }{" "}
-          <InternalAddress className="text-xs" inline={true} address={from == thisWallet ? to : from} />{" "}
+          {from == thisWallet ? " to " : " from "}{" "}
+          <InternalAddress
+            className="text-xs"
+            inline={true}
+            address={from == thisWallet ? to : from}
+          />{" "}
           <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
-          shares. Delta: <span className="text-color-panel-title">{JSON.stringify(delta)}</span>{" "}
+          shares. Delta:{" "}
+          <span className="text-color-panel-title">
+            {JSON.stringify(delta)}
+          </span>{" "}
           Total:{" "}
           <span className="text-color-panel-title">{toCurrency(total)}</span>{" "}
           shares.{" "}
@@ -132,7 +178,11 @@ const EventDetails = (props: IEventDetails) => {
       return (
         <div className="text-xs darken leading-4">
           {from == thisWallet ? " to " : " from "}{" "}
-          <InternalAddress className="text-xs" inline={true} address={from == thisWallet ? to : from} />{" "}
+          <InternalAddress
+            className="text-xs"
+            inline={true}
+            address={from == thisWallet ? to : from}
+          />{" "}
           <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
           shares. Total:{" "}
           <span className="text-color-panel-title">{toCurrency(total)}</span>{" "}
@@ -358,19 +408,34 @@ const EventDetails = (props: IEventDetails) => {
   }
 
   if (props.eventName == "StartVote" || props.eventName == "ExecuteVote") {
-    const voteId = "#" + ethers.BigNumber.from(props.data[0]).toString();
-    return <div className="text-xs darken leading-4">{voteId}</div>;
+    const voteId = parseInt(ethers.BigNumber.from(props.data[0]).toString());
+    return (
+      <div className="text-xs darken leading-4">
+        <VotingLink
+          id={voteId}
+          address={props.address}
+          votings={props.votings}
+          webconfig={props.webconfig}
+        />{" "}
+      </div>
+    );
   } else if (props.eventName == "CastVote") {
-    const voteId = "#" + ethers.BigNumber.from(props.data[0]).toString();
+    const voteId = parseInt(ethers.BigNumber.from(props.data[0]).toString());
     const supports = props.data[2];
     const votes = noDecimals(
       withDecimals(ethers.BigNumber.from(props.data[3]).toString(), 18)
     );
     return (
       <div className="text-xs darken leading-4">
-        {supports ? "Supported" : "Voted against"} {voteId} with{" "}
-        <span className="text-color-panel-title">{toCurrency(votes)}</span>{" "}
-        tokens
+        {supports ? "Supported" : "Voted against"}{" "}
+        <VotingLink
+          id={voteId}
+          address={props.address}
+          votings={props.votings}
+          webconfig={props.webconfig}
+        />{" "}
+        with <span className="text-color-panel-title">{toCurrency(votes)}</span>{" "}
+        tokens.
       </div>
     );
   } else {
@@ -396,14 +461,8 @@ export const WalletEventsListThead = () => (
   </thead>
 );
 
-interface IWalletEventsRowProps {
-  row: IWalletEvent;
-  wallet: IWallet;
-  index: number;
-}
-
 export const WalletEventsListTr = (props: IWalletEventsRowProps) => {
-  const { row, index, wallet } = props;
+  const { row, index, wallet, votings, webconfig } = props;
   return (
     <tr>
       <td className="text-center">{(index || 0) + 1}.</td>
@@ -419,8 +478,11 @@ export const WalletEventsListTr = (props: IWalletEventsRowProps) => {
         <div className="text-xs pt-1">
           <EventDetails
             eventName={row.eventName}
+            address={row.address}
             data={row.data}
             wallet={wallet}
+            votings={votings}
+            webconfig={webconfig}
           />
           <EventGasTotals
             gasUsed={row.gasUsed}
@@ -445,6 +507,8 @@ export const WalletEventsList = (props: IWalletEventsListProps) => {
               row={row}
               index={index}
               wallet={props.wallet}
+              votings={props.votings}
+              webconfig={props.webconfig}
             />
           ))}
         </tbody>

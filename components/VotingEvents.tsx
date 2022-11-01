@@ -110,7 +110,7 @@ export const VotingEventsListTr = (row: IVotingEvent) => {
         <BlockNumber txId={toHex(row.txHash)} blockNumber={row.blockNumber} />
       </td>
       <td className="text-center text-xs font-bold">{row.eventName} </td>
-      <td className="text-left">
+      <td className="text-left text-sm">
         <Link href={`/wallets/${toHex(row.address)}`} className="text-bold">
           <div>
             {row.ensName
