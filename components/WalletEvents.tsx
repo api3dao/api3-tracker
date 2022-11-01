@@ -24,6 +24,27 @@ interface IEventDetails {
   // TODO: map of votings
 }
 
+interface IEventGasTotals {
+  gasUsed: number | undefined;
+  gasPrice: number | undefined;
+  feeUsd: number | undefined;
+}
+
+const EventGasTotals = (props: IEventGasTotals) => {
+  const price = noDecimals(withDecimals("" + (props.gasPrice || 0), 9));
+  return (
+    <div className="text-xs text-color-grey leading-6">
+      Gas Used: <span className="text-color-panel-title">{props.gasUsed}</span>{" "}
+      Gas Price: <span className="text-color-panel-title">{price}</span> GWei,{" "}
+      Est.{" "}
+      <span className="text-color-panel-title">
+        ${parseFloat(props.feeUsd + "").toFixed(2)}
+      </span>{" "}
+    </div>
+  );
+};
+
+
 const EventDetails = (props: IEventDetails) => {
   const thisWallet = props.wallet.address;
   switch (props.eventName) {
@@ -400,6 +421,11 @@ export const WalletEventsListTr = (props: IWalletEventsRowProps) => {
             eventName={row.eventName}
             data={row.data}
             wallet={wallet}
+          />
+          <EventGasTotals
+            gasUsed={row.gasUsed}
+            gasPrice={row.gasPrice}
+            feeUsd={parseFloat(row.feeUsd + "")}
           />
         </div>
       </td>
