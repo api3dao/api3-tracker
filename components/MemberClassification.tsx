@@ -9,7 +9,22 @@ const badges = [
   {
     name: "vested",
     className: "bg-color-panel-title",
-    title: "Some shares of this member are vested",
+    title: "Some shares of this member were vested",
+  },
+  {
+    name: "delegates",
+    className: "bg-color-panel-title",
+    title: "This member is delegating his shares to another member",
+  },
+  {
+    name: "ens",
+    className: "bg-color-panel-title",
+    title: "This member has ENS name",
+  },
+  {
+    name: "voter",
+    className: "bg-color-panel-title",
+    title: "This member participated in votings",
   },
   {
     name: "withdrawn",
@@ -21,9 +36,20 @@ const badges = [
     className: "bg-color-success",
     title: "API3 tokens are not vested, member can withdraw, but never did",
   },
+  {
+    name: "unstaking",
+    className: "bg-color-panel-title",
+    title: "Member in the process of unstaking his shares",
+  },
+  {
+    name: "not-staking",
+    className: "bg-color-panel-title",
+    title: "Tokens were deposited but not staked",
+  },
 ];
 
 export const MemberClassification = (props: IBadgerProps) => {
+  if (props.badges.length == 0) return null;
   return (
     <div className="mt-4">
       <div className="uppercase text-center text-sm">Member classification</div>
