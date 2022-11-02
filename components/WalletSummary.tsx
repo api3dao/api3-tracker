@@ -47,12 +47,14 @@ export const WalletSummary = (props: IWallet) => {
               <div className={classTitle}>Withdrawn</div>
               <div className={classValue}>{toCurrency(props.userWithdrew)}</div>
             </div>
-            <div className="flex-1">
-              <div className={classTitle}>Locked Rewards</div>
-              <div className={classValue}>
-                {toCurrency(props.userLockedReward)}
+            {props.userLockedReward ? (
+              <div className="flex-1">
+                <div className={classTitle}>Locked Rewards</div>
+                <div className={classValue}>
+                  {toCurrency(props.userLockedReward)}
+                </div>
               </div>
-            </div>
+            ): null}
             <div className="flex-1">
               <div className={classTitle}>Deposited</div>
               <div className={classValue}>
