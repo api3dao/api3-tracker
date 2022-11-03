@@ -119,7 +119,7 @@ export const RewardsListTr = (epoch: IEpoch) => (
     <td className="text-center">
       {epoch.blockNumber ? (
         <a
-          href={`https://etherscan.io/tx/${epoch.blockTx}#eventlog`}
+          href={`https://etherscan.io/tx/${epoch.txHash}#eventlog`}
           rel="nofollow noopener noreferrer"
           target="_blank"
         >
