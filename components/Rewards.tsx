@@ -49,12 +49,10 @@ export const RewardsListSmScreen = (epoch: IEpoch) => (
       <div className="text-center">
         Block#{" "}
         <a
-          href={`https://etherscan.io/tx/${epoch.blockTx}#eventlog`}
+          href={`https://etherscan.io/tx/${epoch.txHash}#eventlog`}
           rel="nofollow noopener noreferrer"
           target="_blank"
-        >
-          {toCurrency(epoch.blockNumber)}
-        </a>
+        ></a>
       </div>
       <div className="text-center darken">{niceDate(epoch.createdAt)}</div>
       <div className="text-center darken">
