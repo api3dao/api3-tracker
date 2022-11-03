@@ -54,7 +54,7 @@ export interface IEpoch {
   mintedShares: Prisma.Decimal; // # of minted tokens
   releaseDate: string; // Date when minted tokens will be released
 
-  blockTx?: string;
+  txHash?: string;
   blockNumber?: number;
 }
 

@@ -38,7 +38,7 @@ export const Epochs = {
         where: { NOT: { blockNumber: 0 }},
         orderBy: { epoch: "desc" },
       })
-    ).map((x: any) => ({ ...x }));
+    ).map((x: any) => (Epochs.from(x)));
   },
   // fetch one epoch by its ID
   fetch: async (epoch: number) => {
@@ -46,6 +46,10 @@ export const Epochs = {
       where: { epoch },
     });
   },
+  from: (input: any): IEpoch => {
+    const txHash = "0x" + input.txHash.toString("hex");
+    return { ...input, txHash };
+  }
 };
 
 export const Supply = {

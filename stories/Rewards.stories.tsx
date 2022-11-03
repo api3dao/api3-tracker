@@ -31,7 +31,7 @@ Default.args = {
       mintedShares: new Prisma.Decimal(156944),
       releaseDate: new Date().toISOString(),
       blockNumber: 2828258,
-      blockTx:
+      txHash:
         "0xd29d9e55df72365e1e9b096b8850a6b0f612819d47d1175055c380721dcc8d18",
     },
   ],
