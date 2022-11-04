@@ -217,8 +217,7 @@ export const Wallets = {
   },
   // object mapper
   from: (input: any): IWallet => {
-    const badges = new Array();
-    return { ...input, badges };
+    return { ...input };
   },
   // list mapper
   fromList: (src: Array<any>): Array<IWallet> => {

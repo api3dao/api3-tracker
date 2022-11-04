@@ -11,7 +11,7 @@ import { Filter, Block, Log, Provider } from "@ethersproject/abstract-provider";
 import { EthereumPrice } from "./../services/price";
 import { VotingReader } from "./../services/voting";
 import { VoteGas } from "./../services/gas";
-import { VotingType } from ".prisma/client";
+import { Batch } from "./../services/members";
 
 const rewardsPct = (newApr: number): number => {
   const epochLength = 604800.0;
@@ -373,52 +373,6 @@ export const Address = {
   },
 };
 
-export const Members = {
-  ensureExists: async (addr: string, blockDt: Date, tx: Array<any>) => {
-    if (addr == "" || addr == "0x") return;
-    const address = Address.asBuffer(addr);
-    const members = await prisma.member.findMany({
-      where: { address },
-    });
-    if (members.length === 0) {
-      let ensName = "";
-      const ensRecords = await prisma.cacheEns.findMany({
-        where: { address },
-      });
-      const tags = new Array<String>();
-      tags.push(addr);
-      for (const ens of ensRecords) {
-        ensName = ens.name;
-        tags.push(ensName);
-      }
-      tx.push(
-        prisma.member.createMany({
-          data: [
-            {
-              address,
-              ensName,
-              ensUpdated: blockDt,
-              badges: "",
-              userShare: 0,
-              userStake: 0,
-              userVotingPower: 0,
-              userReward: 0,
-              userLockedReward: 0,
-              userDeposited: 0,
-              userWithdrew: 0,
-              createdAt: blockDt,
-              updatedAt: blockDt,
-              tags: tags.join(",")
-            },
-          ],
-          skipDuplicates: true,
-        })
-      );
-      // console.log("Created member", address.toString("hex"));
-    }
-  },
-};
-
 export const Events = {
   resetState: async () => {
     await prisma.$transaction([
@@ -677,6 +631,10 @@ export const Events = {
       totalStaked = new Prisma.Decimal(
         withDecimals(votingPower.toString(), 18)
       );
+      if (scriptData.address) {
+        const addr = "0x" + Buffer.from(scriptData.address);
+        await Batch.ensureExists(addr, blockDt, "grant");
+      }
 
       // multiply totalStaked by supportRequired. can round up wildly
       const pctRequired = isPrimary ? 0.5 : 0.15;
@@ -793,6 +751,7 @@ export const Events = {
     verbose: SyncVerbosity
   ): Promise<boolean> => {
     VoteGas.reset(); // gas accumulator for the block
+    Batch.reset();
 
     const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
@@ -810,20 +769,8 @@ export const Events = {
         );
         const feeUsd = parseFloat(withDecimals(priceDec.toString(), 18));
 
-          console.log(
-            txHash.toString("hex"),
-            "gasUsed",
-            BigNumber.from(gasUsed).toString(),
-            "gasPrice",
-            BigNumber.from(gasPrice).toString(),
-            "ethPrice",
-            new Prisma.Decimal(blockInfo.price),
-            "fee",
-            withDecimals(fee.toString(), 18),
-            "feeUsd",
-            feeUsd
-          );
-// if( feeUsd > 0 ) process.exit(1);
+        // console.log( txHash.toString("hex"), "gasUsed", BigNumber.from(gasUsed).toString(), "gasPrice", BigNumber.from(gasPrice).toString(), "ethPrice", new Prisma.Decimal(blockInfo.price), "fee", withDecimals(fee.toString(), 18), "feeUsd", feeUsd);
+        // if( feeUsd > 0 ) process.exit(1);
 
         const topicHash: string = event.topics[0];
         if (Events.IGNORED.get(topicHash) === 1) continue;
@@ -837,7 +784,7 @@ export const Events = {
             from
           );
           for (const addr of addresses) {
-            await Members.ensureExists(addr, blockDt, tx);
+            const wallet = await Batch.ensureExists(addr, blockDt, null);
             const eventId =
               event.blockNumber.toString(16) +
               "-" +
@@ -865,6 +812,14 @@ export const Events = {
                   },
                 })
               );
+              if (wallet) {
+                Batch.processEvent(
+                  wallet,
+                  blockDt,
+                  decoded.signature,
+                  decoded.args
+                );
+              }
             } catch (e) {
               console.error(
                 "Event @",
@@ -881,6 +836,7 @@ export const Events = {
             }
           }
           if (decoded.signature == "StartVote(uint256,address,string)") {
+            await Batch.ensureExists(from, blockDt, "voter");
             if (
               await Events.processVote(
                 blockInfo,
@@ -896,8 +852,10 @@ export const Events = {
           } else if (
             decoded.signature == "CastVote(uint256,address,bool,uint256)"
           ) {
+            await Batch.ensureExists(from, blockDt, "voter");
             await Events.castVote(blockInfo, event, decoded.args, config, tx);
           } else if (decoded.signature == "ExecuteVote(uint256)") {
+            await Batch.ensureExists(from, blockDt, "voter");
             await Events.execVote(blockInfo, event, decoded.args, config, tx);
           }
 
@@ -962,6 +920,19 @@ export const Events = {
         }
       }
     }
+
+    for (const data of Batch.getInserts()) {
+      tx.push(prisma.member.create({ data }));
+    }
+    for (const [addr, data] of Batch.getUpdates()) {
+      tx.push(
+        prisma.member.update({
+          where: { address: Address.asBuffer(addr) },
+          data,
+        })
+      );
+    }
+
     for (const [voteId, usage] of VoteGas.totals()) {
       tx.push(
         prisma.voting.updateMany({
