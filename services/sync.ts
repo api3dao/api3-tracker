@@ -24,6 +24,7 @@ interface SyncVerbosity {
   blocks: boolean;
   epochs: boolean;
   votings: boolean;
+  member: string;
 }
 
 interface BlockFullInfo {
@@ -757,6 +758,7 @@ export const Events = {
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
     const tx = new Array();
     let terminate: boolean = false;
+    const vm: string = verbose.member.replace("0x", "").toLowerCase();
     for (const [_contractAddress, logs] of blockInfo.logs.entries()) {
       for (const event of logs) {
         const { transactionHash, transactionIndex, logIndex } = event;
@@ -792,6 +794,17 @@ export const Events = {
               "." +
               Math.random().toString().replace("0.", "");
             try {
+              const matchMember = addr.replace("0x", "").toLowerCase() == vm;
+              if (matchMember) {
+                console.log(
+                  "MEMBER EVENT",
+                  blockNumber,
+                  blockDt,
+                  decoded.name,
+                  decoded.signature,
+                  JSON.stringify(decoded.args)
+                );
+              }
               tx.push(
                 prisma.memberEvent.create({
                   data: {
@@ -922,9 +935,28 @@ export const Events = {
     }
 
     for (const data of Batch.getInserts()) {
+      const matchMember = data.address.toString("hex").toLowerCase() == vm;
+      if (matchMember) {
+        console.log(
+          "MEMBER CREATE",
+          blockNumber,
+          blockDt,
+          JSON.stringify(data)
+        );
+      }
       tx.push(prisma.member.create({ data }));
     }
     for (const [addr, data] of Batch.getUpdates()) {
+      const matchMember = addr.replace("0x", "").toLowerCase() == vm;
+      if (matchMember) {
+        console.log(
+          "MEMBER UPDATE",
+          blockNumber,
+          blockDt,
+          addr,
+          JSON.stringify(data)
+        );
+      }
       tx.push(
         prisma.member.update({
           where: { address: Address.asBuffer(addr) },
