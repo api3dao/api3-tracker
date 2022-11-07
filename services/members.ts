@@ -181,7 +181,12 @@ export const Batch = {
     }
     // return null;
   },
-  addBadge: (existing: IWallet, badge: Badge, blockDt: Date) => {
+  addBadge: (
+    existing: IWallet,
+    badge: Badge,
+    blockDt: Date,
+    verbose: boolean
+  ) => {
     const addr: string = existing.address;
     if (badge && !Wordlist.has(existing.badges, badge)) {
       // 2. we are updating existing member, and this is not a first operation for this block
@@ -193,6 +198,9 @@ export const Batch = {
       }
       existing.updatedAt = blockDt.toISOString();
 
+      if (verbose) {
+        console.log("MEMBER BADGE", badge, "added, now", existing.badges);
+      }
       if (Batch.inserts.has(addr)) {
         Batch.inserts.set(addr, existing);
       }
@@ -202,15 +210,20 @@ export const Batch = {
     }
     return existing;
   },
-  addSupporter: (member: IWallet, blockDt: Date) => {
+  addSupporter: (member: IWallet, blockDt: Date, verbose: boolean) => {
     if (
       !Wordlist.has(member.badges, "withdrawn") &&
       !Wordlist.has(member.badges, "vested")
     ) {
-      Batch.addBadge(member, "supporter", blockDt);
+      Batch.addBadge(member, "supporter", blockDt, verbose);
     }
   },
-  removeBadge: (existing: IWallet, badge: Badge, blockDt: Date) => {
+  removeBadge: (
+    existing: IWallet,
+    badge: Badge,
+    blockDt: Date,
+    verbose: boolean
+  ) => {
     const addr: string = existing.address;
     if (badge && Wordlist.has(existing.badges, badge)) {
       // 2. we are updating existing member, and this is not a first operation for this block
@@ -218,6 +231,9 @@ export const Batch = {
       existing.tags = Wordlist.remove(existing.tags || "", badge);
       existing.updatedAt = blockDt.toISOString();
 
+      if (verbose) {
+        console.log("MEMBER BADGE", badge, "removed, now", existing.badges);
+      }
       if (Batch.inserts.has(addr)) {
         Batch.inserts.set(addr, existing);
       }
@@ -232,37 +248,38 @@ export const Batch = {
     member: IWallet,
     blockDt: Date,
     signature: string,
-    args: any
+    args: any,
+    verbose: boolean
   ) => {
     switch (signature) {
       case "Deposited(address,uint256,uint256)":
-        Batch.addSupporter(member, blockDt);
-        Batch.addBadge(member, "deposited", blockDt);
+        Batch.addSupporter(member, blockDt, verbose);
+        Batch.addBadge(member, "deposited", blockDt, verbose);
         break;
       case "Staked(address,uint256,uint256,uint256,uint256,uint256,uint256)":
-        Batch.removeBadge(member, "deposited", blockDt);
+        Batch.removeBadge(member, "deposited", blockDt, verbose);
         break;
       // case "Unstaked(address,uint256,uint256,uint256,uint256)":
       case "ScheduledUnstake(address,uint256,uint256,uint256,uint256)":
-        Batch.addBadge(member, "unstaking", blockDt);
+        Batch.addBadge(member, "unstaking", blockDt, verbose);
         break;
       case "Delegated(address,address,uint256,uint256)":
         if (member.address == args[0]) {
-          Batch.addBadge(member, "delegates", blockDt);
+          Batch.addBadge(member, "delegates", blockDt, verbose);
         }
         break;
       case "VestedTimeLock(address,uint256,uint256)":
       case "DepositedByTimelockManager(address,uint256,uint256)":
       case "DepositedVesting(address,uint256,uint256,uint256,uint256,uint256)":
-        Batch.addBadge(member, "vested", blockDt);
-        Batch.removeBadge(member, "supporter", blockDt);
+        Batch.addBadge(member, "vested", blockDt, verbose);
+        Batch.removeBadge(member, "supporter", blockDt, verbose);
         break;
       case "Withdrawn(address,uint256)":
       case "Withdrawn(address,uint256,uint256)":
       case "WithdrawnToPool(address,address,address)":
-        Batch.addBadge(member, "withdrawn", blockDt);
-        Batch.removeBadge(member, "supporter", blockDt);
-        Batch.removeBadge(member, "unstaking", blockDt);
+        Batch.addBadge(member, "withdrawn", blockDt, verbose);
+        Batch.removeBadge(member, "supporter", blockDt, verbose);
+        Batch.removeBadge(member, "unstaking", blockDt, verbose);
         break;
     }
   },

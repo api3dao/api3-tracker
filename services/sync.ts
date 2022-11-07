@@ -684,6 +684,7 @@ export const Events = {
     event: Log,
     args: any,
     config: IWebConfig,
+    verbose: boolean,
     tx: any
   ) => {
     const { voteId, supports, stake } = args;
@@ -704,15 +705,21 @@ export const Events = {
       if (supported) totalFor = totalFor.add(foundVote[0].totalFor);
       else totalAgainst = totalAgainst.add(foundVote[0].totalAgainst);
     }
-    console.log(
-      voteInternalId,
-      "SUPPORTED",
-      supported,
-      "FOR",
-      totalFor,
-      "AGAINST",
-      totalAgainst
-    );
+    if (verbose) {
+      const blockDt = new Date(blockInfo.block.timestamp * 1000);
+      console.log(
+        "VOTE",
+        blockInfo.block.number,
+        blockDt,
+        voteInternalId,
+        "SUPPORTED",
+        supported,
+        "FOR",
+        totalFor,
+        "AGAINST",
+        totalAgainst
+      );
+    }
     tx.push(
       prisma.voting.updateMany({
         where: { id: voteInternalId + "" },
@@ -726,12 +733,23 @@ export const Events = {
     event: Log,
     args: any,
     config: IWebConfig,
+    verbose: boolean,
     tx: any
   ) => {
     const { voteId } = args;
     const isPrimary = VotingReader.isPrimary(config, event.address);
     const voteInternalId = voteId * 2 + (isPrimary ? 1 : 0);
     // const receipt = blockInfo.receipts.get(event.transactionHash);
+    if (verbose) {
+      const blockDt = new Date(blockInfo.block.timestamp * 1000);
+      console.log(
+        "VOTE",
+        blockInfo.block.number,
+        blockDt,
+        voteInternalId,
+        "EXECUTED"
+      );
+    }
     tx.push(
       prisma.voting.updateMany({
         where: {
@@ -794,7 +812,8 @@ export const Events = {
               "." +
               Math.random().toString().replace("0.", "");
             try {
-              const matchMember = addr.replace("0x", "").toLowerCase() == vm;
+              const matchMember: boolean =
+                addr.replace("0x", "").toLowerCase() == vm;
               if (matchMember) {
                 console.log(
                   "MEMBER EVENT",
@@ -830,7 +849,8 @@ export const Events = {
                   wallet,
                   blockDt,
                   decoded.signature,
-                  decoded.args
+                  decoded.args,
+                  matchMember
                 );
               }
             } catch (e) {
@@ -866,10 +886,24 @@ export const Events = {
             decoded.signature == "CastVote(uint256,address,bool,uint256)"
           ) {
             await Batch.ensureExists(from, blockDt, "voter");
-            await Events.castVote(blockInfo, event, decoded.args, config, tx);
+            await Events.castVote(
+              blockInfo,
+              event,
+              decoded.args,
+              config,
+              verbose.votings,
+              tx
+            );
           } else if (decoded.signature == "ExecuteVote(uint256)") {
             await Batch.ensureExists(from, blockDt, "voter");
-            await Events.execVote(blockInfo, event, decoded.args, config, tx);
+            await Events.execVote(
+              blockInfo,
+              event,
+              decoded.args,
+              config,
+              verbose.votings,
+              tx
+            );
           }
 
           const votings = Events.votings(decoded.signature, decoded.args);
