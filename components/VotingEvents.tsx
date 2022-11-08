@@ -2,9 +2,8 @@ import React from "react";
 import { ethers } from "ethers";
 import { IVotingEvent } from "./../services/types";
 import Link from "next/link";
-import { BlockNumber, Address } from "./../components/Ethscan";
+import { BlockNumber } from "./../components/Ethscan";
 import {
-  niceDate,
   niceDateTime,
   noDecimals,
   withDecimals,
@@ -111,7 +110,7 @@ export const VotingEventsListTr = (row: IVotingEvent) => {
         <BlockNumber txId={toHex(row.txHash)} blockNumber={row.blockNumber} />
       </td>
       <td className="text-center text-xs font-bold">{row.eventName} </td>
-      <td className="text-left">
+      <td className="text-left text-sm">
         <Link href={`/wallets/${toHex(row.address)}`} className="text-bold">
           <div>
             {row.ensName

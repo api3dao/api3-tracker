@@ -124,8 +124,10 @@ export interface IWallet {
 }
 
 export interface IWalletEvent {
+  index?: number; // row index
   id: string;
   createdAt: string;
+  address: string;
   txHash: string;
   blockNumber: number;
   txIndex?: number;
