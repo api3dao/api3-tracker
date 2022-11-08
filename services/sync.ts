@@ -806,17 +806,12 @@ export const Events = {
         const { gasPrice } = blockInfo.txs.get(transactionHash);
         const fee = BigNumber.from(gasUsed).mul(BigNumber.from(gasPrice));
         const priceDec = new Prisma.Decimal(blockInfo.price).mul(
-          fee.toString()
+          new Prisma.Decimal(withDecimals(fee.toString(), 18))
         );
         const feeUsd = parseFloat(withDecimals(priceDec.toString(), 18));
-        if (
-          txHash ==
-          Buffer.from(
-            "5dd64a8084d5c6c933aef681e5725ec1a41a8823d6cd4706fa7e6e7ee020fc29",
-            "hex"
-          )
-        ) {
+
           console.log(
+            txHash.toString("hex"),
             "gasUsed",
             BigNumber.from(gasUsed).toString(),
             "gasPrice",
@@ -824,11 +819,12 @@ export const Events = {
             "ethPrice",
             new Prisma.Decimal(blockInfo.price),
             "fee",
-            fee.toString(),
+            withDecimals(fee.toString(), 18),
             "feeUsd",
             feeUsd
           );
-        }
+// if( feeUsd > 0 ) process.exit(1);
+
         const topicHash: string = event.topics[0];
         if (Events.IGNORED.get(topicHash) === 1) continue;
         try {
