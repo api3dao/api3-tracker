@@ -57,7 +57,7 @@ const stringQuery = (input: any, defaultValue: string): string => {
 const WalletsPage: NextPage = (props: any) => {
   const { lastBlock, webconfig } = props;
   const router = useRouter();
-  const q = stringQuery(router.query, "");
+  const q = stringQuery(router.query.q, "");
 
   const [isLoading, setLoading] = React.useState(false);
   const [isLoadingMore, setLoadingMore] = React.useState(false);
@@ -106,7 +106,7 @@ const WalletsPage: NextPage = (props: any) => {
     if (isLoadingMore) return;
     if (!state.hasMore) return;
     setLoadingMore(true);
-    console.log("on Load More q=", q);
+    console.log("on Load More q=", state.q);
     fetcher(
       "/api/json/wallets?q=" +
         (state.q || "") +
@@ -134,7 +134,7 @@ const WalletsPage: NextPage = (props: any) => {
             pageStart={0}
             loadMore={onLoadMore}
             hasMore={state.hasMore}
-            loader={<div></div>}
+            loader={<div key={0}></div>}
           >
             <WalletsList list={wallets} />
           </InfiniteScroll>
