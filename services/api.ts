@@ -207,9 +207,11 @@ export const Wallets = {
   },
   // fetch one voting by its ID
   fetch: async (address: Buffer): Promise<IWallet | null> => {
-    return (await prisma.member.findUnique({
+    const out = await prisma.member.findUnique({
       where: { address },
-    })) as IWallet | null;
+    }) as IWallet | null;
+    if (out) return Wallets.from(out);
+    return null;
   },
   // fetch total number of members
   total: async (): Promise<number> => {
@@ -217,7 +219,8 @@ export const Wallets = {
   },
   // object mapper
   from: (input: any): IWallet => {
-    return { ...input };
+    const address = (typeof input.address == "string") ? input.address.replace("0x", "") : "0x" + Buffer.from(input.address).toString("hex");
+    return { ...input, address };
   },
   // list mapper
   fromList: (src: Array<any>): Array<IWallet> => {

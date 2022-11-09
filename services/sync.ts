@@ -45,6 +45,14 @@ const elapsed = (since: number): string => {
   return `${duration / 1000}s`;
 };
 
+const uniqueArray = (arr: Array<any>): Array<any> => {
+  const a = new Array();
+  for (let i = 0, l = arr.length; i < l; i++) {
+    if (a.indexOf(arr[i]) === -1 && arr[i] !== "") a.push(arr[i]);
+  }
+  return a;
+};
+
 export const BlockLoader = {
   fromDatabase: async (
     blockRecord: any,
@@ -434,11 +442,11 @@ export const Events = {
       case "Staked(address,uint256,uint256,uint256,uint256,uint256,uint256)":
         return [args[0]];
       case "Delegated(address,address,uint256,uint256)":
-        return [args[0], args[1]];
+        return uniqueArray([args[0], args[1]]);
       case "UpdatedDelegation(address,address,bool,uint256,uint256)":
-        return [args[0], args[1]];
+        return uniqueArray([args[0], args[1]]);
       case "Undelegated(address,address,uint256,uint256)":
-        return [args[0], args[1]];
+        return uniqueArray([args[0], args[1]]);
       case "Unstaked(address,uint256,uint256,uint256,uint256)":
         return [args[0]];
       case "ScheduledUnstake(address,uint256,uint256,uint256,uint256)":
@@ -448,7 +456,7 @@ export const Events = {
       case "DepositedByTimelockManager(address,uint256,uint256)":
         return [args[0]];
       case "UpdatedLastProposalTimestamp(address,uint256,address)":
-        return [args[0], args[2]];
+        return uniqueArray([args[0], args[2]]);
       case "VestedTimeLock(address,uint256,uint256)":
       case "VestedTimelock(address,uint256,uint256)":
         return [args[0]];
@@ -457,11 +465,11 @@ export const Events = {
       case "Withdrawn(address,uint256,uint256)":
         return [args[0]];
       case "WithdrawnToPool(address,address,address)":
-        return [args[0], args[1], args[2]];
+        return uniqueArray([args[0], args[1], args[2]]);
       case "OwnershipTransferred(address,address)":
-        return [args[0], args[1]];
+        return uniqueArray([args[0], args[1]]);
       case "TransferredAndLocked(address,address,uint256,uint256,uint256)":
-        return [args[0], args[1]];
+        return uniqueArray([args[0], args[1]]);
       case "StartVote(uint256,address,string)":
         return [args[1]];
       case "CastVote(uint256,address,bool,uint256)":
@@ -588,7 +596,8 @@ export const Events = {
     args: any,
     config: IWebConfig,
     endpoint: string,
-    verbose: boolean,
+    verboseVote: boolean,
+    verboseMember: string,
     tx: any
   ): Promise<boolean> => {
     const { transactionHash } = event;
@@ -633,8 +642,10 @@ export const Events = {
         withDecimals(votingPower.toString(), 18)
       );
       if (scriptData.address) {
-        const addr = "0x" + Buffer.from(scriptData.address);
-        await Batch.ensureExists(addr, blockDt, "grant");
+        const addr = "0x" + Buffer.from(scriptData.address).toString("hex");
+        const matchMember: boolean =
+          addr.replace("0x", "").toLowerCase() == verboseMember;
+        await Batch.ensureExists(addr, blockDt, "grant", matchMember);
       }
 
       // multiply totalStaked by supportRequired. can round up wildly
@@ -684,7 +695,8 @@ export const Events = {
     event: Log,
     args: any,
     config: IWebConfig,
-    verbose: boolean,
+    verboseVote: boolean,
+    _verboseMember: string,
     tx: any
   ) => {
     const { voteId, supports, stake } = args;
@@ -705,7 +717,7 @@ export const Events = {
       if (supported) totalFor = totalFor.add(foundVote[0].totalFor);
       else totalAgainst = totalAgainst.add(foundVote[0].totalAgainst);
     }
-    if (verbose) {
+    if (verboseVote) {
       const blockDt = new Date(blockInfo.block.timestamp * 1000);
       console.log(
         "VOTE",
@@ -733,14 +745,15 @@ export const Events = {
     event: Log,
     args: any,
     config: IWebConfig,
-    verbose: boolean,
+    verboseVote: boolean,
+    _verboseMember: string,
     tx: any
   ) => {
     const { voteId } = args;
     const isPrimary = VotingReader.isPrimary(config, event.address);
     const voteInternalId = voteId * 2 + (isPrimary ? 1 : 0);
     // const receipt = blockInfo.receipts.get(event.transactionHash);
-    if (verbose) {
+    if (verboseVote) {
       const blockDt = new Date(blockInfo.block.timestamp * 1000);
       console.log(
         "VOTE",
@@ -782,6 +795,7 @@ export const Events = {
         const { transactionHash, transactionIndex, logIndex } = event;
         const txHash = Buffer.from(transactionHash.replace("0x", ""), "hex");
         const { from, gasUsed } = blockInfo.receipts.get(transactionHash);
+        const matchFrom = from.replace("0x", "").toLowerCase() == vm;
         const { gasPrice } = blockInfo.txs.get(transactionHash);
         const fee = BigNumber.from(gasUsed).mul(BigNumber.from(gasPrice));
         const priceDec = new Prisma.Decimal(blockInfo.price).mul(
@@ -804,7 +818,14 @@ export const Events = {
             from
           );
           for (const addr of addresses) {
-            const wallet = await Batch.ensureExists(addr, blockDt, null);
+            const matchMember: boolean =
+              addr.toString().replace("0x", "").toLowerCase() == vm;
+            const wallet = await Batch.ensureExists(
+              addr,
+              blockDt,
+              null,
+              matchMember
+            );
             const eventId =
               event.blockNumber.toString(16) +
               "-" +
@@ -812,13 +833,12 @@ export const Events = {
               "." +
               Math.random().toString().replace("0.", "");
             try {
-              const matchMember: boolean =
-                addr.replace("0x", "").toLowerCase() == vm;
               if (matchMember) {
                 console.log(
                   "MEMBER EVENT",
                   blockNumber,
                   blockDt,
+                  addr,
                   decoded.name,
                   decoded.signature,
                   JSON.stringify(decoded.args)
@@ -869,7 +889,7 @@ export const Events = {
             }
           }
           if (decoded.signature == "StartVote(uint256,address,string)") {
-            await Batch.ensureExists(from, blockDt, "voter");
+            await Batch.ensureExists(from, blockDt, "voter", matchFrom);
             if (
               await Events.processVote(
                 blockInfo,
@@ -878,6 +898,7 @@ export const Events = {
                 config,
                 endpoint,
                 verbose.votings,
+                verbose.member,
                 tx
               )
             )
@@ -885,23 +906,25 @@ export const Events = {
           } else if (
             decoded.signature == "CastVote(uint256,address,bool,uint256)"
           ) {
-            await Batch.ensureExists(from, blockDt, "voter");
+            await Batch.ensureExists(from, blockDt, "voter", matchFrom);
             await Events.castVote(
               blockInfo,
               event,
               decoded.args,
               config,
               verbose.votings,
+              verbose.member,
               tx
             );
           } else if (decoded.signature == "ExecuteVote(uint256)") {
-            await Batch.ensureExists(from, blockDt, "voter");
+            await Batch.ensureExists(from, blockDt, "voter", matchFrom);
             await Events.execVote(
               blockInfo,
               event,
               decoded.args,
               config,
               verbose.votings,
+              verbose.member,
               tx
             );
           }
@@ -969,7 +992,8 @@ export const Events = {
     }
 
     for (const data of Batch.getInserts()) {
-      const matchMember = data.address.toString("hex").toLowerCase() == vm;
+      const matchMember =
+        data.address.toString("hex").replace("0x", "").toLowerCase() == vm;
       if (matchMember) {
         console.log(
           "MEMBER CREATE",

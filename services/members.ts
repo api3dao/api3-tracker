@@ -15,12 +15,13 @@ export type Badge =
 
 const Wordlist = {
   has: (wordlist: string, word: string): boolean => {
-    // console.log("WORDLIST: HAS", typeof wordlist, wordlist);
     if (!wordlist) return false;
-
     const parts = wordlist.split(",");
-    for (const p in parts) {
-      if (p == word) return true;
+    for (let i = 0; i < parts.length; i++) {
+      const p = parts[i];
+      if (p == word) {
+        return true;
+      }
     }
     return false;
   },
@@ -40,7 +41,7 @@ const Wordlist = {
     }
     // console.log("WORDLIST: REMOVE", JSON.stringify(wordlist), word);
     const parts = new Array<string>();
-    for (const p in wordlist.split(",")) {
+    for (const p of wordlist.split(",")) {
       if (p != word) {
         parts.push(p);
       }
@@ -58,18 +59,28 @@ export const Address = {
 export const Batch = {
   getInserts: (): Array<Prisma.MemberCreateInput> => {
     const out = new Array<Prisma.MemberCreateInput>();
-    for (const [_addr, m] of Batch.inserts) {
+    for (const [addr, m] of Batch.inserts) {
       const tags = m.tags || "";
-      out.push({ ...m, tags, address: Address.asBuffer(m.address) });
+      const addrBuf =
+        typeof addr == "string"
+          ? Address.asBuffer(addr)
+          : Buffer.from(addr, "hex");
+      // console.log("READY.TO.INSERT", addr, typeof addr, m);
+      out.push({ ...m, tags, address: addrBuf });
     }
     return out;
   },
 
   getUpdates: (): Map<string, Prisma.MemberUpdateInput> => {
     const out = new Map<string, Prisma.MemberUpdateInput>();
-    for (const [addr, m] of Batch.inserts) {
+    for (const [addr, m] of Batch.updates) {
       const tags = m.tags || "";
-      out.set(addr, { ...m, tags, address: Address.asBuffer(m.address) });
+      const addrBuf =
+        typeof addr == "string"
+          ? Address.asBuffer(addr)
+          : Buffer.from(addr, "hex");
+      // console.log("READY.TO.UPDATE", addr, typeof addr, m);
+      out.set(addrBuf.toString("hex"), { ...m, tags, address: addrBuf });
     }
     return out;
   },
@@ -78,15 +89,16 @@ export const Batch = {
   updates: new Map<string, IWallet>(),
 
   reset: () => {
-    Batch.inserts = new Map<string, IWallet>();
-    Batch.updates = new Map<string, IWallet>();
+    Batch.inserts.clear();
+    Batch.updates.clear();
   },
 
   // this function can update only badge
   ensureExists: async (
     addr: string,
     blockDt: Date,
-    badge: Badge | null
+    badge: Badge | null,
+    verbose: boolean
   ): Promise<IWallet | null> => {
     if (addr == "" || addr == "0x") return null;
     const address = Address.asBuffer(addr);
@@ -102,6 +114,7 @@ export const Batch = {
           existing.tags = badge;
         }
         existing.updatedAt = blockDt.toISOString();
+        if (verbose) console.log("ENSURE INSERT ", blockDt, addr, typeof addr);
         Batch.inserts.set(addr, existing);
       }
       return existing || null;
@@ -116,6 +129,7 @@ export const Batch = {
           existing.tags = badge;
         }
         existing.updatedAt = blockDt.toISOString();
+        if (verbose) console.log("ENSURE UPDATE ", blockDt, addr);
         Batch.updates.set(addr, existing);
       }
       return existing || null;
@@ -158,6 +172,9 @@ export const Batch = {
           badges: badges.join(","),
           tags: tags.join(","),
         };
+        if (verbose) {
+          console.log("EXISTING MEMBER IS INSERTING?", addr, member.badges);
+        }
         Batch.inserts.set(addr, member);
         return member;
       } else {
@@ -174,6 +191,9 @@ export const Batch = {
             }
           }
           existing.updatedAt = blockDt.toISOString();
+          if (verbose) {
+            console.log("EXISTING MEMBER IS UPDATING", addr, existing.badges);
+          }
           Batch.updates.set(addr, existing);
         }
         return existing;
@@ -198,13 +218,27 @@ export const Batch = {
       }
       existing.updatedAt = blockDt.toISOString();
 
-      if (verbose) {
-        console.log("MEMBER BADGE", badge, "added, now", existing.badges);
-      }
       if (Batch.inserts.has(addr)) {
+        if (verbose) {
+          console.log(
+            "MEMBER BADGE INSERTED",
+            addr,
+            badge,
+            "added, now",
+            existing.badges
+          );
+        }
         Batch.inserts.set(addr, existing);
-      }
-      if (Batch.updates.has(addr)) {
+      } else { // if (Batch.updates.has(addr)) {
+        if (verbose) {
+          console.log(
+            "MEMBER BADGE UPDATED",
+            addr,
+            badge,
+            "added, now",
+            existing.badges
+          );
+        }
         Batch.updates.set(addr, existing);
       }
     }
@@ -215,8 +249,9 @@ export const Batch = {
       !Wordlist.has(member.badges, "withdrawn") &&
       !Wordlist.has(member.badges, "vested")
     ) {
-      Batch.addBadge(member, "supporter", blockDt, verbose);
+      return Batch.addBadge(member, "supporter", blockDt, verbose);
     }
+    return member;
   },
   removeBadge: (
     existing: IWallet,
@@ -231,13 +266,27 @@ export const Batch = {
       existing.tags = Wordlist.remove(existing.tags || "", badge);
       existing.updatedAt = blockDt.toISOString();
 
-      if (verbose) {
-        console.log("MEMBER BADGE", badge, "removed, now", existing.badges);
-      }
       if (Batch.inserts.has(addr)) {
+        if (verbose) {
+          console.log(
+            "MEMBER BADGE INSERTED",
+            addr,
+            badge,
+            "removed, now",
+            existing.badges
+          );
+        }
         Batch.inserts.set(addr, existing);
-      }
-      if (Batch.updates.has(addr)) {
+      } else { // if (Batch.updates.has(addr)) {
+        if (verbose) {
+          console.log(
+            "MEMBER BADGE UPDATED",
+            addr,
+            badge,
+            "removed, now",
+            existing.badges
+          );
+        }
         Batch.updates.set(addr, existing);
       }
     }
@@ -253,34 +302,29 @@ export const Batch = {
   ) => {
     switch (signature) {
       case "Deposited(address,uint256,uint256)":
-        Batch.addSupporter(member, blockDt, verbose);
-        Batch.addBadge(member, "deposited", blockDt, verbose);
-        break;
+        const m = Batch.addSupporter(member, blockDt, verbose);
+        return Batch.addBadge(m, "deposited", blockDt, verbose);
       case "Staked(address,uint256,uint256,uint256,uint256,uint256,uint256)":
-        Batch.removeBadge(member, "deposited", blockDt, verbose);
-        break;
+        return Batch.removeBadge(member, "deposited", blockDt, verbose);
       // case "Unstaked(address,uint256,uint256,uint256,uint256)":
       case "ScheduledUnstake(address,uint256,uint256,uint256,uint256)":
-        Batch.addBadge(member, "unstaking", blockDt, verbose);
-        break;
+        return Batch.addBadge(member, "unstaking", blockDt, verbose);
       case "Delegated(address,address,uint256,uint256)":
         if (member.address == args[0]) {
-          Batch.addBadge(member, "delegates", blockDt, verbose);
+          return Batch.addBadge(member, "delegates", blockDt, verbose);
         }
-        break;
+        return member;
       case "VestedTimeLock(address,uint256,uint256)":
       case "DepositedByTimelockManager(address,uint256,uint256)":
       case "DepositedVesting(address,uint256,uint256,uint256,uint256,uint256)":
-        Batch.addBadge(member, "vested", blockDt, verbose);
-        Batch.removeBadge(member, "supporter", blockDt, verbose);
-        break;
+        const mm = Batch.removeBadge(member, "supporter", blockDt, verbose);
+        return Batch.addBadge(mm, "vested", blockDt, verbose);
       case "Withdrawn(address,uint256)":
       case "Withdrawn(address,uint256,uint256)":
-      case "WithdrawnToPool(address,address,address)":
-        Batch.addBadge(member, "withdrawn", blockDt, verbose);
-        Batch.removeBadge(member, "supporter", blockDt, verbose);
-        Batch.removeBadge(member, "unstaking", blockDt, verbose);
-        break;
+      // case "WithdrawnToPool(address,address,address)":
+        const m1 = Batch.removeBadge(member, "supporter", blockDt, verbose);
+        const m2 = Batch.removeBadge(m1, "unstaking", blockDt, verbose);
+        return Batch.addBadge(m2, "withdrawn", blockDt, verbose);
     }
   },
 };

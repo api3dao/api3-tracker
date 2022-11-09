@@ -79,7 +79,7 @@ yargs(hideBin(process.argv))
         .option("verbose-member", {
           type: "string",
           description:
-            "Run with verbose member logging (hex address to be proviced)",
+            "Run with verbose member logging (hex address to be provided)",
         })
         .option("verbose-votings", {
           type: "boolean",
