@@ -7,6 +7,7 @@ import {
   niceDateTime,
   toCurrency,
 } from "./../services/format";
+import { MemberBadges } from "./../components/MemberClassification";
 
 export interface IWalletsListProps {
   list: Array<IWallet>;
@@ -35,10 +36,9 @@ export const WalletsListTr = (row: IWallet) => (
     <td className="text-left">
       <Link href={`/wallets/${toHex(row.address)}`} className="text-bold">
         {row.ensName ? (
-          <div>
-            <span className="font-bold">{row.ensName}</span>
-            <br />
-            <span className="accent" style={{ fontFamily: "monospace", cursor:"pointer" }}>{toHex(row.address)}</span>
+          <div className="">
+            <div className="leading-1 font-bold">{row.ensName}</div>
+            <div className="leading-1 accent" style={{ fontFamily: "monospace", cursor:"pointer" }}>{toHex(row.address)}</div>
           </div>
         ) : (
           <div>
@@ -46,6 +46,7 @@ export const WalletsListTr = (row: IWallet) => (
           </div>
         )}
       </Link>
+      <MemberBadges badges={row.badges} />
     </td>
     <td className="text-right">{toCurrency(row.userVotingPower)}</td>
     <td className="text-right">0%</td>

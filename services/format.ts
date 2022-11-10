@@ -43,7 +43,7 @@ export const toHex = (x: any): string => {
       }).join("")
     );
   }
-  return "" + x;
+  return "0x" + x.replace("0x", "");
 };
 
 export const months = [
