@@ -60,8 +60,8 @@ export const MemberClassification = (props: IBadgerProps) => {
               className="text-sm text-left leading-6 text-color-grey"
               key={b.name}
             >
-              <span className={classBadge + b.className}>{b.name}</span> -
-              {b.title}
+              <span className={classBadge + b.className}>{b.name}</span> -{" "}
+              <span className="text-xs">{b.title}</span>
             </li>
           )
         )}
@@ -76,7 +76,7 @@ export const MemberBadges = (props: IBadgerProps) => {
     <div className="leading-2 text-xs">
       {badges.map((b: any) =>
         props.badges.indexOf(b.name) === -1 ? null : (
-          <span className={classBadge + b.className}>{b.name}</span>
+          <span key={b.name} className={classBadge + b.className}>{b.name}</span>
         )
       )}
     </div>

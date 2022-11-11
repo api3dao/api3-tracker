@@ -9,6 +9,7 @@ import { IWallet, IBlockNumber } from "../services/types";
 import { WalletsSearch } from "../components/WalletsSearch";
 import { WalletsList } from "../components/WalletsList";
 import { serializable } from "../services/format";
+import { Debounced } from "../services/debounced";
 
 // const fetcher = (...args) => fetch(...args).then((res) => res.json());
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
@@ -68,15 +69,16 @@ const WalletsPage: NextPage = (props: any) => {
     total: props.total || 0,
     hasMore: props.total > props.list.length,
   });
-  const setData = (response: any) => {
+  const setData = (q: string) => ((response: any) => {
+    console.log("set Data q=", state.q);
     setState({
-      q: state.q,
+      q,
       list: response.list,
       take: state.take,
       total: response.page.total,
       hasMore: response.page.total > response.list.length,
     });
-  };
+  });
   const appendData = (response: any) => {
     const list = state.list.slice();
     for (const item of response.list) {
@@ -93,20 +95,22 @@ const WalletsPage: NextPage = (props: any) => {
 
   const wallets = state.list;
   const onChange = (value: string) => {
-    router.push("?q=" + value, undefined, { shallow: true });
     setLoading(true);
-    setState({ ...state, q: value || "" });
-    fetcher("/api/json/wallets?q=" + value + "&take=" + state.take)
-      .then(setData)
-      .then(() => setLoading(false))
-      .catch((e: any) => setLoading(false));
+    Debounced.start("q", () => {
+      router.push("?q=" + value, undefined, { shallow: true });
+      setState({ ...state, q: value || "" });
+      fetcher("/api/json/wallets?q=" + value + "&take=" + state.take)
+        .then(setData(value))
+        .then(() => setLoading(false))
+        .catch((e: any) => setLoading(false));
+    }, 300);
   };
 
   const onLoadMore = () => {
     if (isLoadingMore) return;
     if (!state.hasMore) return;
     setLoadingMore(true);
-    console.log("on Load More q=", state.q);
+    console.log("on Load More q=", state);
     fetcher(
       "/api/json/wallets?q=" +
         (state.q || "") +
