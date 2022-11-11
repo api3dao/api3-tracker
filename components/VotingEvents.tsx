@@ -1,8 +1,9 @@
 import React from "react";
 import { ethers } from "ethers";
-import { IVotingEvent } from "./../services/types";
+import { IWallet, IVotingEvent } from "./../services/types";
 import Link from "next/link";
 import { BlockNumber } from "./../components/Ethscan";
+import { MemberBadges } from "./../components/MemberClassification";
 import {
   niceDateTime,
   noDecimals,
@@ -14,6 +15,7 @@ import {
 export interface IVotingEventsListProps {
   list: Array<IVotingEvent>;
   totalStake: number;
+  members: Array<IWallet>;
 }
 
 export const VotingEventsListThead = () => (
@@ -122,9 +124,9 @@ export const VotingEventsListTr = (row: IVotingEvent) => {
                 ]
               : null}
             <div className="accent">{toHex(row.address)}</div>
-            <div className="darken"></div>
           </div>
         </Link>
+        <MemberBadges badges={row.badges} />
         <EventGasTotals
           gasUsed={row.gasUsed}
           gasPrice={row.gasPrice}
@@ -146,14 +148,18 @@ export const VotingEventsList = (props: IVotingEventsListProps) => {
       <table className="table invisible lg:visible">
         <VotingEventsListThead />
         <tbody>
-          {props.list.map((row, index) => (
-            <VotingEventsListTr
-              key={row.id}
-              {...row}
-              index={index}
-              totalStake={props.totalStake}
-            />
-          ))}
+          {props.list.map((row, index) => {
+            const member = props.members.filter((x: any) => (toHex(row.address) == toHex(x.address)));
+            return (
+              <VotingEventsListTr
+                key={row.id}
+                {...member[0]}
+                {...row}
+                index={index}
+                totalStake={props.totalStake}
+              />
+            );
+          })}
         </tbody>
       </table>
       <div className="pt-6 font-xl">&nbsp;</div>

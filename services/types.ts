@@ -157,6 +157,7 @@ export interface IVotingEvent {
   feeUsd?: Prisma.Decimal;
 
   address?: string;
+  badges?: string;
   ensName?: string;
   supports?: number;
   totalStake?: number;

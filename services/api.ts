@@ -205,11 +205,20 @@ export const Wallets = {
     ]);
     return { list: list.map((x: any) => ({ ...x })), page: { total } };
   },
+  // fetch and return map
+  fetchByAddresses: async (
+    addresses: Array<Buffer>
+  ): Promise<Array<IWallet>> => {
+    const where = { address: { in: addresses } };
+    return (await prisma.member.findMany({ where })).map((x: any) => ({
+      ...x,
+    }));
+  },
   // fetch one voting by its ID
   fetch: async (address: Buffer): Promise<IWallet | null> => {
-    const out = await prisma.member.findUnique({
+    const out = (await prisma.member.findUnique({
       where: { address },
-    }) as IWallet | null;
+    })) as IWallet | null;
     if (out) return Wallets.from(out);
     return null;
   },
@@ -219,7 +228,10 @@ export const Wallets = {
   },
   // object mapper
   from: (input: any): IWallet => {
-    const address = (typeof input.address == "string") ? input.address.replace("0x", "") : "0x" + Buffer.from(input.address).toString("hex");
+    const address =
+      typeof input.address == "string"
+        ? input.address.replace("0x", "")
+        : "0x" + Buffer.from(input.address).toString("hex");
     return { ...input, address };
   },
   // list mapper
