@@ -14,8 +14,6 @@ import { serializable } from "../services/format";
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export async function getServerSideProps(context: any) {
-  await new Promise((r) => setTimeout(r, 1300));
-
   const q = context.query.q || "";
   const cursor = {
     take: parseInt(context.query.take) || 100,
@@ -42,7 +40,7 @@ export async function getServerSideProps(context: any) {
 }
 
 interface WalletsPageState {
-  q: String;
+  q: String,
   list: Array<IWallet>;
   total: number;
   hasMore: boolean;
@@ -50,9 +48,9 @@ interface WalletsPageState {
 }
 
 const stringQuery = (input: any, defaultValue: string): string => {
-  if (typeof input === "undefined") return defaultValue;
-  if (typeof input === "number") return defaultValue + "";
-  if (typeof input === "string") return input;
+  if (typeof input === 'undefined') return defaultValue;
+  if (typeof input === 'number') return defaultValue + "";
+  if (typeof input === 'string') return input;
   return input[0];
 };
 
