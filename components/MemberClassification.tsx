@@ -29,7 +29,7 @@ const badges = [
   {
     name: "withdrawn",
     className: "bg-color-error text-color-panel-title",
-    title: "withdrew tokens in the past",
+    title: "Withdrew tokens in the past",
   },
   {
     name: "supporter",

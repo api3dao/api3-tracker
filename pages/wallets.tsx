@@ -70,7 +70,6 @@ const WalletsPage: NextPage = (props: any) => {
     hasMore: props.total > props.list.length,
   });
   const setData = (q: string) => ((response: any) => {
-    console.log("set Data q=", state.q);
     setState({
       q,
       list: response.list,
@@ -110,7 +109,6 @@ const WalletsPage: NextPage = (props: any) => {
     if (isLoadingMore) return;
     if (!state.hasMore) return;
     setLoadingMore(true);
-    console.log("on Load More q=", state);
     fetcher(
       "/api/json/wallets?q=" +
         (state.q || "") +

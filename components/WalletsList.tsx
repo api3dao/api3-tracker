@@ -5,6 +5,7 @@ import {
   toHex,
   niceDate,
   niceDateTime,
+  toPct, noDecimals,
   toCurrency,
 } from "./../services/format";
 import { MemberBadges } from "./../components/MemberClassification";
@@ -20,10 +21,8 @@ export const WalletsListThead = () => (
       <th className="text-center">Joined</th>
       <th className="text-center">Updated</th>
       <th className="text-left">Wallet</th>
-      <th className="text-right">Voting Power</th>
       <th className="text-right">%</th>
-      <th className="text-right">Owns</th>
-      <th className="text-right">Rewards</th>
+      <th className="text-right">Voting Power</th>
     </tr>
   </thead>
 );
@@ -48,10 +47,8 @@ export const WalletsListTr = (row: IWallet) => (
       </Link>
       <MemberBadges badges={row.badges} />
     </td>
-    <td className="text-right">{toCurrency(row.userVotingPower)}</td>
-    <td className="text-right">0%</td>
-    <td className="text-right">{toCurrency(row.userShare)}</td>
-    <td className="text-right">{toCurrency(row.userReward)}</td>
+    <td className="text-right">{toPct(row.userVotingPower)}</td>
+    <td className="text-right">{noDecimals(toCurrency(row.userShare))}</td>
   </tr>
 );
 
