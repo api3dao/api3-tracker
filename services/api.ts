@@ -197,7 +197,7 @@ export const Wallets = {
     const [list, total] = await prisma.$transaction([
       prisma.member.findMany({
         where,
-        orderBy: [{ userVotingPower: "desc"},{ createdAt: "asc" }],
+        orderBy: [{ userShare: "desc"},{ createdAt: "asc" }],
         take: cursor.take || 100,
         skip: cursor.skip || 0,
       }),

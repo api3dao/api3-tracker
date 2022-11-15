@@ -2,6 +2,8 @@ import prisma from "./db";
 import { Prisma } from "@prisma/client";
 import { IWallet } from "./types";
 import { Wallets } from "./api";
+import { BigNumber, ethers } from "ethers";
+import { noDecimals, withDecimals } from "./../services/format";
 
 export type Badge =
   | "grant"
@@ -301,30 +303,53 @@ export const Batch = {
     verbose: boolean
   ) => {
     switch (signature) {
-      case "Deposited(address,uint256,uint256)":
-        const m = Batch.addSupporter(member, blockDt, verbose);
-        return Batch.addBadge(m, "deposited", blockDt, verbose);
-      case "Staked(address,uint256,uint256,uint256,uint256,uint256,uint256)":
-        return Batch.removeBadge(member, "deposited", blockDt, verbose);
+      case "Deposited(address,uint256,uint256)": {
+        const m0 = Batch.addSupporter(member, blockDt, verbose);
+        const m1 = Batch.addBadge(m0, "deposited", blockDt, verbose);
+        const tokens = withDecimals(BigNumber.from(args[1]).toString(), 18);
+        m1.userDeposited = m1.userDeposited.add(new Prisma.Decimal(tokens));
+        return m1;
+      }
+      case "Staked(address,uint256,uint256,uint256,uint256,uint256,uint256)": {
+        const userShares = new Prisma.Decimal(withDecimals(ethers.BigNumber.from(args[4]).toString(), 18));
+        // const totalShares = new Prisma.Decimal(withDecimals(ethers.BigNumber.from(args[5]).toString(), 18));
+        const m0 = Batch.removeBadge(member, "deposited", blockDt, verbose);
+        m0.userShare = m0.userShare.add(userShares);
+        m0.userVotingPower = new Prisma.Decimal(0.0);
+        // TODO: add every existing user in the batch should be updated
+        // TODO: evert user in the database should be updated....
+        return m0;
+      }
       // case "Unstaked(address,uint256,uint256,uint256,uint256)":
       case "ScheduledUnstake(address,uint256,uint256,uint256,uint256)":
         return Batch.addBadge(member, "unstaking", blockDt, verbose);
       case "Delegated(address,address,uint256,uint256)":
-        if (member.address == args[0]) {
+        if (member.address.toLowerCase() == args[0].toLowerCase()) {
           return Batch.addBadge(member, "delegates", blockDt, verbose);
         }
         return member;
-      case "VestedTimeLock(address,uint256,uint256)":
-      case "DepositedByTimelockManager(address,uint256,uint256)":
-      case "DepositedVesting(address,uint256,uint256,uint256,uint256,uint256)":
-        const mm = Batch.removeBadge(member, "supporter", blockDt, verbose);
-        return Batch.addBadge(mm, "vested", blockDt, verbose);
+      case "VestedTimeLock(address,uint256,uint256)": {
+        const m0 = Batch.removeBadge(member, "supporter", blockDt, verbose);
+        return Batch.addBadge(m0, "vested", blockDt, verbose);
+      }
+      case "DepositedByTimelockManager(address,uint256,uint256)": {
+        const m0 = Batch.removeBadge(member, "supporter", blockDt, verbose);
+        return Batch.addBadge(m0, "vested", blockDt, verbose);
+      }
+      case "DepositedVesting(address,uint256,uint256,uint256,uint256,uint256)": {
+        const m0 = Batch.removeBadge(member, "supporter", blockDt, verbose);
+        return Batch.addBadge(m0, "vested", blockDt, verbose);
+      }
       case "Withdrawn(address,uint256)":
-      case "Withdrawn(address,uint256,uint256)":
+      case "Withdrawn(address,uint256,uint256)": {
       // case "WithdrawnToPool(address,address,address)":
         const m1 = Batch.removeBadge(member, "supporter", blockDt, verbose);
         const m2 = Batch.removeBadge(m1, "unstaking", blockDt, verbose);
-        return Batch.addBadge(m2, "withdrawn", blockDt, verbose);
+        const m3 = Batch.addBadge(m2, "withdrawn", blockDt, verbose);
+        const tokens = withDecimals(BigNumber.from(args[1]).toString(), 18);
+        m3.userWithdrew = m3.userWithdrew.add(new Prisma.Decimal(tokens));
+        return m3;
+      }
     }
   },
 };
