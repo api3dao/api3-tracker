@@ -315,12 +315,14 @@ export const Batch = {
         // const totalShares = new Prisma.Decimal(withDecimals(ethers.BigNumber.from(args[5]).toString(), 18));
         const m0 = Batch.removeBadge(member, "deposited", blockDt, verbose);
         m0.userShare = m0.userShare.add(userShares);
-        m0.userVotingPower = new Prisma.Decimal(0.0);
-        // TODO: add every existing user in the batch should be updated
-        // TODO: evert user in the database should be updated....
+        m0.userVotingPower = new Prisma.Decimal(0.0); // we will calculate it on fly
         return m0;
       }
-      // case "Unstaked(address,uint256,uint256,uint256,uint256)":
+      case "Unstaked(address,uint256,uint256,uint256,uint256)": {
+        const userShares = new Prisma.Decimal(withDecimals(ethers.BigNumber.from(args[1]).toString(), 18));
+        member.userShare = member.userShare.add(userShares);
+        return member;
+      }
       case "ScheduledUnstake(address,uint256,uint256,uint256,uint256)":
         return Batch.addBadge(member, "unstaking", blockDt, verbose);
       case "Delegated(address,address,uint256,uint256)":
