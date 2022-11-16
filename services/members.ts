@@ -320,7 +320,7 @@ export const Batch = {
       }
       case "Unstaked(address,uint256,uint256,uint256,uint256)": {
         const userShares = new Prisma.Decimal(withDecimals(ethers.BigNumber.from(args[1]).toString(), 18));
-        member.userShare = member.userShare.add(userShares);
+        member.userShare = member.userShare.sub(userShares);
         return member;
       }
       case "ScheduledUnstake(address,uint256,uint256,uint256,uint256)":
