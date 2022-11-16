@@ -4,8 +4,8 @@ import { useRouter } from "next/router";
 import InfiniteScroll from "react-infinite-scroller";
 import { Footer, Header, Meta } from "../components/";
 import { fetchWebconfig } from "../services/webconfig";
-import { Wallets, Blocks } from "../services/api";
-import { IWallet, IBlockNumber } from "../services/types";
+import { Supply, Wallets, Blocks } from "../services/api";
+import { ISupply, IWallet, IBlockNumber } from "../services/types";
 import { WalletsSearch } from "../components/WalletsSearch";
 import { WalletsList } from "../components/WalletsList";
 import { serializable } from "../services/format";
@@ -23,10 +23,12 @@ export async function getServerSideProps(context: any) {
   const results = await Promise.all([
     Wallets.fetchList(q, cursor),
     Blocks.fetchLast(),
+    Supply.fetch(),
   ]);
   const list: Array<IWallet> = results[0].list;
   const total = results[0].page.total;
   const lastBlock: IBlockNumber = results[1];
+  const supply: ISupply | null = results[2];
 
   return {
     props: {
@@ -36,6 +38,7 @@ export async function getServerSideProps(context: any) {
       list: serializable(list),
       total,
       lastBlock: serializable(lastBlock),
+      supply: serializable(supply),
     }, // will be passed to the page component as props
   };
 }
@@ -56,7 +59,7 @@ const stringQuery = (input: any, defaultValue: string): string => {
 };
 
 const WalletsPage: NextPage = (props: any) => {
-  const { lastBlock, webconfig } = props;
+  const { lastBlock, supply, webconfig } = props;
   const router = useRouter();
   const q = stringQuery(router.query.q, "");
 
@@ -138,7 +141,7 @@ const WalletsPage: NextPage = (props: any) => {
             hasMore={state.hasMore}
             loader={<div key={0}></div>}
           >
-            <WalletsList list={wallets} />
+            <WalletsList total={supply.totalStaked} list={wallets} />
           </InfiniteScroll>
         )}
         {isLoadingMore ? (

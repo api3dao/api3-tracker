@@ -126,7 +126,7 @@ export const VotingEventsListTr = (row: IVotingEvent) => {
             <div className="accent">{toHex(row.address)}</div>
           </div>
         </Link>
-        <MemberBadges badges={row.badges} />
+        <MemberBadges badges={row.badges || ''} />
         <EventGasTotals
           gasUsed={row.gasUsed}
           gasPrice={row.gasPrice}
