@@ -2,7 +2,7 @@ resource "local_file" "yarn" {
    content = <<EOF
 #!/usr/bin/env bash
 set -x
-docker exec -it ${local.hostname} yarn  $@
+docker exec -i ${local.hostname} yarn  $@
 EOF
 
    filename = "./bin/yarn.sh"
