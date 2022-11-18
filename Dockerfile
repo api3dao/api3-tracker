@@ -8,7 +8,6 @@ FROM node:16.16-alpine3.15 as builder
 WORKDIR /app
 COPY . .
 COPY --from=dependencies /app/node_modules ./node_modules
-RUN yarn rm-dev && rm -rf .storybook/ stories/
 RUN yarn prisma generate
 RUN yarn build
 
