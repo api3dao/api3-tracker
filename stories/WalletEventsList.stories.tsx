@@ -22,6 +22,7 @@ Example.args = {
       id: "1",
       createdAt: new Date().toISOString(),
       txHash: "",
+      address: "0x5846711b4b7485392c1f0feaec203aa889071717",
       blockNumber: 12942126,
       data: "",
       eventName: "CastVote",
