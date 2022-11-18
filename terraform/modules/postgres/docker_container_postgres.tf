@@ -1,5 +1,5 @@
 resource "docker_container" "postgres" {
-  image = docker_image.postgres.latest
+  image = docker_image.postgres.image_id
   name = local.host
   restart = "always"
 

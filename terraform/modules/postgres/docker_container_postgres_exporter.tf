@@ -1,7 +1,7 @@
 resource "docker_container" "postgres_exporter" {
   count = var.enable_metrics ? 1 : 0
 
-  image = docker_image.postgres_exporter.latest
+  image = docker_image.postgres_exporter.image_id
   name = "${local.metrics_shortname}-${local.postfix}"
   restart = "always"
 

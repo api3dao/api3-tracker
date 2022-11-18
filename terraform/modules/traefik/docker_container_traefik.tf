@@ -1,12 +1,12 @@
 resource "docker_container" traefik {
   name = local.hostname
-  image = docker_image.traefik.latest
+  image = docker_image.traefik.image_id
   restart = "always"
 
   command = local.command
   env = local.env
-  log_opts = var.network_params.log_opts 
-  
+  log_opts = var.network_params.log_opts
+
   networks_advanced {
     name  = docker_network.public.id
   }
