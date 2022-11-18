@@ -55,8 +55,8 @@ export const Menu = (props: IMenuProps) => {
         ].join(" ");
 
         return (
-          <Link href={item.href} key={item.href}>
-            <a className={classFull}>{item.title}</a>
+          <Link href={item.href} key={item.href} className={classFull}>
+            {item.title}
           </Link>
         );
       })}
