@@ -20,11 +20,21 @@ const rewardsPct = (newApr: number): number => {
   return (newApr * 100 * aprCoeff) / 52.0;
 };
 
+interface SyncTermination {
+  epoch: boolean;
+  block: number;
+}
+
 interface SyncVerbosity {
   blocks: boolean;
   epochs: boolean;
   votings: boolean;
   member: string;
+}
+
+interface SyncBlockResult {
+  shouldTerminate: boolean;
+  included: boolean;
 }
 
 interface BlockFullInfo {
@@ -642,7 +652,7 @@ export const Events = {
         withDecimals(votingPower.toString(), 18)
       );
       if (scriptData.address) {
-        const addr = "0x" + Buffer.from(scriptData.address).toString("hex");
+        const addr = "0x" + Buffer.from(scriptData.address).toString("hex").toLowerCase();
         const matchMember: boolean =
           addr.replace("0x", "").toLowerCase() == verboseMember;
         await Batch.ensureExists(addr, blockDt, "grant", matchMember);
@@ -780,15 +790,17 @@ export const Events = {
     blockInfo: BlockFullInfo,
     config: IWebConfig,
     endpoint: string,
-    verbose: SyncVerbosity
-  ): Promise<boolean> => {
+    verbose: SyncVerbosity,
+    termination: SyncTermination
+  ): Promise<SyncBlockResult> => {
     VoteGas.reset(); // gas accumulator for the block
     Batch.reset();
 
     const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
     const tx = new Array();
-    let terminate: boolean = false;
+    let shouldTerminate: boolean = false;
+    let included: boolean = true;
     const vm: string = verbose.member.replace("0x", "").toLowerCase();
     for (const [_contractAddress, logs] of blockInfo.logs.entries()) {
       for (const event of logs) {
@@ -835,7 +847,7 @@ export const Events = {
             try {
               if (matchMember) {
                 console.log(
-                  "MEMBER EVENT",
+                  "MEMBER.EVENT",
                   blockNumber,
                   blockDt,
                   addr,
@@ -901,8 +913,10 @@ export const Events = {
                 verbose.member,
                 tx
               )
-            )
-              terminate = true;
+            ) {
+              shouldTerminate = true;
+              included = false;
+            }
           } else if (
             decoded.signature == "CastVote(uint256,address,bool,uint256)"
           ) {
@@ -975,8 +989,11 @@ export const Events = {
           if (
             decoded.signature == "MintedReward(uint256,uint256,uint256,uint256)"
           ) {
-            if (await Events.processEpoch(blockInfo, event, tx))
-              terminate = true;
+            if (await Events.processEpoch(blockInfo, event, tx)) {
+              if (termination.epoch) {
+                shouldTerminate = true;
+              }
+            }
           }
         } catch (e) {
           console.error(
@@ -991,12 +1008,13 @@ export const Events = {
       }
     }
 
-    for (const data of Batch.getInserts()) {
+    let verboseBatch = true;
+    for (const data of Batch.getInserts(verboseBatch)) {
       const matchMember =
         data.address.toString("hex").replace("0x", "").toLowerCase() == vm;
       if (matchMember) {
         console.log(
-          "MEMBER CREATE",
+          "MEMBER.CREATE",
           blockNumber,
           blockDt,
           JSON.stringify(data)
@@ -1004,11 +1022,11 @@ export const Events = {
       }
       tx.push(prisma.member.create({ data }));
     }
-    for (const [addr, data] of Batch.getUpdates()) {
+    for (const [addr, data] of Batch.getUpdates(verboseBatch)) {
       const matchMember = addr.replace("0x", "").toLowerCase() == vm;
       if (matchMember) {
         console.log(
-          "MEMBER UPDATE",
+          "MEMBER.UPDATE",
           blockNumber,
           blockDt,
           addr,
@@ -1044,27 +1062,37 @@ export const Events = {
         },
       })
     );
-    await prisma.$transaction(tx);
-    return terminate;
+    if (termination.block == blockNumber) { // stop on a certain block
+      shouldTerminate = true;
+      included = false;
+    }
+
+    if (included) {
+      await prisma.$transaction(tx);
+    }
+    return { shouldTerminate, included };
   },
 
   processState: async (
     endpoint: string,
-    stopOnEpoch: boolean,
-    verbose: SyncVerbosity
+    verbose: SyncVerbosity,
+    terminate: SyncTermination
   ) => {
     let total = 0;
     const webconfig = fetchWebconfig();
     do {
       const blockInfo: BlockFullInfo | null = await Sync.next(verbose.blocks);
       if (blockInfo) {
-        const terminate = await Events.processBlock(
+        const result = await Events.processBlock(
           blockInfo,
           webconfig,
           endpoint,
-          verbose
+          verbose,
+          terminate
         );
-        if (terminate && stopOnEpoch) return ++total;
+        if (result.shouldTerminate) {
+          return result.included ? ++total : total;
+        }
       } else {
         return total;
       }

@@ -76,6 +76,12 @@ yargs(hideBin(process.argv))
           type: "boolean",
           description: "Run with verbose epochs logging",
         })
+        .option("stop-block", {
+          type: "number",
+          default: 0,
+          description:
+            "Calculate state until the certain block number and stop without writing it",
+        })
         .option("verbose-member", {
           type: "string",
           description:
@@ -99,6 +105,7 @@ yargs(hideBin(process.argv))
       verboseEpochs,
       verboseVotings,
       verboseMember,
+      stopBlock,
     }) => {
       if (sub == "reset") {
         await Events.resetState();
@@ -110,7 +117,15 @@ yargs(hideBin(process.argv))
           votings: verboseVotings || false,
           member: verboseMember || "",
         };
-        const blocks = await Events.processState(endpoint, true, verbose);
+        const termination = {
+          epoch: true,
+          block: stopBlock,
+        };
+        const blocks = await Events.processState(
+          endpoint,
+          verbose,
+          termination,
+        );
         console.log(`${blocks} blocks were processed`);
       } else if (sub == "update") {
         const verbose = {
@@ -119,7 +134,11 @@ yargs(hideBin(process.argv))
           votings: verboseVotings || false,
           member: verboseMember || "",
         };
-        const blocks = await Events.processState(endpoint, false, verbose);
+        const termination = {
+          epoch: false,
+          block: stopBlock,
+        };
+        const blocks = await Events.processState(endpoint, verbose, termination);
         console.log(`${blocks} blocks were processed`);
       } else {
         console.error("ERROR: Unknown sub-command");

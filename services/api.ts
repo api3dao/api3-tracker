@@ -231,7 +231,7 @@ export const Wallets = {
     const address =
       typeof input.address == "string"
         ? input.address.replace("0x", "")
-        : "0x" + Buffer.from(input.address).toString("hex");
+        : "0x" + Buffer.from(input.address).toString("hex").toLowerCase();
     return { ...input, address };
   },
   // list mapper

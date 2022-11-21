@@ -59,7 +59,7 @@ export const Address = {
 };
 
 export const Batch = {
-  getInserts: (): Array<Prisma.MemberCreateInput> => {
+  getInserts: (verbose: boolean): Array<Prisma.MemberCreateInput> => {
     const out = new Array<Prisma.MemberCreateInput>();
     for (const [addr, m] of Batch.inserts) {
       const tags = m.tags || "";
@@ -67,13 +67,13 @@ export const Batch = {
         typeof addr == "string"
           ? Address.asBuffer(addr)
           : Buffer.from(addr, "hex");
-      // console.log("READY.TO.INSERT", addr, typeof addr, m);
+      if (verbose) console.log("BATCH.INSERT", addr, m);
       out.push({ ...m, tags, address: addrBuf });
     }
     return out;
   },
 
-  getUpdates: (): Map<string, Prisma.MemberUpdateInput> => {
+  getUpdates: (verbose: boolean): Map<string, Prisma.MemberUpdateInput> => {
     const out = new Map<string, Prisma.MemberUpdateInput>();
     for (const [addr, m] of Batch.updates) {
       const tags = m.tags || "";
@@ -81,7 +81,7 @@ export const Batch = {
         typeof addr == "string"
           ? Address.asBuffer(addr)
           : Buffer.from(addr, "hex");
-      // console.log("READY.TO.UPDATE", addr, typeof addr, m);
+      if (verbose) console.log("BATCH.UPDATE", addr, m);
       out.set(addrBuf.toString("hex"), { ...m, tags, address: addrBuf });
     }
     return out;
@@ -103,7 +103,7 @@ export const Batch = {
     verbose: boolean
   ): Promise<IWallet | null> => {
     if (addr == "" || addr == "0x") return null;
-    const address = Address.asBuffer(addr);
+    const address: Buffer = Address.asBuffer(addr);
 
     if (Batch.inserts.has(addr)) {
       const existing = Batch.inserts.get(addr);
@@ -231,7 +231,8 @@ export const Batch = {
           );
         }
         Batch.inserts.set(addr, existing);
-      } else { // if (Batch.updates.has(addr)) {
+      } else {
+        // if (Batch.updates.has(addr)) {
         if (verbose) {
           console.log(
             "MEMBER BADGE UPDATED",
@@ -279,7 +280,8 @@ export const Batch = {
           );
         }
         Batch.inserts.set(addr, existing);
-      } else { // if (Batch.updates.has(addr)) {
+      } else {
+        // if (Batch.updates.has(addr)) {
         if (verbose) {
           console.log(
             "MEMBER BADGE UPDATED",
@@ -311,15 +313,20 @@ export const Batch = {
         return m1;
       }
       case "Staked(address,uint256,uint256,uint256,uint256,uint256,uint256)": {
-        const userShares = new Prisma.Decimal(withDecimals(ethers.BigNumber.from(args[4]).toString(), 18));
+        const userShares = new Prisma.Decimal(
+          withDecimals(ethers.BigNumber.from(args[4]).toString(), 18)
+        );
         // const totalShares = new Prisma.Decimal(withDecimals(ethers.BigNumber.from(args[5]).toString(), 18));
         const m0 = Batch.removeBadge(member, "deposited", blockDt, verbose);
         m0.userShare = m0.userShare.add(userShares);
         m0.userVotingPower = new Prisma.Decimal(0.0); // we will calculate it on fly
+        console.log("USER SHARE", member.address, m0.userShare);
         return m0;
       }
       case "Unstaked(address,uint256,uint256,uint256,uint256)": {
-        const userShares = new Prisma.Decimal(withDecimals(ethers.BigNumber.from(args[1]).toString(), 18));
+        const userShares = new Prisma.Decimal(
+          withDecimals(ethers.BigNumber.from(args[1]).toString(), 18)
+        );
         member.userShare = member.userShare.sub(userShares);
         return member;
       }
@@ -344,7 +351,7 @@ export const Batch = {
       }
       case "Withdrawn(address,uint256)":
       case "Withdrawn(address,uint256,uint256)": {
-      // case "WithdrawnToPool(address,address,address)":
+        // case "WithdrawnToPool(address,address,address)":
         const m1 = Batch.removeBadge(member, "supporter", blockDt, verbose);
         const m2 = Batch.removeBadge(m1, "unstaking", blockDt, verbose);
         const m3 = Batch.addBadge(m2, "withdrawn", blockDt, verbose);
