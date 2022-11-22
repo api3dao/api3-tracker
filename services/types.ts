@@ -112,6 +112,7 @@ export interface IWallet {
   ensName: string; // ENS domain name
   ensUpdated: string;
   badges: string;
+  tags?: string;
   userShare: Prisma.Decimal;
   userStake: Prisma.Decimal; // number of user stake at the moment of this epoch
   userVotingPower: Prisma.Decimal; // user voting power at this epoch
@@ -156,6 +157,7 @@ export interface IVotingEvent {
   feeUsd?: Prisma.Decimal;
 
   address?: string;
+  badges?: string;
   ensName?: string;
   supports?: number;
   totalStake?: number;

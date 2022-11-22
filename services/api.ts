@@ -197,7 +197,7 @@ export const Wallets = {
     const [list, total] = await prisma.$transaction([
       prisma.member.findMany({
         where,
-        orderBy: { createdAt: "asc" }, // TODO: order by rewards
+        orderBy: [{ userShare: "desc"},{ createdAt: "asc" }],
         take: cursor.take || 100,
         skip: cursor.skip || 0,
       }),
@@ -205,11 +205,22 @@ export const Wallets = {
     ]);
     return { list: list.map((x: any) => ({ ...x })), page: { total } };
   },
+  // fetch and return map
+  fetchByAddresses: async (
+    addresses: Array<Buffer>
+  ): Promise<Array<IWallet>> => {
+    const where = { address: { in: addresses } };
+    return (await prisma.member.findMany({ where })).map((x: any) => ({
+      ...x,
+    }));
+  },
   // fetch one voting by its ID
   fetch: async (address: Buffer): Promise<IWallet | null> => {
-    return (await prisma.member.findUnique({
+    const out = (await prisma.member.findUnique({
       where: { address },
     })) as IWallet | null;
+    if (out) return Wallets.from(out);
+    return null;
   },
   // fetch total number of members
   total: async (): Promise<number> => {
@@ -217,8 +228,11 @@ export const Wallets = {
   },
   // object mapper
   from: (input: any): IWallet => {
-    const badges = new Array();
-    return { ...input, badges };
+    const address =
+      typeof input.address == "string"
+        ? input.address.replace("0x", "")
+        : "0x" + Buffer.from(input.address).toString("hex");
+    return { ...input, address };
   },
   // list mapper
   fromList: (src: Array<any>): Array<IWallet> => {

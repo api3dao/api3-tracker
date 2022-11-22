@@ -76,6 +76,11 @@ yargs(hideBin(process.argv))
           type: "boolean",
           description: "Run with verbose epochs logging",
         })
+        .option("verbose-member", {
+          type: "string",
+          description:
+            "Run with verbose member logging (hex address to be provided)",
+        })
         .option("verbose-votings", {
           type: "boolean",
           description: "Run with verbose votings logging",
@@ -93,6 +98,7 @@ yargs(hideBin(process.argv))
       verboseBlocks,
       verboseEpochs,
       verboseVotings,
+      verboseMember,
     }) => {
       if (sub == "reset") {
         await Events.resetState();
@@ -102,6 +108,7 @@ yargs(hideBin(process.argv))
           blocks: verboseBlocks || false,
           epochs: verboseEpochs || false,
           votings: verboseVotings || false,
+          member: verboseMember || "",
         };
         const blocks = await Events.processState(endpoint, true, verbose);
         console.log(`${blocks} blocks were processed`);
@@ -110,6 +117,7 @@ yargs(hideBin(process.argv))
           blocks: verboseBlocks || false,
           epochs: verboseEpochs || false,
           votings: verboseVotings || false,
+          member: verboseMember || "",
         };
         const blocks = await Events.processState(endpoint, false, verbose);
         console.log(`${blocks} blocks were processed`);

@@ -4,11 +4,12 @@ import { useRouter } from "next/router";
 import InfiniteScroll from "react-infinite-scroller";
 import { Footer, Header, Meta } from "../components/";
 import { fetchWebconfig } from "../services/webconfig";
-import { Wallets, Blocks } from "../services/api";
-import { IWallet, IBlockNumber } from "../services/types";
+import { Supply, Wallets, Blocks } from "../services/api";
+import { ISupply, IWallet, IBlockNumber } from "../services/types";
 import { WalletsSearch } from "../components/WalletsSearch";
 import { WalletsList } from "../components/WalletsList";
 import { serializable } from "../services/format";
+import { Debounced } from "../services/debounced";
 
 // const fetcher = (...args) => fetch(...args).then((res) => res.json());
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
@@ -22,10 +23,12 @@ export async function getServerSideProps(context: any) {
   const results = await Promise.all([
     Wallets.fetchList(q, cursor),
     Blocks.fetchLast(),
+    Supply.fetch(),
   ]);
   const list: Array<IWallet> = results[0].list;
   const total = results[0].page.total;
   const lastBlock: IBlockNumber = results[1];
+  const supply: ISupply | null = results[2];
 
   return {
     props: {
@@ -35,6 +38,7 @@ export async function getServerSideProps(context: any) {
       list: serializable(list),
       total,
       lastBlock: serializable(lastBlock),
+      supply: serializable(supply),
     }, // will be passed to the page component as props
   };
 }
@@ -55,9 +59,9 @@ const stringQuery = (input: any, defaultValue: string): string => {
 };
 
 const WalletsPage: NextPage = (props: any) => {
-  const { lastBlock, webconfig } = props;
+  const { lastBlock, supply, webconfig } = props;
   const router = useRouter();
-  const q = stringQuery(router.query, "");
+  const q = stringQuery(router.query.q, "");
 
   const [isLoading, setLoading] = React.useState(false);
   const [isLoadingMore, setLoadingMore] = React.useState(false);
@@ -68,15 +72,15 @@ const WalletsPage: NextPage = (props: any) => {
     total: props.total || 0,
     hasMore: props.total > props.list.length,
   });
-  const setData = (response: any) => {
+  const setData = (q: string) => ((response: any) => {
     setState({
-      q: state.q,
+      q,
       list: response.list,
       take: state.take,
       total: response.page.total,
       hasMore: response.page.total > response.list.length,
     });
-  };
+  });
   const appendData = (response: any) => {
     const list = state.list.slice();
     for (const item of response.list) {
@@ -93,20 +97,21 @@ const WalletsPage: NextPage = (props: any) => {
 
   const wallets = state.list;
   const onChange = (value: string) => {
-    router.push("?q=" + value, undefined, { shallow: true });
     setLoading(true);
-    setState({ ...state, q: value || "" });
-    fetcher("/api/json/wallets?q=" + value + "&take=" + state.take)
-      .then(setData)
-      .then(() => setLoading(false))
-      .catch((e: any) => setLoading(false));
+    Debounced.start("q", () => {
+      router.push("?q=" + value, undefined, { shallow: true });
+      setState({ ...state, q: value || "" });
+      fetcher("/api/json/wallets?q=" + value + "&take=" + state.take)
+        .then(setData(value))
+        .then(() => setLoading(false))
+        .catch((e: any) => setLoading(false));
+    }, 300);
   };
 
   const onLoadMore = () => {
     if (isLoadingMore) return;
     if (!state.hasMore) return;
     setLoadingMore(true);
-    console.log("on Load More q=", q);
     fetcher(
       "/api/json/wallets?q=" +
         (state.q || "") +
@@ -134,9 +139,9 @@ const WalletsPage: NextPage = (props: any) => {
             pageStart={0}
             loadMore={onLoadMore}
             hasMore={state.hasMore}
-            loader={<div></div>}
+            loader={<div key={0}></div>}
           >
-            <WalletsList list={wallets} />
+            <WalletsList total={supply.totalStaked} list={wallets} />
           </InfiniteScroll>
         )}
         {isLoadingMore ? (

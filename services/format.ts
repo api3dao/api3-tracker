@@ -24,6 +24,20 @@ export const noDecimals = (x: string): string => {
   return x.replace(/\..+$/g, "");
 };
 
+export const justDecimals = (x: string, l: number): string => {
+  return x.replace(/^.+\./g, "").substring(0, l);
+};
+
+export const toPct4= (x: any): string => {
+  if (typeof x === "undefined" || toCurrency(x) === "") return "";
+  if (typeof x === "object" || typeof x === "string") {
+       if (x.toString().indexOf("e-") !== -1) return "0.0000%";
+       return noDecimals(x.toString()) + "." + justDecimals(x.toString(), 4) + "%"
+  }
+  if (typeof x === "number" && x < 1) return x.toString() + "%";
+  return `${toCurrency(x).replace(/0*$/g, "").replace(/\.$/, "")}%`;
+};
+
 export const toPct = (x: any): string => {
   if (typeof x === "undefined" || toCurrency(x) === "") return "";
   if (typeof x === "object" || typeof x === "string") return x.toString() + "%";
@@ -43,7 +57,7 @@ export const toHex = (x: any): string => {
       }).join("")
     );
   }
-  return "" + x;
+  return "0x" + x.replace("0x", "");
 };
 
 export const months = [

@@ -3,9 +3,17 @@ import { Footer, Header, Meta } from "../../components/";
 import { VotingSummary } from "../../components/VotingSummary";
 import { VotingEventsList } from "../../components/VotingEvents";
 import { fetchWebconfig } from "../../services/webconfig";
-import { Votings, VotingEvents, Blocks } from "../../services/api";
+import { Wallets, Votings, VotingEvents, Blocks } from "../../services/api";
 import { IBlockNumber, IVoting, IVotingEvent } from "../../services/types";
 import { serializable } from "../../services/format";
+
+const uniqueArray = (arr: Array<any>): Array<any> => {
+  const a = new Array();
+  for (let i = 0, l = arr.length; i < l; i++) {
+    if (a.indexOf(arr[i]) === -1 && arr[i] !== "") a.push(arr[i]);
+  }
+  return a;
+};
 
 export async function getServerSideProps(context: any) {
   const id = context.params.id;
@@ -17,19 +25,22 @@ export async function getServerSideProps(context: any) {
   const voting: IVoting | null = results[0];
   const events: Array<IVotingEvent> = results[1];
   const lastBlock: IBlockNumber = results[2];
+  const addresses = uniqueArray(events.map((x: any) => x.address));
+  const members = await Wallets.fetchByAddresses(addresses);
   return {
     props: {
       webconfig: fetchWebconfig(),
       id,
       voting: serializable(voting),
       events: serializable(events),
+      members: serializable(members),
       lastBlock: serializable(lastBlock),
     }, // will be passed to the page component as props
   };
 }
 
 const VotingDetailsPage: NextPage = (props: any) => {
-  const { voting, events, lastBlock, webconfig } = props;
+  const { voting, events, lastBlock, webconfig, members } = props;
 
   return (
     <div>
@@ -40,7 +51,11 @@ const VotingDetailsPage: NextPage = (props: any) => {
         <h1 className="text-center uppercase">API3 DAO Voting</h1>
         <VotingSummary {...Votings.from(voting)} />
         <div className="max-w-screen-lg mx-auto">
-          <VotingEventsList list={VotingEvents.fromList(events)} totalStake={voting.totalStaked} />
+          <VotingEventsList
+            members={members}
+            list={VotingEvents.fromList(events)}
+            totalStake={voting.totalStaked}
+          />
         </div>
       </main>
 

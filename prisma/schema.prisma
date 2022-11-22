@@ -95,9 +95,9 @@ model Member {
   updatedAt DateTime @default(now()) // date of the last update with this address
   tags      String // field for a full text search, indexes can't be defined here for Postgres and should be defined in database directly
 
-  epochs      MemberEpoch[]      @relation("memberEpochs") // relations to epochs
-  events      MemberEvent[]      @relation("memberEvents") // relations to events
-  votings     VotingEvent[]      @relation("votingMember") // relation to votes
+  // epochs      MemberEpoch[]      @relation("memberEpochs") // relations to epochs
+  // events      MemberEvent[]      @relation("memberEvents") // relations to events
+  // votings     VotingEvent[]      @relation("votingMember") // relation to votes
   delegatesTo MemberDelegation?  @relation("delegatesTo") // relation to delegations OF this member
   delegates   MemberDelegation[] @relation("delegated") // relation to delegations TO this member
 
@@ -126,7 +126,7 @@ model VotingEvent {
   feeUsd      Decimal? @db.Decimal(10, 2) // USD equivalent of the fee
 
   address Bytes // Address of the member to whom this transaction is related to
-  member  Member @relation(name: "votingMember", fields: [address], references: [address])
+  // member  Member @relation(name: "votingMember", fields: [address], references: [address])
 
   supports        Int     @default(0) // -1 - against, 1 - supports, 0 - unrelated
   userShare       Decimal @db.Decimal(60, 18) // number of user shares at the moment of this voting
