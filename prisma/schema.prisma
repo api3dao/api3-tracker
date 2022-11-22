@@ -33,7 +33,7 @@ model Epoch {
 model MemberEpoch {
   epoch   Int // relation scalar field
   address Bytes // relation scalar field
-  member  Member @relation(name: "memberEpochs", fields: [address], references: [address])
+  // member  Member @relation(name: "memberEpochs", fields: [address], references: [address])
 
   userShare       Decimal @db.Decimal(60, 18) // number of user shares at the moment of this epoch
   userStake       Decimal @db.Decimal(60, 18) // number of user stake at the moment of this epoch
@@ -48,7 +48,7 @@ model MemberEvent {
   id          String   @id // Combined ID of event
   createdAt   DateTime // Date of Event Transaction (taken from the block)
   address     Bytes // Address of the member to whom this transaction is related to
-  member      Member   @relation(name: "memberEvents", fields: [address], references: [address])
+  //  member      Member   @relation(name: "memberEvents", fields: [address], references: [address])
   chainId     Int // Chain ID
   txHash      Bytes // Transaction hash
   blockNumber Int // Block Number
