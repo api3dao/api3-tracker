@@ -1008,7 +1008,7 @@ export const Events = {
       }
     }
 
-    let verboseBatch = true;
+    let verboseBatch = Batch.hasMember(vm);
     for (const data of Batch.getInserts(verboseBatch)) {
       const matchMember =
         data.address.toString("hex").replace("0x", "").toLowerCase() == vm;

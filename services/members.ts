@@ -59,6 +59,16 @@ export const Address = {
 };
 
 export const Batch = {
+  hasMember: (address: string): boolean => {
+    const vm = address.replace("0x", "").toLowerCase();
+    for (const [addr, _m] of Batch.inserts) {
+      if (addr.replace("0x", "").toLowerCase() == vm) return true;
+    }
+    for (const [addr, _m] of Batch.updates) {
+      if (addr.replace("0x", "").toLowerCase() == vm) return true;
+    }
+    return false;
+  },
   getInserts: (verbose: boolean): Array<Prisma.MemberCreateInput> => {
     const out = new Array<Prisma.MemberCreateInput>();
     for (const [addr, m] of Batch.inserts) {
@@ -104,9 +114,9 @@ export const Batch = {
   ): Promise<IWallet | null> => {
     if (addr == "" || addr == "0x") return null;
     const address: Buffer = Address.asBuffer(addr);
-
-    if (Batch.inserts.has(addr)) {
-      const existing = Batch.inserts.get(addr);
+    const batchIndex = address.toString("hex").replace("0x", "").toLowerCase();
+    if (Batch.inserts.has(batchIndex)) {
+      const existing = Batch.inserts.get(batchIndex);
       if (existing && badge && !Wordlist.has(existing.badges, badge)) {
         // 1. we are adding a new record, but this is not a first operation for this block
         existing.badges = Wordlist.add(existing.badges, badge);
@@ -117,11 +127,11 @@ export const Batch = {
         }
         existing.updatedAt = blockDt.toISOString();
         if (verbose) console.log("ENSURE INSERT ", blockDt, addr, typeof addr);
-        Batch.inserts.set(addr, existing);
+        Batch.inserts.set(batchIndex, existing);
       }
       return existing || null;
-    } else if (Batch.updates.has(addr)) {
-      const existing = Batch.updates.get(addr);
+    } else if (Batch.updates.has(batchIndex)) {
+      const existing = Batch.updates.get(batchIndex);
       if (existing && badge && !Wordlist.has(existing.badges, badge)) {
         // 2. we are updating existing member, and this is not a first operation for this block
         existing.badges = Wordlist.add(existing.badges, badge);
@@ -132,7 +142,7 @@ export const Batch = {
         }
         existing.updatedAt = blockDt.toISOString();
         if (verbose) console.log("ENSURE UPDATE ", blockDt, addr);
-        Batch.updates.set(addr, existing);
+        Batch.updates.set(batchIndex, existing);
       }
       return existing || null;
     } else {
@@ -177,7 +187,7 @@ export const Batch = {
         if (verbose) {
           console.log("EXISTING MEMBER IS INSERTING?", addr, member.badges);
         }
-        Batch.inserts.set(addr, member);
+        Batch.inserts.set(batchIndex, member);
         return member;
       } else {
         const existing: IWallet = Wallets.from(members[0]);
@@ -196,7 +206,7 @@ export const Batch = {
           if (verbose) {
             console.log("EXISTING MEMBER IS UPDATING", addr, existing.badges);
           }
-          Batch.updates.set(addr, existing);
+          Batch.updates.set(batchIndex, existing);
         }
         return existing;
       }
@@ -209,7 +219,7 @@ export const Batch = {
     blockDt: Date,
     verbose: boolean
   ) => {
-    const addr: string = existing.address;
+    const addrIndex: string = existing.address.replace("0x", "").toLowerCase();
     if (badge && !Wordlist.has(existing.badges, badge)) {
       // 2. we are updating existing member, and this is not a first operation for this block
       existing.badges = Wordlist.add(existing.badges, badge);
@@ -220,29 +230,29 @@ export const Batch = {
       }
       existing.updatedAt = blockDt.toISOString();
 
-      if (Batch.inserts.has(addr)) {
+      if (Batch.inserts.has(addrIndex)) {
         if (verbose) {
           console.log(
             "MEMBER BADGE INSERTED",
-            addr,
+            addrIndex,
             badge,
             "added, now",
             existing.badges
           );
         }
-        Batch.inserts.set(addr, existing);
+        Batch.inserts.set(addrIndex, existing);
       } else {
         // if (Batch.updates.has(addr)) {
         if (verbose) {
           console.log(
             "MEMBER BADGE UPDATED",
-            addr,
+            addrIndex,
             badge,
             "added, now",
             existing.badges
           );
         }
-        Batch.updates.set(addr, existing);
+        Batch.updates.set(addrIndex, existing);
       }
     }
     return existing;
@@ -262,38 +272,48 @@ export const Batch = {
     blockDt: Date,
     verbose: boolean
   ) => {
-    const addr: string = existing.address;
+    const addrIndex: string = existing.address.replace("0x", "").toLowerCase();
     if (badge && Wordlist.has(existing.badges, badge)) {
       // 2. we are updating existing member, and this is not a first operation for this block
       existing.badges = Wordlist.remove(existing.badges, badge);
       existing.tags = Wordlist.remove(existing.tags || "", badge);
       existing.updatedAt = blockDt.toISOString();
 
-      if (Batch.inserts.has(addr)) {
+      if (Batch.inserts.has(addrIndex)) {
         if (verbose) {
           console.log(
             "MEMBER BADGE INSERTED",
-            addr,
+            addrIndex,
             badge,
             "removed, now",
             existing.badges
           );
         }
-        Batch.inserts.set(addr, existing);
+        Batch.inserts.set(addrIndex, existing);
       } else {
         // if (Batch.updates.has(addr)) {
         if (verbose) {
           console.log(
             "MEMBER BADGE UPDATED",
-            addr,
+            addrIndex,
             badge,
             "removed, now",
             existing.badges
           );
         }
-        Batch.updates.set(addr, existing);
+        Batch.updates.set(addrIndex, existing);
       }
     }
+    return existing;
+  },
+
+  ensureUpdated: (existing: IWallet): IWallet => {
+    const addrIndex: string = existing.address.replace("0x", "").toLowerCase();
+      if (Batch.inserts.has(addrIndex)) {
+        Batch.inserts.set(addrIndex, existing);
+      } else {
+        Batch.updates.set(addrIndex, existing);
+      }
     return existing;
   },
 
@@ -310,7 +330,7 @@ export const Batch = {
         const m1 = Batch.addBadge(m0, "deposited", blockDt, verbose);
         const tokens = withDecimals(BigNumber.from(args[1]).toString(), 18);
         m1.userDeposited = m1.userDeposited.add(new Prisma.Decimal(tokens));
-        return m1;
+        return Batch.ensureUpdated(m1);
       }
       case "Staked(address,uint256,uint256,uint256,uint256,uint256,uint256)": {
         const userShares = new Prisma.Decimal(
@@ -320,15 +340,15 @@ export const Batch = {
         const m0 = Batch.removeBadge(member, "deposited", blockDt, verbose);
         m0.userShare = m0.userShare.add(userShares);
         m0.userVotingPower = new Prisma.Decimal(0.0); // we will calculate it on fly
-        console.log("USER SHARE", member.address, m0.userShare);
-        return m0;
+        const m1 = Batch.removeBadge(member, "deposited", blockDt, verbose);
+        return Batch.ensureUpdated(m1);
       }
       case "Unstaked(address,uint256,uint256,uint256,uint256)": {
         const userShares = new Prisma.Decimal(
           withDecimals(ethers.BigNumber.from(args[1]).toString(), 18)
         );
         member.userShare = member.userShare.sub(userShares);
-        return member;
+        return Batch.ensureUpdated(member);
       }
       case "ScheduledUnstake(address,uint256,uint256,uint256,uint256)":
         return Batch.addBadge(member, "unstaking", blockDt, verbose);
@@ -357,7 +377,7 @@ export const Batch = {
         const m3 = Batch.addBadge(m2, "withdrawn", blockDt, verbose);
         const tokens = withDecimals(BigNumber.from(args[1]).toString(), 18);
         m3.userWithdrew = m3.userWithdrew.add(new Prisma.Decimal(tokens));
-        return m3;
+        return Batch.ensureUpdated(m3);
       }
     }
   },
