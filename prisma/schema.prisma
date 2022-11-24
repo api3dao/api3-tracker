@@ -66,9 +66,9 @@ model MemberEvent {
 
 model MemberDelegation {
   from       Bytes
-  memberFrom Member   @relation(name: "delegatesTo", fields: [from], references: [address])
+  // memberFrom Member   @relation(name: "delegatesTo", fields: [from], references: [address])
   to         Bytes    @unique
-  memberTo   Member   @relation(name: "delegated", fields: [to], references: [address])
+  // memberTo   Member   @relation(name: "delegated", fields: [to], references: [address])
   updatedAt  DateTime @default(now()) // time of the last delegation update
   userShares Decimal  @db.Decimal(60, 18) // number of delegated shares
 
@@ -98,8 +98,8 @@ model Member {
   // epochs      MemberEpoch[]      @relation("memberEpochs") // relations to epochs
   // events      MemberEvent[]      @relation("memberEvents") // relations to events
   // votings     VotingEvent[]      @relation("votingMember") // relation to votes
-  delegatesTo MemberDelegation?  @relation("delegatesTo") // relation to delegations OF this member
-  delegates   MemberDelegation[] @relation("delegated") // relation to delegations TO this member
+  // delegatesTo MemberDelegation?  @relation("delegatesTo") // relation to delegations OF this member
+  // delegates   MemberDelegation[] @relation("delegated") // relation to delegations TO this member
 
   @@map("members")
 }
