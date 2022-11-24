@@ -124,6 +124,13 @@ export interface IWallet {
   updatedAt: string;
 }
 
+export interface IDelegation {
+  from: string;
+  to: string;
+  userShare: Prisma.Decimal;
+  updatedAt: string;
+}
+
 export interface IWalletEvent {
   index?: number; // row index
   id: string;

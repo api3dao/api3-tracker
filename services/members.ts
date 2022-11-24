@@ -1,6 +1,6 @@
 import prisma from "./db";
 import { Prisma } from "@prisma/client";
-import { IWallet } from "./types";
+import { IDelegation, IWallet } from "./types";
 import { Wallets } from "./api";
 import { BigNumber, ethers } from "ethers";
 import { noDecimals, withDecimals } from "./../services/format";
@@ -59,6 +59,19 @@ export const Address = {
 };
 
 export const Batch = {
+  inserts: new Map<string, IWallet>(),
+  updates: new Map<string, IWallet>(),
+
+  insertsDelegations: new Map<string, IDelegation>(),
+  updatesDelegations: new Map<string, IDelegation>(),
+
+  reset: () => {
+    Batch.inserts.clear();
+    Batch.updates.clear();
+    Batch.insertsDelegations.clear();
+    Batch.updatesDelegations.clear();
+  },
+
   hasMember: (address: string): boolean => {
     const vm = address.replace("0x", "").toLowerCase();
     for (const [addr, _m] of Batch.inserts) {
@@ -69,6 +82,7 @@ export const Batch = {
     }
     return false;
   },
+
   getInserts: (verbose: boolean): Array<Prisma.MemberCreateInput> => {
     const out = new Array<Prisma.MemberCreateInput>();
     for (const [addr, m] of Batch.inserts) {
@@ -97,12 +111,52 @@ export const Batch = {
     return out;
   },
 
-  inserts: new Map<string, IWallet>(),
-  updates: new Map<string, IWallet>(),
+  getDelegationInserts: (
+    verbose: boolean
+  ): Array<Prisma.MemberDelegationCreateInput> => {
+    const out = new Array<Prisma.MemberDelegationCreateInput>();
+    for (const [addr, m] of Batch.insertsDelegations) {
+      const from = (
+        typeof m.from == "string"
+          ? Address.asBuffer(m.from)
+          : Buffer.from(m.from, "hex")
+      );
+      const to = (
+        typeof m.to == "string"
+          ? Address.asBuffer(m.to)
+          : Buffer.from(m.to, "hex")
+      );
+      if (verbose) console.log("BATCH.DELEGATION.INSERT", addr, m);
+      out.push({
+        from,
+        to,
+        userShares: m.userShare,
+        updatedAt: m.updatedAt,
+      });
+    }
+    return out;
+  },
 
-  reset: () => {
-    Batch.inserts.clear();
-    Batch.updates.clear();
+  getDelegationUpdates: (
+    verbose: boolean
+  ): Map<string, Prisma.MemberDelegationUpdateInput> => {
+    const out = new Map<string, Prisma.MemberDelegationUpdateInput>();
+    for (const [_, m] of Batch.updatesDelegations) {
+      const from = (
+        typeof m.from == "string"
+          ? Address.asBuffer(m.from)
+          : Buffer.from(m.from, "hex")
+      );
+      const to = (
+        typeof m.to == "string"
+          ? Address.asBuffer(m.to)
+          : Buffer.from(m.to, "hex")
+      );
+      const key = (from.toString("hex") + ":" + to.toString("hex")).toLowerCase();
+      if (verbose) console.log("BATCH.DELEGATION.UPDATE", key, m);
+      out.set(key, { to, updatedAt: m.updatedAt, userShares: m.userShare });
+    }
+    return out;
   },
 
   // this function can update only badge
@@ -309,11 +363,11 @@ export const Batch = {
 
   ensureUpdated: (existing: IWallet): IWallet => {
     const addrIndex: string = existing.address.replace("0x", "").toLowerCase();
-      if (Batch.inserts.has(addrIndex)) {
-        Batch.inserts.set(addrIndex, existing);
-      } else {
-        Batch.updates.set(addrIndex, existing);
-      }
+    if (Batch.inserts.has(addrIndex)) {
+      Batch.inserts.set(addrIndex, existing);
+    } else {
+      Batch.updates.set(addrIndex, existing);
+    }
     return existing;
   },
 
@@ -353,10 +407,17 @@ export const Batch = {
       case "ScheduledUnstake(address,uint256,uint256,uint256,uint256)":
         return Batch.addBadge(member, "unstaking", blockDt, verbose);
       case "Delegated(address,address,uint256,uint256)":
+        // TODO: const members = Batch.updateDelegation(args[0], args[2], blockDt);
         if (member.address.toLowerCase() == args[0].toLowerCase()) {
           return Batch.addBadge(member, "delegates", blockDt, verbose);
         }
         return member;
+      case "UpdatedDelegation(address,address,bool,uint256,uint256)":
+      case "Undelegated(address,address,uint256,uint256)": {
+        // TODO: update delegation
+        // TODO: update each member update
+        return member
+      }
       case "VestedTimeLock(address,uint256,uint256)": {
         const m0 = Batch.removeBadge(member, "supporter", blockDt, verbose);
         return Batch.addBadge(m0, "vested", blockDt, verbose);

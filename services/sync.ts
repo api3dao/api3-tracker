@@ -1022,6 +1022,19 @@ export const Events = {
       }
       tx.push(prisma.member.create({ data }));
     }
+    for (const data of Batch.getDelegationInserts(verboseBatch)) {
+      const matchMember =
+        data.from.toString("hex").replace("0x", "").toLowerCase() == vm;
+      if (matchMember) {
+        console.log(
+          "MEMBER.DELEGATION.CREATE",
+          blockNumber,
+          blockDt,
+          JSON.stringify(data)
+        );
+      }
+      tx.push(prisma.memberDelegation.create({ data }));
+    }
     for (const [addr, data] of Batch.getUpdates(verboseBatch)) {
       const matchMember = addr.replace("0x", "").toLowerCase() == vm;
       if (matchMember) {
@@ -1036,6 +1049,27 @@ export const Events = {
       tx.push(
         prisma.member.update({
           where: { address: Address.asBuffer(addr) },
+          data,
+        })
+      );
+    }
+    for (const [key, data] of Batch.getDelegationUpdates(verboseBatch)) {
+      const addrs = key.split("-");
+      const from = Buffer.from(addrs[0], "hex");
+      const to = Buffer.from(addrs[1], "hex");
+      const matchMember = addrs[0] == vm || addrs[1] == vm;
+      if (matchMember) {
+        console.log(
+          "MEMBER.DELEGATION.UPDATE",
+          blockNumber,
+          blockDt,
+          key,
+          JSON.stringify(data)
+        );
+      }
+      tx.push(
+        prisma.memberDelegation.update({
+          where: { from, to },
           data,
         })
       );
