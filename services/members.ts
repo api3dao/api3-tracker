@@ -366,8 +366,13 @@ export const Batch = {
         return Batch.addBadge(m0, "vested", blockDt, verbose);
       }
       case "DepositedVesting(address,uint256,uint256,uint256,uint256,uint256)": {
+        const tokens = new Prisma.Decimal(
+          withDecimals(ethers.BigNumber.from(args[0]).toString(), 18)
+        );
         const m0 = Batch.removeBadge(member, "supporter", blockDt, verbose);
-        return Batch.addBadge(m0, "vested", blockDt, verbose);
+        const m1 = Batch.addBadge(m0, "vested", blockDt, verbose);
+        m1.userDeposited = m1.userDeposited.add(new Prisma.Decimal(tokens));
+        return Batch.ensureUpdated(m1);
       }
       case "Withdrawn(address,uint256)":
       case "Withdrawn(address,uint256,uint256)": {
