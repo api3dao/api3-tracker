@@ -39,6 +39,7 @@ model MemberEpoch {
   userStake       Decimal @db.Decimal(60, 18) // number of user stake at the moment of this epoch
   userVotingPower Decimal @db.Decimal(10, 2) // user voting power at this epoch
   userReward      Decimal @db.Decimal(60, 18) // user reward for this epoch
+  isReleased      Int // whether rewards of these epochs are released
 
   @@id([epoch, address])
   @@map("member_epochs")
@@ -65,14 +66,13 @@ model MemberEvent {
 }
 
 model MemberDelegation {
-  from       Bytes
+  from       Bytes @id // delegation is identified by who is delegating
   // memberFrom Member   @relation(name: "delegatesTo", fields: [from], references: [address])
-  to         Bytes    @unique
+  to         Bytes
   // memberTo   Member   @relation(name: "delegated", fields: [to], references: [address])
   updatedAt  DateTime @default(now()) // time of the last delegation update
   userShares Decimal  @db.Decimal(60, 18) // number of delegated shares
 
-  @@id([from])
   @@map("member_delegations")
 }
 
@@ -88,6 +88,8 @@ model Member {
   userVotingPower  Decimal @db.Decimal(10, 2) // user voting power at this epoch
   userReward       Decimal @db.Decimal(60, 18) // user reqard for this epoch
   userLockedReward Decimal @db.Decimal(60, 18) // how much of the reward is still locked
+  userDelegates    Decimal @db.Decimal(60, 18) @default(0.0) // how much user delegates
+  userIsDelegated  Decimal @db.Decimal(60, 18) @default(0.0) // how much user is delegated
   userDeposited    Decimal @db.Decimal(60, 18) // total user deposited over the time
   userWithdrew     Decimal @db.Decimal(60, 18) // total user withdrew over the time
 
