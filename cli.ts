@@ -119,7 +119,7 @@ yargs(hideBin(process.argv))
         };
         const termination = {
           epoch: true,
-          block: stopBlock,
+          block: 0,
         };
         const blocks = await Events.processState(
           endpoint,
