@@ -395,6 +395,7 @@ export const Address = {
 export const Events = {
   resetState: async () => {
     await prisma.$transaction([
+      prisma.memberDelegation.deleteMany({}),
       prisma.memberEvent.deleteMany({}),
       prisma.votingEvent.deleteMany({}),
       prisma.member.deleteMany({}),
@@ -652,7 +653,8 @@ export const Events = {
         withDecimals(votingPower.toString(), 18)
       );
       if (scriptData.address) {
-        const addr = "0x" + Buffer.from(scriptData.address).toString("hex").toLowerCase();
+        const addr =
+          "0x" + Buffer.from(scriptData.address).toString("hex").toLowerCase();
         const matchMember: boolean =
           addr.replace("0x", "").toLowerCase() == verboseMember;
         await Batch.ensureExists(addr, blockDt, "grant", matchMember);
@@ -848,7 +850,7 @@ export const Events = {
               if (matchMember) {
                 console.log(
                   "MEMBER.EVENT",
-                  blockNumber,
+                  blockNumber + "-" + logIndex.toString(16),
                   blockDt,
                   addr,
                   decoded.name,
@@ -992,6 +994,7 @@ export const Events = {
             if (await Events.processEpoch(blockInfo, event, tx)) {
               if (termination.epoch) {
                 shouldTerminate = true;
+                included = true;
               }
             }
           }
@@ -1022,9 +1025,11 @@ export const Events = {
       }
       tx.push(prisma.member.create({ data }));
     }
+
     for (const data of Batch.getDelegationInserts(verboseBatch)) {
       const matchMember =
-        data.from.toString("hex").replace("0x", "").toLowerCase() == vm;
+        data.from.toString("hex").toLowerCase() == vm ||
+        data.to.toString("hex").toLowerCase() == vm;
       if (matchMember) {
         console.log(
           "MEMBER.DELEGATION.CREATE",
@@ -1033,10 +1038,11 @@ export const Events = {
           JSON.stringify(data)
         );
       }
-      tx.push(prisma.memberDelegation.create({ data }));
+        tx.push(prisma.memberDelegation.create({ data }));
     }
+
     for (const [addr, data] of Batch.getUpdates(verboseBatch)) {
-      const matchMember = addr.replace("0x", "").toLowerCase() == vm;
+      const matchMember = vm && addr.indexOf(vm) > -1;
       if (matchMember) {
         console.log(
           "MEMBER.UPDATE",
@@ -1054,25 +1060,21 @@ export const Events = {
       );
     }
     for (const [key, data] of Batch.getDelegationUpdates(verboseBatch)) {
-      const addrs = key.split("-");
-      const from = Buffer.from(addrs[0], "hex");
-      const to = Buffer.from(addrs[1], "hex");
-      const matchMember = addrs[0] == vm || addrs[1] == vm;
-      if (matchMember) {
-        console.log(
-          "MEMBER.DELEGATION.UPDATE",
-          blockNumber,
-          blockDt,
-          key,
-          JSON.stringify(data)
-        );
+      const from = Address.asBuffer(key);
+      if (data.to) {
+        const matchMember =
+          key == vm || data.to.toString("hex").toLowerCase() == vm;
+        if (matchMember) {
+          console.log(
+            "MEMBER.DELEGATION.UPDATE",
+            blockNumber,
+            blockDt,
+            key,
+            JSON.stringify(data)
+          );
+        }
+        tx.push( prisma.memberDelegation.update({ where: { from }, data }));
       }
-      tx.push(
-        prisma.memberDelegation.update({
-          where: { from, to },
-          data,
-        })
-      );
     }
 
     for (const [voteId, usage] of VoteGas.totals()) {
@@ -1096,7 +1098,8 @@ export const Events = {
         },
       })
     );
-    if (termination.block == blockNumber) { // stop on a certain block
+    if (!termination.epoch && termination.block == blockNumber) {
+      // stop on a certain block
       shouldTerminate = true;
       included = false;
     }
