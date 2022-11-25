@@ -408,6 +408,9 @@ const EventDetails = (props: IEventDetails) => {
   }
 
   if (props.eventName == "StartVote" || props.eventName == "ExecuteVote") {
+    if (typeof props.data[0] == "undefined") {
+       return (<div className="darken text-xs">NO DETAILS</div>);
+    }
     const voteId = parseInt(ethers.BigNumber.from(props.data[0]).toString());
     return (
       <div className="text-xs darken leading-4">
@@ -420,6 +423,9 @@ const EventDetails = (props: IEventDetails) => {
       </div>
     );
   } else if (props.eventName == "CastVote") {
+    if (typeof props.data[0] == "undefined") {
+       return (<div className="darken text-xs">NO DETAILS</div>);
+    }
     const voteId = parseInt(ethers.BigNumber.from(props.data[0]).toString());
     const supports = props.data[2];
     const votes = noDecimals(
