@@ -831,6 +831,8 @@ export const Events = {
             decoded.args,
             from
           );
+
+          // loop 1 ensures all wallets are created and event is recorded for every member
           for (const addr of addresses) {
             const matchMember: boolean =
               addr.toString().replace("0x", "").toLowerCase() == vm;
@@ -846,62 +848,60 @@ export const Events = {
               logIndex.toString(16) +
               "." +
               Math.random().toString().replace("0.", "");
-            try {
-              if (matchMember) {
-                console.log(
-                  "MEMBER.EVENT",
-                  blockNumber + "-" + logIndex.toString(16),
-                  blockDt,
-                  addr,
-                  decoded.name,
-                  decoded.signature,
-                  JSON.stringify(decoded.args)
-                );
-              }
-              tx.push(
-                prisma.memberEvent.create({
-                  data: {
-                    id: eventId,
-                    createdAt: blockDt,
-                    address: Address.asBuffer(addr),
-                    chainId: 0,
-                    txHash,
-                    blockNumber,
-                    txIndex: transactionIndex,
-                    logIndex: logIndex,
-                    eventName: decoded.name,
-                    data: decoded.args,
-                    gasPrice: BigNumber.from(gasPrice).toNumber(),
-                    gasUsed: BigNumber.from(gasUsed).toNumber(),
-                    fee: BigInt(fee.toString()),
-                    feeUsd: feeUsd.toString(),
-                  },
-                })
-              );
-              if (wallet) {
-                Batch.processEvent(
-                  wallet,
-                  blockDt,
-                  decoded.signature,
-                  decoded.args,
-                  matchMember
-                );
-              }
-            } catch (e) {
-              console.error(
-                "Event @",
-                blockNumber,
-                transactionHash,
-                "txIndex",
-                transactionIndex,
-                "logIndex",
-                logIndex,
-                "address",
+            if (matchMember) {
+              console.log(
+                "MEMBER.EVENT",
+                blockNumber + "-" + logIndex.toString(16),
+                blockDt,
                 addr,
-                e
+                decoded.name,
+                decoded.signature,
+                JSON.stringify(decoded.args)
+              );
+            }
+            tx.push(
+              prisma.memberEvent.create({
+                data: {
+                  id: eventId,
+                  createdAt: blockDt,
+                  address: Address.asBuffer(addr),
+                  chainId: 0,
+                  txHash,
+                  blockNumber,
+                  txIndex: transactionIndex,
+                  logIndex: logIndex,
+                  eventName: decoded.name,
+                  data: decoded.args,
+                  gasPrice: BigNumber.from(gasPrice).toNumber(),
+                  gasUsed: BigNumber.from(gasUsed).toNumber(),
+                  fee: BigInt(fee.toString()),
+                  feeUsd: feeUsd.toString(),
+                },
+              })
+            );
+          }
+
+          // loop 2 processes event for each member
+          for (const addr of addresses) {
+            const matchMember: boolean =
+              addr.toString().replace("0x", "").toLowerCase() == vm;
+            const wallet = await Batch.ensureExists(
+              addr,
+              blockDt,
+              null,
+              matchMember
+            );
+            if (wallet) {
+              Batch.processEvent(
+                wallet,
+                blockDt,
+                decoded.signature,
+                decoded.args,
+                matchMember
               );
             }
           }
+
           if (decoded.signature == "StartVote(uint256,address,string)") {
             await Batch.ensureExists(from, blockDt, "voter", matchFrom);
             if (
@@ -1038,7 +1038,7 @@ export const Events = {
           JSON.stringify(data)
         );
       }
-        tx.push(prisma.memberDelegation.create({ data }));
+      tx.push(prisma.memberDelegation.create({ data }));
     }
 
     for (const [addr, data] of Batch.getUpdates(verboseBatch)) {
@@ -1073,7 +1073,7 @@ export const Events = {
             JSON.stringify(data)
           );
         }
-        tx.push( prisma.memberDelegation.update({ where: { from }, data }));
+        tx.push(prisma.memberDelegation.update({ where: { from }, data }));
       }
     }
 
