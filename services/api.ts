@@ -2,6 +2,7 @@ import prisma from "./db";
 import {
   Decimal,
   IBlockNumber,
+  IDelegation,
   IWallet,
   IWalletEvent,
   IVoting,
@@ -189,6 +190,21 @@ export interface WalletsList {
   list: Array<IWallet>;
   page: IPage;
 }
+
+export const Delegation = {
+  // object mapper
+  from: (input: any): IDelegation => {
+    const from =
+      typeof input.from == "string"
+        ? input.from.replace("0x", "")
+        : "0x" + Buffer.from(input.from.toString("hex").toLowerCase());
+    const to =
+      typeof input.to == "string"
+        ? input.to.replace("0x", "")
+        : "0x" + Buffer.from(input.to.toString("hex").toLowerCase());
+    return { ...input, from, to };
+  },
+};
 
 export const Wallets = {
   // fetch a list of votings for the certain status

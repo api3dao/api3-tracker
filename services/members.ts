@@ -1,7 +1,7 @@
 import prisma from "./db";
 import { Prisma } from "@prisma/client";
 import { IDelegation, IWallet } from "./types";
-import { Wallets } from "./api";
+import { Delegation, Wallets } from "./api";
 import { BigNumber, ethers } from "ethers";
 import { noDecimals, withDecimals } from "./../services/format";
 
@@ -106,7 +106,11 @@ export const Batch = {
           ? Address.asBuffer(addr)
           : Buffer.from(addr, "hex");
       if (verbose) console.log("BATCH.UPDATE", addr, m);
-      out.set(addrBuf.toString("hex").toLowerCase(), { ...m, tags, address: addrBuf });
+      out.set(addrBuf.toString("hex").toLowerCase(), {
+        ...m,
+        tags,
+        address: addrBuf,
+      });
     }
     return out;
   },
@@ -167,13 +171,15 @@ export const Batch = {
     const batchIndex = address.toString("hex").replace("0x", "").toLowerCase();
     if (Batch.inserts.has(batchIndex)) {
       const existing = Batch.inserts.get(batchIndex);
-      if (existing && badge && !Wordlist.has(existing.badges, badge)) {
-        // 1. we are adding a new record, but this is not a first operation for this block
-        existing.badges = Wordlist.add(existing.badges, badge);
-        if (existing.tags) {
-          existing.tags = Wordlist.add(existing.tags, badge);
-        } else {
-          existing.tags = badge;
+      if (existing) {
+        if (badge && !Wordlist.has(existing.badges, badge)) {
+          // 1. we are adding a new record, but this is not a first operation for this block
+          existing.badges = Wordlist.add(existing.badges, badge);
+          if (existing.tags) {
+            existing.tags = Wordlist.add(existing.tags, badge);
+          } else {
+            existing.tags = badge;
+          }
         }
         existing.updatedAt = blockDt.toISOString();
         if (verbose) console.log("ENSURE INSERT ", blockDt, addr, typeof addr);
@@ -182,13 +188,15 @@ export const Batch = {
       return existing || null;
     } else if (Batch.updates.has(batchIndex)) {
       const existing = Batch.updates.get(batchIndex);
-      if (existing && badge && !Wordlist.has(existing.badges, badge)) {
-        // 2. we are updating existing member, and this is not a first operation for this block
-        existing.badges = Wordlist.add(existing.badges, badge);
-        if (existing.tags) {
-          existing.tags = Wordlist.add(existing.tags, badge);
-        } else {
-          existing.tags = badge;
+      if (existing) {
+        if (badge && !Wordlist.has(existing.badges, badge)) {
+          // 2. we are updating existing member, and this is not a first operation for this block
+          existing.badges = Wordlist.add(existing.badges, badge);
+          if (existing.tags) {
+            existing.tags = Wordlist.add(existing.tags, badge);
+          } else {
+            existing.tags = badge;
+          }
         }
         existing.updatedAt = blockDt.toISOString();
         if (verbose) console.log("ENSURE UPDATE ", blockDt, addr);
@@ -229,6 +237,8 @@ export const Batch = {
           userLockedReward: new Prisma.Decimal(0.0),
           userDeposited: new Prisma.Decimal(0.0),
           userWithdrew: new Prisma.Decimal(0.0),
+          userDelegates: new Prisma.Decimal(0.0),
+          userIsDelegated: new Prisma.Decimal(0.0),
           createdAt: blockDt.toISOString(),
           updatedAt: blockDt.toISOString(),
           badges: badges.join(","),
@@ -357,6 +367,78 @@ export const Batch = {
     return existing;
   },
 
+  readMember: async (addr: Buffer): Promise<IWallet | undefined> => {
+    const addrIndex = addr.toString("hex").toLowerCase();
+    if (Batch.inserts.has(addrIndex)) {
+      return Batch.inserts.get(addrIndex);
+    }
+    if (Batch.updates.has(addrIndex)) {
+      return Batch.updates.get(addrIndex);
+    }
+    const members = await prisma.member.findMany({ where: { address: addr } });
+    if (members.length == 0) return undefined;
+    return Wallets.from(members[0]);
+  },
+
+  readMemberDelegates: async (
+    addr: Buffer
+  ): Promise<IDelegation | undefined> => {
+    const addrIndex = addr.toString("hex").toLowerCase();
+    if (Batch.insertsDelegations.has(addrIndex)) {
+      return Batch.insertsDelegations.get(addrIndex);
+    }
+    if (Batch.updatesDelegations.has(addrIndex)) {
+      return Batch.updatesDelegations.get(addrIndex);
+    }
+    const delegation = await prisma.memberDelegation.findMany({
+      where: { from: addr },
+    });
+    if (delegation.length == 0) return undefined;
+    return Delegation.from(delegation[0]);
+  },
+
+  // TODO: readMemberDelegationTotal: async (addr: Buffer): Promise<Prisma.Decimal> => {
+  // }
+
+  ensureUpdated: (existing: IWallet): IWallet => {
+    const addrIndex: string = existing.address.replace("0x", "").toLowerCase();
+    if (Batch.inserts.has(addrIndex)) {
+      Batch.inserts.set(addrIndex, existing);
+    } else {
+      Batch.updates.set(addrIndex, existing);
+    }
+    return existing;
+  },
+
+  updateTotals: async (addr: Buffer) => {
+    const addrIndex = addr.toString("hex").toLowerCase();
+    const member = await Batch.readMember(addr);
+    const delegation = await Batch.readMemberDelegates(addr);
+    if (member) {
+      // find if there is a delegation BY the member
+      // console.log( "updateTotals delegation", addrIndex, JSON.stringify(delegation));
+      member.userDelegates = new Prisma.Decimal(
+        delegation ? delegation.userShare : 0
+      );
+      // find what are the delegations TO the member
+      // TODO:
+      // update  userVotingPower = userShares + userIsDelegated + lockedRewards - unlockedRewards
+      console.log("updateTotals member", addrIndex, JSON.stringify(member));
+      Batch.ensureUpdated(member);
+    }
+  },
+
+  updateMembersTotals: async (addresses: Array<Buffer>) => {
+    const updated = new Map<string, number>();
+    for (const addr of addresses) {
+      const index = addr.toString("hex");
+      if (!updated.has(index)) {
+        Batch.updateTotals(addr);
+        updated.set(index, 1);
+      }
+    }
+  },
+
   updateDelegation: async (
     from: Buffer,
     to: Buffer,
@@ -369,38 +451,27 @@ export const Batch = {
       updatedAt: blockDt.toISOString(),
       userShare: shares,
     };
-    console.log("DELEGATION", blockDt, JSON.stringify(delegation));
-    const index =
-      delegation.from.replace("0x", "").toLowerCase();
+    const index = delegation.from.replace("0x", "").toLowerCase();
     if (Batch.insertsDelegations.has(index)) {
       const existing = Object.assign({}, Batch.insertsDelegations.get(index));
       Batch.insertsDelegations.set(index, delegation);
-      // Batch.updateDelegationTotals([existing.from, existing.to]);
+      Batch.updateMembersTotals([from, to, Address.asBuffer(existing.to)]);
     } else if (Batch.updatesDelegations.has(index)) {
       const existing = Object.assign({}, Batch.updatesDelegations.get(index));
       Batch.updatesDelegations.set(index, delegation);
-      // Batch.updateDelegationTotals([delegation.from, existing.to, delegation.to]);
+      Batch.updateMembersTotals([from, to, Address.asBuffer(existing.to)]);
     } else {
       const existing = await prisma.memberDelegation.findMany({
         where: { from, to },
       });
       if (existing.length === 0) {
         Batch.insertsDelegations.set(index, delegation);
+        Batch.updateMembersTotals([from, to]);
       } else {
         Batch.updatesDelegations.set(index, delegation);
+        Batch.updateMembersTotals([from, to, existing[0].to]);
       }
-      // Batch.updateDelegationTotals([delegation.from, delegation.to]);
     }
-  },
-
-  ensureUpdated: (existing: IWallet): IWallet => {
-    const addrIndex: string = existing.address.replace("0x", "").toLowerCase();
-    if (Batch.inserts.has(addrIndex)) {
-      Batch.inserts.set(addrIndex, existing);
-    } else {
-      Batch.updates.set(addrIndex, existing);
-    }
-    return existing;
   },
 
   processEvent: (
@@ -442,17 +513,32 @@ export const Batch = {
         const userShares = new Prisma.Decimal(
           withDecimals(ethers.BigNumber.from(args[3]).toString(), 18)
         );
-        Batch.updateDelegation(Address.asBuffer(args[0]), Address.asBuffer(args[1]), blockDt, userShares);
+        Batch.updateDelegation(
+          Address.asBuffer(args[0]),
+          Address.asBuffer(args[1]),
+          blockDt,
+          userShares
+        );
         return member;
       case "UpdatedDelegation(address,address,bool,uint256,uint256)": {
         const userShares = new Prisma.Decimal(
           withDecimals(ethers.BigNumber.from(args[3]).toString(), 18)
         );
-        Batch.updateDelegation(Address.asBuffer(args[0]), Address.asBuffer(args[1]), blockDt, new Prisma.Decimal(0));
+        Batch.updateDelegation(
+          Address.asBuffer(args[0]),
+          Address.asBuffer(args[1]),
+          blockDt,
+          new Prisma.Decimal(0)
+        );
         return member;
       }
       case "Undelegated(address,address,uint256,uint256)": {
-        Batch.updateDelegation(Address.asBuffer(args[0]), Address.asBuffer(args[1]), blockDt, new Prisma.Decimal(0));
+        Batch.updateDelegation(
+          Address.asBuffer(args[0]),
+          Address.asBuffer(args[1]),
+          blockDt,
+          new Prisma.Decimal(0)
+        );
         return member;
       }
       case "VestedTimeLock(address,uint256,uint256)": {

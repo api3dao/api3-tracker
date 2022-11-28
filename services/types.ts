@@ -120,6 +120,8 @@ export interface IWallet {
   userLockedReward: Prisma.Decimal; // how much of the reward is still locked
   userDeposited: Prisma.Decimal;
   userWithdrew: Prisma.Decimal;
+  userDelegates: Prisma.Decimal;
+  userIsDelegated: Prisma.Decimal;
   createdAt: string;
   updatedAt: string;
 }
