@@ -1,5 +1,5 @@
 resource "docker_container" "api3tracker" {
-  image = docker_image.api3tracker.latest
+  image = docker_image.api3tracker.image_id
   name  = local.hostname
   restart = "always"
 
@@ -20,7 +20,7 @@ resource "docker_container" "api3tracker" {
           value = labels.value.value
       }
   }
-  
+
   dynamic upload {
       for_each = local.upload
       content {

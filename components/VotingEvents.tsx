@@ -113,7 +113,10 @@ export const VotingEventsListTr = (row: IVotingEvent) => {
       </td>
       <td className="text-center text-xs font-bold">{row.eventName} </td>
       <td className="text-left text-sm">
-        <Link href={`/wallets/${toHex(row.address)}`} className="text-bold">
+        <Link
+          href={`/wallets/${toHex(row.address)}`}
+          className="text-bold"
+          legacyBehavior>
           <div>
             {row.ensName
               ? [

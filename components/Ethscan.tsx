@@ -70,7 +70,7 @@ export const InternalAddress = (props: IAddress) => (
     className="eth-address"
     style={props.inline ? { display: "inline" } : {}}
   >
-    <Link href={`/wallets/${addressHex(props.address)}`}>
+    <Link href={`/wallets/${addressHex(props.address)}`} legacyBehavior>
       {addressHex(props.address)}
     </Link>
   </div>

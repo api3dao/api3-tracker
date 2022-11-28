@@ -75,7 +75,7 @@ const VotingLink = (props: IVotingLinkProps) => {
   let title = `#${props.id}`;
   for (const v of props.votings) {
     if (v.id == id) {
-      return <Link href={href}>{v.name}</Link>;
+      return <Link href={href} legacyBehavior>{v.name}</Link>;
     }
   }
   return <span> {title}</span>;

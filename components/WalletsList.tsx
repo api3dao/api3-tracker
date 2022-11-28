@@ -38,7 +38,10 @@ export const WalletsListTr = (row: IWallet) => (
       {niceDateTime(row.updatedAt)}
     </td>
     <td className="text-left">
-      <Link href={`/wallets/${toHex(row.address)}`} className="text-bold">
+      <Link
+        href={`/wallets/${toHex(row.address)}`}
+        className="text-bold"
+        legacyBehavior>
         {row.ensName ? (
           <div className="">
             <div className="leading-1 font-bold">{row.ensName}</div>

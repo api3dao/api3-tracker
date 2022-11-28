@@ -6,7 +6,6 @@ module "api3tracker" {
   source = "../../app/api3tracker"
   trusted_ips = []
   enable_metrics = false
-  enable_storybook = false
   https = 0
   hosted_zones = {
     # Default hosted zone of the website

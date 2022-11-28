@@ -7,9 +7,6 @@ LOCALPORT2 := $(shell cat terraform/workspaces/api3tracker-local/modules.tf | gr
 build:
 	docker build -t api3tracker .
 
-build-storybook:
-	docker build -t api3tracker-storybook . -f .storybook/Dockerfile
-
 install:
 	@cd terraform/workspaces/api3tracker-local && \
 	terraform init && \

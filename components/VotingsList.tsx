@@ -89,7 +89,7 @@ export const VotingsListTr = (props: IVotingItem) => {
         </span>
       </td>
       <td className="text-left">
-        <Link href={`/votings/${item.id}`} className="text-bold">
+        <Link href={`/votings/${item.id}`} className="text-bold" legacyBehavior>
           {item.name}
         </Link>
         {item.transferValue ? <TransferDetails {...item} /> : null}
