@@ -1030,7 +1030,7 @@ export const Events = {
       const matchMember =
         data.from.toString("hex").toLowerCase() == vm ||
         data.to.toString("hex").toLowerCase() == vm;
-      if (matchMember) {
+      if (true) {
         console.log(
           "MEMBER.DELEGATION.CREATE",
           blockNumber,
@@ -1064,7 +1064,7 @@ export const Events = {
       if (data.to) {
         const matchMember =
           key == vm || data.to.toString("hex").toLowerCase() == vm;
-        if (matchMember) {
+        if (true) {
           console.log(
             "MEMBER.DELEGATION.UPDATE",
             blockNumber,

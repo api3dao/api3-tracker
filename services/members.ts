@@ -397,8 +397,39 @@ export const Batch = {
     return Delegation.from(delegation[0]);
   },
 
-  // TODO: readMemberDelegationTotal: async (addr: Buffer): Promise<Prisma.Decimal> => {
-  // }
+  readMemberDelegatedTotal: async (
+    addr: Buffer,
+    verbose: boolean
+  ): Promise<Prisma.Decimal> => {
+    const addrIndex = addr.toString("hex").toLowerCase();
+    const delegationMap = new Map<string, Prisma.Decimal>();
+    // go through delegations in the database
+    const delegations = await prisma.memberDelegation.findMany({
+      where: { to: addr },
+    });
+    for (const d of delegations) {
+      const fromIndex = d.from.toString("hex").toLowerCase();
+      delegationMap.set(fromIndex, d.userShares);
+    }
+    // overwrite number of shares with in-memory buffers
+    for (const [fromIndex, ins] of Batch.insertsDelegations) {
+      const to = Address.asBuffer(ins.to);
+      if (to.toString("hex").toLowerCase() == addrIndex)
+        delegationMap.set(fromIndex, ins.userShare);
+    }
+    for (const [fromIndex, upd] of Batch.updatesDelegations) {
+      const to = Address.asBuffer(upd.to);
+      if (to.toString("hex").toLowerCase() == addrIndex)
+        delegationMap.set(fromIndex, upd.userShare);
+    }
+    // at this point we have in-memory delegation map of this member
+    if (verbose) console.log("delegationMap", addrIndex, delegationMap);
+    let total = new Prisma.Decimal(0.0);
+    for (const [_, shares] of delegationMap) {
+      total = total.add(shares);
+    }
+    return total;
+  },
 
   ensureUpdated: (existing: IWallet): IWallet => {
     const addrIndex: string = existing.address.replace("0x", "").toLowerCase();
@@ -410,10 +441,11 @@ export const Batch = {
     return existing;
   },
 
-  updateTotals: async (addr: Buffer) => {
+  updateTotals: async (addr: Buffer, verbose: boolean) => {
     const addrIndex = addr.toString("hex").toLowerCase();
     const member = await Batch.readMember(addr);
     const delegation = await Batch.readMemberDelegates(addr);
+    const delegated = await Batch.readMemberDelegatedTotal(addr, verbose);
     if (member) {
       // find if there is a delegation BY the member
       // console.log( "updateTotals delegation", addrIndex, JSON.stringify(delegation));
@@ -421,19 +453,19 @@ export const Batch = {
         delegation ? delegation.userShare : 0
       );
       // find what are the delegations TO the member
-      // TODO:
+      member.userIsDelegated = delegated;
       // update  userVotingPower = userShares + userIsDelegated + lockedRewards - unlockedRewards
       console.log("updateTotals member", addrIndex, JSON.stringify(member));
       Batch.ensureUpdated(member);
     }
   },
 
-  updateMembersTotals: async (addresses: Array<Buffer>) => {
+  updateMembersTotals: async (addresses: Array<Buffer>, verbose: boolean) => {
     const updated = new Map<string, number>();
     for (const addr of addresses) {
       const index = addr.toString("hex");
       if (!updated.has(index)) {
-        Batch.updateTotals(addr);
+        Batch.updateTotals(addr, verbose);
         updated.set(index, 1);
       }
     }
@@ -443,7 +475,8 @@ export const Batch = {
     from: Buffer,
     to: Buffer,
     blockDt: Date,
-    shares: Prisma.Decimal
+    shares: Prisma.Decimal,
+    verbose: boolean
   ) => {
     const delegation: IDelegation = {
       from: "0x" + from.toString("hex").toLowerCase(),
@@ -455,21 +488,27 @@ export const Batch = {
     if (Batch.insertsDelegations.has(index)) {
       const existing = Object.assign({}, Batch.insertsDelegations.get(index));
       Batch.insertsDelegations.set(index, delegation);
-      Batch.updateMembersTotals([from, to, Address.asBuffer(existing.to)]);
+      Batch.updateMembersTotals(
+        [from, to, Address.asBuffer(existing.to)],
+        verbose
+      );
     } else if (Batch.updatesDelegations.has(index)) {
       const existing = Object.assign({}, Batch.updatesDelegations.get(index));
       Batch.updatesDelegations.set(index, delegation);
-      Batch.updateMembersTotals([from, to, Address.asBuffer(existing.to)]);
+      Batch.updateMembersTotals(
+        [from, to, Address.asBuffer(existing.to)],
+        verbose
+      );
     } else {
       const existing = await prisma.memberDelegation.findMany({
-        where: { from, to },
+        where: { from },
       });
       if (existing.length === 0) {
         Batch.insertsDelegations.set(index, delegation);
-        Batch.updateMembersTotals([from, to]);
+        Batch.updateMembersTotals([from, to], verbose);
       } else {
         Batch.updatesDelegations.set(index, delegation);
-        Batch.updateMembersTotals([from, to, existing[0].to]);
+        Batch.updateMembersTotals([from, to, existing[0].to], verbose);
       }
     }
   },
@@ -481,6 +520,7 @@ export const Batch = {
     args: any,
     verbose: boolean
   ) => {
+    const verboseDelegation = false;
     switch (signature) {
       case "Deposited(address,uint256,uint256)": {
         const m0 = Batch.addSupporter(member, blockDt, verbose);
@@ -513,31 +553,34 @@ export const Batch = {
         const userShares = new Prisma.Decimal(
           withDecimals(ethers.BigNumber.from(args[3]).toString(), 18)
         );
-        Batch.updateDelegation(
-          Address.asBuffer(args[0]),
-          Address.asBuffer(args[1]),
-          blockDt,
-          userShares
-        );
+        const m1 = Address.asBuffer(args[0]);
+        const m2 = Address.asBuffer(args[1]);
+        Batch.updateDelegation(m1, m2, blockDt, userShares, verboseDelegation);
         return member;
       case "UpdatedDelegation(address,address,bool,uint256,uint256)": {
         const userShares = new Prisma.Decimal(
           withDecimals(ethers.BigNumber.from(args[3]).toString(), 18)
         );
+        const m1 = Address.asBuffer(args[0]);
+        const m2 = Address.asBuffer(args[1]);
         Batch.updateDelegation(
-          Address.asBuffer(args[0]),
-          Address.asBuffer(args[1]),
+          m1,
+          m2,
           blockDt,
-          new Prisma.Decimal(0)
+          new Prisma.Decimal(0),
+          verboseDelegation
         );
         return member;
       }
       case "Undelegated(address,address,uint256,uint256)": {
+        const m1 = Address.asBuffer(args[0]);
+        const m2 = Address.asBuffer(args[1]);
         Batch.updateDelegation(
-          Address.asBuffer(args[0]),
-          Address.asBuffer(args[1]),
+          m1,
+          m2,
           blockDt,
-          new Prisma.Decimal(0)
+          new Prisma.Decimal(0),
+          verboseDelegation
         );
         return member;
       }
