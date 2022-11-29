@@ -1,7 +1,7 @@
 import prisma from "./db";
 import { Prisma } from "@prisma/client";
 import { IDelegation, IWallet } from "./types";
-import { Delegation, Wallets } from "./api";
+import { Delegations, Wallets } from "./api";
 import { BigNumber, ethers } from "ethers";
 import { noDecimals, withDecimals } from "./../services/format";
 
@@ -132,7 +132,7 @@ export const Batch = {
       out.push({
         from,
         to,
-        userShares: m.userShare,
+        userShares: m.userShares,
         updatedAt: m.updatedAt,
       });
     }
@@ -154,7 +154,7 @@ export const Batch = {
           : Buffer.from(m.to, "hex");
       const key = from.toString("hex").toLowerCase();
       if (verbose) console.log("BATCH.DELEGATION.UPDATE", key, m);
-      out.set(key, { to, updatedAt: m.updatedAt, userShares: m.userShare });
+      out.set(key, { to, updatedAt: m.updatedAt, userShares: m.userShares });
     }
     return out;
   },
@@ -394,7 +394,7 @@ export const Batch = {
       where: { from: addr },
     });
     if (delegation.length == 0) return undefined;
-    return Delegation.from(delegation[0]);
+    return Delegations.from(delegation[0]);
   },
 
   readMemberDelegatedTotal: async (
@@ -415,12 +415,12 @@ export const Batch = {
     for (const [fromIndex, ins] of Batch.insertsDelegations) {
       const to = Address.asBuffer(ins.to);
       if (to.toString("hex").toLowerCase() == addrIndex)
-        delegationMap.set(fromIndex, ins.userShare);
+        delegationMap.set(fromIndex, ins.userShares);
     }
     for (const [fromIndex, upd] of Batch.updatesDelegations) {
       const to = Address.asBuffer(upd.to);
       if (to.toString("hex").toLowerCase() == addrIndex)
-        delegationMap.set(fromIndex, upd.userShare);
+        delegationMap.set(fromIndex, upd.userShares);
     }
     // at this point we have in-memory delegation map of this member
     if (verbose) console.log("delegationMap", addrIndex, delegationMap);

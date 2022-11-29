@@ -191,7 +191,19 @@ export interface WalletsList {
   page: IPage;
 }
 
-export const Delegation = {
+export const Delegations = {
+  fetchFrom: async (from: Buffer): Promise<Array<IDelegation>> => {
+    const out = (await prisma.memberDelegation.findMany({
+      where: { from },
+    })).map((x: any) => (Delegations.from(x)));
+    return out;
+  },
+  fetchTo: async (to: Buffer): Promise<Array<IDelegation>> => {
+    const out = (await prisma.memberDelegation.findMany({
+      where: { to },
+    })).map((x: any) => (Delegations.from(x)));
+    return out;
+  },
   // object mapper
   from: (input: any): IDelegation => {
     const from =

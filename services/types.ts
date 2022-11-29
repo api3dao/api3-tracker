@@ -129,7 +129,7 @@ export interface IWallet {
 export interface IDelegation {
   from: string;
   to: string;
-  userShare: Prisma.Decimal;
+  userShares: Prisma.Decimal;
   updatedAt: string;
 }
 
