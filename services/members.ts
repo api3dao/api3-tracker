@@ -450,7 +450,7 @@ export const Batch = {
       // find if there is a delegation BY the member
       // console.log( "updateTotals delegation", addrIndex, JSON.stringify(delegation));
       member.userDelegates = new Prisma.Decimal(
-        delegation ? delegation.userShare : 0
+        delegation ? delegation.userShares : 0
       );
       // find what are the delegations TO the member
       member.userIsDelegated = delegated;
@@ -482,7 +482,7 @@ export const Batch = {
       from: "0x" + from.toString("hex").toLowerCase(),
       to: "0x" + to.toString("hex").toLowerCase(),
       updatedAt: blockDt.toISOString(),
-      userShare: shares,
+      userShares: shares,
     };
     const index = delegation.from.replace("0x", "").toLowerCase();
     if (Batch.insertsDelegations.has(index)) {
