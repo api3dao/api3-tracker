@@ -12,6 +12,7 @@ import {
   niceDate,
   niceDateTime,
   toCurrency,
+  toPct4,
   noDecimals,
   withDecimals,
 } from "./../services/format";
@@ -48,6 +49,7 @@ interface IEventGasTotals {
 }
 
 const EventGasTotals = (props: IEventGasTotals) => {
+  if (props.gasUsed == 0) return null;
   const price = noDecimals(withDecimals("" + (props.gasPrice || 0), 9));
   return (
     <div className="text-xs text-color-grey leading-6">
@@ -75,7 +77,11 @@ const VotingLink = (props: IVotingLinkProps) => {
   let title = `#${props.id}`;
   for (const v of props.votings) {
     if (v.id == id) {
-      return <Link href={href} legacyBehavior>{v.name}</Link>;
+      return (
+        <Link href={href} legacyBehavior>
+          {v.name}
+        </Link>
+      );
     }
   }
   return <span> {title}</span>;
@@ -84,6 +90,49 @@ const VotingLink = (props: IVotingLinkProps) => {
 const EventDetails = (props: IEventDetails) => {
   const thisWallet = props.wallet.address;
   switch (props.eventName) {
+    case "Rewards": {
+      const userShare = props.data[0];
+      const userSharePct = props.data[1];
+      const userMintedShares = props.data[2];
+      const userReleasedShares = props.data[3];
+      const totalShares = props.data[4];
+      const mintedShares = props.data[5];
+      return (
+        <div className="leading-4">
+          <div key={0} className="text-xs darken">
+            User shares:{" "}
+            <span className="text-color-panel-title">
+              {noDecimals(toCurrency(userShare))}
+            </span>{" (owns "}
+            <span className="text-color-panel-title">
+              {toPct4(userSharePct)}
+            </span>{" "}
+            out of{" "}
+            <span className="text-color-panel-title">
+              {noDecimals(toCurrency(totalShares))}
+            </span>{" shares). "}
+          </div>
+          <div key={1} className="text-xs darken">
+            Rewarded with{" "}
+            <span className="text-color-panel-title">
+              {noDecimals(toCurrency(userMintedShares))}
+            </span>{" "}
+            locked tokens out of {" "}
+            <span className="text-color-panel-title">
+              {noDecimals(toCurrency(mintedShares))}
+            </span>{" "}
+            minted shares {" "}
+          </div>
+         {(userReleasedShares > 0) ? (
+          <div key={2} className="text-xs darken">
+            Released {" "}
+            <span className="text-color-panel-title">
+              {noDecimals(toCurrency(userReleasedShares))}
+            </span>{" shares "}
+          </div>) : null}
+        </div>
+      );
+    }
     case "TransferredAndLocked": {
       // source, recipient, amount, release start, release end
       const source: string = props.data[0];
@@ -409,7 +458,7 @@ const EventDetails = (props: IEventDetails) => {
 
   if (props.eventName == "StartVote" || props.eventName == "ExecuteVote") {
     if (typeof props.data[0] == "undefined") {
-       return (<div className="darken text-xs">NO DETAILS</div>);
+      return <div className="darken text-xs">NO DETAILS</div>;
     }
     const voteId = parseInt(ethers.BigNumber.from(props.data[0]).toString());
     return (
@@ -424,7 +473,7 @@ const EventDetails = (props: IEventDetails) => {
     );
   } else if (props.eventName == "CastVote") {
     if (typeof props.data[0] == "undefined") {
-       return (<div className="darken text-xs">NO DETAILS</div>);
+      return <div className="darken text-xs">NO DETAILS</div>;
     }
     const voteId = parseInt(ethers.BigNumber.from(props.data[0]).toString());
     const supports = props.data[2];

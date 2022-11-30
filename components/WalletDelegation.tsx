@@ -67,8 +67,9 @@ export const WalletDelegation = (props: IWalletDelegationProps) => {
         <div className="text-color-panel-title">
           <h2 className="text-xl font-bold text-center">
             This member is delegated{" "}
-{noDecimals(toCurrency(props.userIsDelegated))}{" shares by "}
-{toNZ.length}{" "}members
+            {noDecimals(toCurrency(props.userIsDelegated))}
+            {" shares by "}
+            {toNZ.length} members
           </h2>
           <table className="table invisible lg:visible">
             <WalletDelegationThead />

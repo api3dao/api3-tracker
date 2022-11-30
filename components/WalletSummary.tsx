@@ -15,7 +15,7 @@ export const WalletSummary = (props: IWalletSummaryProps) => {
     "text-sm text-center text-color-grey py-4 border-t border-solid border-color-cell-border uppercase";
   const classValue = "text-2xl mb-10 text-color-panel-title font-bold";
   const { wallet } = props;
-  const userVotingPower = new Prisma.Decimal(wallet.userShare).div(props.total);
+  const userVotingPower = new Prisma.Decimal(wallet.userVotingPower).mul(100).div(props.total);
   return (
     <div className="max-w-screen-lg text-center mx-auto my-10">
       {wallet.ensName ? (
@@ -31,7 +31,7 @@ export const WalletSummary = (props: IWalletSummaryProps) => {
         <BorderedPanel title="Voting Power" big={true}>
           <div className="my-4">
             <span className="text-2xl text-color-panel-title">
-              {noDecimals(toCurrency(wallet.userShare))}
+              {noDecimals(toCurrency(wallet.userVotingPower))}
             </span>{" "}
             shares
           </div>
