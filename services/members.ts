@@ -455,7 +455,7 @@ export const Batch = {
       // find what are the delegations TO the member
       member.userIsDelegated = delegated;
       // update  userVotingPower = userShares + userIsDelegated + lockedRewards - unlockedRewards
-      console.log("updateTotals member", addrIndex, JSON.stringify(member));
+      // console.log("updateTotals member", addrIndex, JSON.stringify(member));
       Batch.ensureUpdated(member);
     }
   },

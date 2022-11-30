@@ -815,9 +815,8 @@ export const Events = {
         const priceDec = new Prisma.Decimal(blockInfo.price).mul(
           new Prisma.Decimal(withDecimals(fee.toString(), 18))
         );
-        const feeUsd = parseFloat(withDecimals(priceDec.toString(), 18));
-
-        // console.log( txHash.toString("hex"), "gasUsed", BigNumber.from(gasUsed).toString(), "gasPrice", BigNumber.from(gasPrice).toString(), "ethPrice", new Prisma.Decimal(blockInfo.price), "fee", withDecimals(fee.toString(), 18), "feeUsd", feeUsd);
+        const feeUsd = parseFloat(priceDec.toString());
+        // console.log( txHash.toString("hex"), "gasUsed", BigNumber.from(gasUsed).toString(), "gasPrice", BigNumber.from(gasPrice).toString(), "ethPrice", new Prisma.Decimal(blockInfo.price), "fee", new Prisma.Decimal(withDecimals(fee.toString(), 18)), "feeUsd", feeUsd);
         // if( feeUsd > 0 ) process.exit(1);
 
         const topicHash: string = event.topics[0];
@@ -1030,7 +1029,7 @@ export const Events = {
       const matchMember =
         data.from.toString("hex").toLowerCase() == vm ||
         data.to.toString("hex").toLowerCase() == vm;
-      if (true) {
+      if (matchMember) {
         console.log(
           "MEMBER.DELEGATION.CREATE",
           blockNumber,
@@ -1064,7 +1063,7 @@ export const Events = {
       if (data.to) {
         const matchMember =
           key == vm || data.to.toString("hex").toLowerCase() == vm;
-        if (true) {
+        if (matchMember) {
           console.log(
             "MEMBER.DELEGATION.UPDATE",
             blockNumber,

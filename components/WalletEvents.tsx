@@ -503,7 +503,7 @@ export const WalletEventsListTr = (props: IWalletEventsRowProps) => {
 
 export const WalletEventsList = (props: IWalletEventsListProps) => {
   return (
-    <div className="max-w-screen-lg mx-auto">
+    <div className="max-w-screen-lg mx-auto mb-20">
       <table className="table invisible lg:visible">
         <WalletEventsListThead />
         <tbody>
