@@ -597,11 +597,6 @@ export const Events = {
       const member: IWallet = m;
       member.userReward.add(userMintedShares);
       member.userLockedReward.add(userMintedShares);
-      member.userVotingPower = new Prisma.Decimal(member.userShare).add(
-        member.userIsDelegated
-      );
-      if (member.userDelegates > new Prisma.Decimal(0.0))
-        member.userVotingPower = new Prisma.Decimal(0.0);
 
       tx.push(
         prisma.memberEpoch.create({
@@ -1001,7 +996,7 @@ export const Events = {
               matchMember
             );
             if (wallet) {
-              Batch.processEvent(
+              await Batch.processEvent(
                 wallet,
                 blockDt,
                 decoded.signature,

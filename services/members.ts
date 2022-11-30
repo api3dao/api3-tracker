@@ -466,7 +466,7 @@ export const Batch = {
     for (const addr of addresses) {
       const index = addr.toString("hex");
       if (!updated.has(index)) {
-        Batch.updateTotals(addr, verbose);
+        await Batch.updateTotals(addr, verbose);
         updated.set(index, 1);
       }
     }
@@ -489,14 +489,14 @@ export const Batch = {
     if (Batch.insertsDelegations.has(index)) {
       const existing = Object.assign({}, Batch.insertsDelegations.get(index));
       Batch.insertsDelegations.set(index, delegation);
-      Batch.updateMembersTotals(
+      await Batch.updateMembersTotals(
         [from, to, Address.asBuffer(existing.to)],
         verbose
       );
     } else if (Batch.updatesDelegations.has(index)) {
       const existing = Object.assign({}, Batch.updatesDelegations.get(index));
       Batch.updatesDelegations.set(index, delegation);
-      Batch.updateMembersTotals(
+      await Batch.updateMembersTotals(
         [from, to, Address.asBuffer(existing.to)],
         verbose
       );
@@ -506,15 +506,15 @@ export const Batch = {
       });
       if (existing.length === 0) {
         Batch.insertsDelegations.set(index, delegation);
-        Batch.updateMembersTotals([from, to], verbose);
+        await Batch.updateMembersTotals([from, to], verbose);
       } else {
         Batch.updatesDelegations.set(index, delegation);
-        Batch.updateMembersTotals([from, to, existing[0].to], verbose);
+        await Batch.updateMembersTotals([from, to, existing[0].to], verbose);
       }
     }
   },
 
-  processEvent: (
+  processEvent: async (
     member: IWallet,
     blockDt: Date,
     signature: string,
@@ -535,14 +535,13 @@ export const Batch = {
       }
       case "Staked(address,uint256,uint256,uint256,uint256,uint256,uint256)": {
         const userShares = new Prisma.Decimal(
-          withDecimals(ethers.BigNumber.from(args[4]).toString(), 18)
+          withDecimals(ethers.BigNumber.from(args[3]).toString(), 18)
         );
-        // const totalShares = new Prisma.Decimal(withDecimals(ethers.BigNumber.from(args[5]).toString(), 18));
         const m0 = Batch.removeBadge(member, "deposited", blockDt, verbose);
-        m0.userShare = m0.userShare.add(userShares);
+        m0.userShare = userShares;
         const m1 = Batch.removeBadge(member, "deposited", blockDt, verbose);
         Batch.ensureUpdated(m1);
-        Batch.updateTotals(Address.asBuffer(m1.address), verboseTotals);
+        await Batch.updateTotals(Address.asBuffer(m1.address), verboseTotals);
         return m1;
       }
       case "Unstaked(address,uint256,uint256,uint256,uint256)": {
@@ -551,7 +550,7 @@ export const Batch = {
         );
         member.userShare = member.userShare.sub(userShares);
         Batch.ensureUpdated(member);
-        Batch.updateTotals(Address.asBuffer(member.address), verboseTotals);
+        await Batch.updateTotals(Address.asBuffer(member.address), verboseTotals);
         return member;
       }
       case "ScheduledUnstake(address,uint256,uint256,uint256,uint256)":
@@ -563,7 +562,7 @@ export const Batch = {
         );
         const m1 = Address.asBuffer(args[0]);
         const m2 = Address.asBuffer(args[1]);
-        Batch.updateDelegation(m1, m2, blockDt, userShares, verboseDelegation);
+        await Batch.updateDelegation(m1, m2, blockDt, userShares, verboseDelegation);
         return member;
       case "UpdatedDelegation(address,address,bool,uint256,uint256)": {
         const userShares = new Prisma.Decimal(
@@ -571,19 +570,19 @@ export const Batch = {
         );
         const m1 = Address.asBuffer(args[0]);
         const m2 = Address.asBuffer(args[1]);
-        Batch.updateDelegation(
+        await Batch.updateDelegation(
           m1,
           m2,
           blockDt,
           new Prisma.Decimal(0),
           verboseDelegation
-        ).toString();
+        );
         return member;
       }
       case "Undelegated(address,address,uint256,uint256)": {
         const m1 = Address.asBuffer(args[0]);
         const m2 = Address.asBuffer(args[1]);
-        Batch.updateDelegation(
+        await Batch.updateDelegation(
           m1,
           m2,
           blockDt,
