@@ -452,10 +452,22 @@ export const Batch = {
       member.userDelegates = new Prisma.Decimal(
         delegation ? delegation.userShares : 0
       );
+      if (delegation) { // delegates badge should be received
+        const badge = "delegates";
+        member.badges = Wordlist.add(member.badges, badge);
+        if (member.tags) {
+          member.tags = Wordlist.add(member.tags, badge);
+        } else {
+          member.tags = badge;
+        }
+      }
       // find what are the delegations TO the member
       member.userIsDelegated = delegated;
-      member.userVotingPower = new Prisma.Decimal(member.userShare).add(member.userIsDelegated);
-      if (member.userDelegates > new Prisma.Decimal(0.0)) member.userVotingPower =  new Prisma.Decimal(0.0);
+      member.userVotingPower = new Prisma.Decimal(member.userShare).add(
+        member.userIsDelegated
+      );
+      if (member.userDelegates > new Prisma.Decimal(0.0))
+        member.userVotingPower = new Prisma.Decimal(0.0);
       // console.log("updateTotals member", addrIndex, JSON.stringify(member));
       Batch.ensureUpdated(member);
     }
@@ -550,7 +562,10 @@ export const Batch = {
         );
         member.userShare = member.userShare.sub(userShares);
         Batch.ensureUpdated(member);
-        await Batch.updateTotals(Address.asBuffer(member.address), verboseTotals);
+        await Batch.updateTotals(
+          Address.asBuffer(member.address),
+          verboseTotals
+        );
         return member;
       }
       case "ScheduledUnstake(address,uint256,uint256,uint256,uint256)":
@@ -562,7 +577,13 @@ export const Batch = {
         );
         const m1 = Address.asBuffer(args[0]);
         const m2 = Address.asBuffer(args[1]);
-        await Batch.updateDelegation(m1, m2, blockDt, userShares, verboseDelegation);
+        await Batch.updateDelegation(
+          m1,
+          m2,
+          blockDt,
+          userShares,
+          verboseDelegation
+        );
         return member;
       case "UpdatedDelegation(address,address,bool,uint256,uint256)": {
         const userShares = new Prisma.Decimal(
