@@ -6,7 +6,7 @@ import { Wallets } from "./../services/api";
 import { noDecimals, withDecimals } from "./../services/format";
 import { BigNumber, ethers } from "ethers";
 import { fetchWebconfig } from "./webconfig";
-import { IContract } from "./types";
+import { IWallet, IContract } from "./types";
 import { Filter, Block, Log, Provider } from "@ethersproject/abstract-provider";
 import { EthereumPrice } from "./../services/price";
 import { VotingReader } from "./../services/voting";
@@ -503,7 +503,7 @@ export const Events = {
     event: Log,
     tx: any
   ): Promise<boolean> => {
-    const { transactionHash } = event;
+    const { transactionIndex, transactionHash, logIndex } = event;
     const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
 
@@ -516,16 +516,120 @@ export const Events = {
     const totalMembers = await Wallets.total();
     const total = totalStake.sub(amount);
     const minted = amount;
+
+    const totalShares = new Prisma.Decimal(
+      withDecimals(totalStake.toString(), 18)
+    );
+    const mintedShares = new Prisma.Decimal(
+      withDecimals(amount.toString(), 18)
+    );
+
     const currentEpoch = await prisma.epoch.findMany({
       where: { isCurrent: 1 },
     });
 
-    // todo: members distribution: save snapshots
     const oldApr = currentEpoch.length > 0 ? currentEpoch[0].apr : 38.75;
+    const oldAprPct = rewardsPct(parseFloat(oldApr + ""));
+
     const newAprPct = parseFloat(
       new Prisma.Decimal(withDecimals(newApr.toString(), 18)).toString()
     );
 
+    let totalDeposits = new Prisma.Decimal(0);
+    let totalWithdrawals = new Prisma.Decimal(0);
+    let totalUnlocked = new Prisma.Decimal(0);
+    let totalLocked = new Prisma.Decimal(0);
+
+    // scanning epochs that should be released
+    // const epochsToBeReleased = await prisma.epoch.findMany({
+    // where: { isReleased: 0, releaseDate: { lt: blockDt.toISOString() }},
+    // });
+
+    // members distribution: save snapshots
+    const allMembers = await Wallets.fetchAll();
+    for (const m of allMembers) {
+      let userShare = m.userShare;
+      if (userShare < new Prisma.Decimal(0.0))
+        userShare = new Prisma.Decimal(0.0);
+      const userSharePct = userShare.mul(100).div(totalShares);
+      const userMintedShares = mintedShares.mul(userSharePct).div(100); // rewards are proportional
+      const userReleasedShares = new Prisma.Decimal(0);
+
+      // save mintedEvent for each member
+      const eventId =
+        event.blockNumber.toString(16) +
+        "-" +
+        logIndex.toString(16) +
+        "." +
+        m.address.replace("0x", "") +
+        "." +
+        Math.random().toString().replace("0.", "");
+      const args: any = [
+        userShare,
+        userSharePct,
+        userMintedShares,
+        userReleasedShares,
+        totalShares,
+        mintedShares,
+      ];
+      tx.push(
+        prisma.memberEvent.create({
+          data: {
+            id: eventId,
+            createdAt: blockDt,
+            address: Address.asBuffer(m.address),
+            chainId: 0,
+            txHash,
+            blockNumber,
+            txIndex: transactionIndex,
+            logIndex: logIndex,
+            eventName: "Rewards",
+            data: args,
+            // we do not want the gas price to be included in totals
+            // because of this event
+            gasPrice: BigNumber.from(0).toNumber(),
+            gasUsed: BigNumber.from(0).toNumber(),
+            fee: BigInt(0),
+            feeUsd: "0",
+          },
+        })
+      );
+      const member: IWallet = m;
+      member.userReward.add(userMintedShares);
+      member.userLockedReward.add(userMintedShares);
+      member.userVotingPower = new Prisma.Decimal(member.userShare).add(
+        member.userIsDelegated
+      );
+      if (member.userDelegates > new Prisma.Decimal(0.0))
+        member.userVotingPower = new Prisma.Decimal(0.0);
+
+      tx.push(
+        prisma.memberEpoch.create({
+          data: {
+            epoch: parseInt(epochIndex.toString()),
+            address: Address.asBuffer(m.address),
+            userShare,
+            userStake: new Prisma.Decimal(0.0),
+            userVotingPower: member.userVotingPower,
+            userReward: userMintedShares,
+            isReleased: 0,
+            userTotalDeposits: member.userDeposited,
+            userTotalWithdrawals: member.userWithdrew,
+            userTotalUnlocked: member.userReward.sub(member.userLockedReward),
+            userTotalLocked: member.userLockedReward,
+          },
+        })
+      );
+
+      totalDeposits = totalDeposits.add(m.userDeposited);
+      totalWithdrawals = totalWithdrawals.add(m.userWithdrew);
+      totalUnlocked = totalUnlocked.add(m.userReward.sub(m.userLockedReward));
+      totalLocked = totalLocked.add(m.userLockedReward);
+
+      Batch.ensureUpdated(member);
+    }
+
+    /*
     if (currentEpoch.length == 0) {
       const prevDt = new Date(blockInfo.block.timestamp * 1000);
       prevDt.setDate(prevDt.getDate() - 7);
@@ -554,18 +658,18 @@ export const Events = {
         })
       );
     } else {
-      tx.push(
-        prisma.epoch.updateMany({
-          where: {
-            blockNumber: { lt: blockNumber },
-            isCurrent: 1,
-          },
-          data: {
-            isCurrent: 0,
-          },
-        })
-      );
-    }
+  */
+    tx.push(
+      prisma.epoch.updateMany({
+        where: {
+          blockNumber: { lt: blockNumber },
+          isCurrent: 1,
+        },
+        data: {
+          isCurrent: 0,
+        },
+      })
+    );
     tx.push(
       prisma.epoch.create({
         data: {
@@ -575,6 +679,8 @@ export const Events = {
           txHash,
           apr: new Prisma.Decimal(withDecimals(newApr.toString(), 16)),
           rewardsPct: rewardsPct(newAprPct),
+          // apr: oldApr,
+          // rewardsPct: rewardsPct(oldAprPct),
           members: totalMembers,
           totalStake: new Prisma.Decimal(
             noDecimals(withDecimals(total.toString(), 18))
@@ -587,6 +693,10 @@ export const Events = {
           createdAt: blockDt,
           isCurrent: 1,
           stakedRewards: 0,
+          totalDeposits,
+          totalWithdrawals,
+          totalUnlocked,
+          totalLocked,
         },
       })
     );
@@ -973,8 +1083,8 @@ export const Events = {
                   logIndex: logIndex,
                   eventName: decoded.name,
                   data: decoded.args,
-                  gasPrice: BigNumber.from(gasPrice).toNumber(),
-                  gasUsed: BigNumber.from(gasUsed).toNumber(),
+                  gasPrice: ethers.BigNumber.from(gasPrice).toNumber(),
+                  gasUsed: ethers.BigNumber.from(gasUsed).toNumber(),
                   fee: BigInt(fee.toString()),
                   feeUsd: feeUsd.toString(),
                   address: Address.asBuffer(from),
@@ -1010,7 +1120,7 @@ export const Events = {
       }
     }
 
-    let verboseBatch = Batch.hasMember(vm);
+    let verboseBatch = false; // Batch.hasMember(vm);
     for (const data of Batch.getInserts(verboseBatch)) {
       const matchMember =
         data.address.toString("hex").replace("0x", "").toLowerCase() == vm;

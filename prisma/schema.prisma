@@ -24,13 +24,14 @@ model Epoch {
   mintedShares  Decimal  @db.Decimal(60, 18) // # of minted tokens
   releaseDate   DateTime // Date when minted tokens will be released
   isCurrent     Int // whether this epoch is current
+  isReleased    Int @default(0) // whether rewards of the epoch are released
   rewardsPct    Decimal  @db.Decimal(10, 4) // real epoch rewards (calculated from APR)
   stakedRewards Decimal  @db.Decimal(60, 18) // total staked rewards at the moment of the epoch
 
-  totalDeposits    Decimal @db.Decimal(60, 18) @default(0.0) // total deposits of the user at the moment of this epoch
-  totalWithdrawals Decimal @db.Decimal(60, 18) @default(0.0) // total withdrawals of the user at the moment of this epoch
-  totalUnlocked    Decimal @db.Decimal(60, 18) @default(0.0) // total unlocked rewards of the user at the moment of this epoch
-  totalLocked      Decimal @db.Decimal(60, 18) @default(0.0) // total locked rewards of the user at the moment of this epoch
+  totalDeposits    Decimal @default(0.0) @db.Decimal(60, 18) // total deposits of the user at the moment of this epoch
+  totalWithdrawals Decimal @default(0.0) @db.Decimal(60, 18) // total withdrawals of the user at the moment of this epoch
+  totalUnlocked    Decimal @default(0.0) @db.Decimal(60, 18) // total unlocked rewards of the user at the moment of this epoch
+  totalLocked      Decimal @default(0.0) @db.Decimal(60, 18) // total locked rewards of the user at the moment of this epoch
 
   @@map("epochs")
 }
@@ -44,12 +45,12 @@ model MemberEpoch {
   userStake       Decimal @db.Decimal(60, 18) // number of user stake at the moment of this epoch
   userVotingPower Decimal @db.Decimal(10, 2) // user voting power at this epoch
   userReward      Decimal @db.Decimal(60, 18) // user reward for this epoch
-  isReleased      Int @default(0) // whether rewards of these epochs are released
+  isReleased      Int     @default(0) // whether rewards of these epochs are released
 
-  userTotalDeposits    Decimal @db.Decimal(60, 18) @default(0.0) // total deposits of the user at the moment of this epoch
-  userTotalWithdrawals Decimal @db.Decimal(60, 18) @default(0.0) // total withdrawals of the user at the moment of this epoch
-  userTotalUnlocked    Decimal @db.Decimal(60, 18) @default(0.0) // total unlocked rewards of the user at the moment of this epoch
-  userTotalLocked      Decimal @db.Decimal(60, 18) @default(0.0) // total locked rewards of the user at the moment of this epoch
+  userTotalDeposits    Decimal @default(0.0) @db.Decimal(60, 18) // total deposits of the user at the moment of this epoch
+  userTotalWithdrawals Decimal @default(0.0) @db.Decimal(60, 18) // total withdrawals of the user at the moment of this epoch
+  userTotalUnlocked    Decimal @default(0.0) @db.Decimal(60, 18) // total unlocked rewards of the user at the moment of this epoch
+  userTotalLocked      Decimal @default(0.0) @db.Decimal(60, 18) // total locked rewards of the user at the moment of this epoch
 
   @@id([epoch, address])
   @@map("member_epochs")

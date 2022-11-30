@@ -219,7 +219,12 @@ export const Delegations = {
 };
 
 export const Wallets = {
-  // fetch a list of votings for the certain status
+  // fetch all members
+  fetchAll: async (): Promise<Array<IWallet>> => {
+      const list = await  prisma.member.findMany({ });
+      return list.map((x: any) => (Wallets.from(x)));
+  },
+  // fetch a list of wallets for the certain search query
   fetchList: async (q: string, cursor: ICursor): Promise<WalletsList> => {
     const where = q.length > 0 ? { tags: { search: q } } : {};
     const [list, total] = await prisma.$transaction([

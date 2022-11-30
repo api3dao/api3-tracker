@@ -16,7 +16,7 @@
     "db:rm": "docker rm -f pgapi3dao",
     "db:dump": "(docker exec -i pgapi3dao pg_dump --no-owner --clean --if-exists -U postgres -h 127.0.0.1 api3dao > pgapi3dao.sql) && find . -name pgapi3dao.sql.gz -delete && gzip pgapi3dao.sql",
     "db:upload": "cat pgapi3dao.sql.gz | gzip -d - | docker exec -i $(docker ps -q --filter label=role=postgres --filter label=project=api3tracker)  sh -c 'psql -U $POSTGRES_USER -d $POSTGRES_DB -h 127.0.0.1'",
-    "cache:dump": "(docker exec -i pgapi3dao pg_dump --no-owner --format plain --clean --if-exists --table cache_blocks --table cache_ens --table cache_logs --table cache_receipts --table cache_tx -U postgres -h 127.0.0.1 api3dao > cache.sql) && find . -name cache.sql.gz -delete && gzip cache.sql",
+    "cache:dump": "(docker exec -i pgapi3dao pg_dump --no-owner --format plain --clean --if-exists --table sync_status --table cache_blocks --table cache_ens --table cache_logs --table cache_receipts --table cache_tx -U postgres -h 127.0.0.1 api3dao > cache.sql) && find . -name cache.sql.gz -delete && gzip cache.sql",
     "cache:restore": "cat cache.sql.gz | gzip -d - | docker exec -i pgapi3dao psql -U postgres -h 127.0.0.1 -d api3dao",
     "format": "prettier --write \"./**/*.{ts,tsx,js,jsx,css,scss,md,json,prisma}\" --loglevel silent",
     "format:check": "prettier --check \"./**/*.{ts,tsx,js,jsx,css,scss,md,json,prisma}\" --loglevel debug",

@@ -423,11 +423,11 @@ export const Batch = {
         delegationMap.set(fromIndex, upd.userShares);
     }
     // at this point we have in-memory delegation map of this member
-    if (verbose) console.log("delegationMap", addrIndex, delegationMap);
     let total = new Prisma.Decimal(0.0);
     for (const [_, shares] of delegationMap) {
       total = total.add(shares);
     }
+    // if (delegationMap.size) { console.log("delegationMap", addrIndex, total, delegationMap); }
     return total;
   },
 
@@ -454,7 +454,8 @@ export const Batch = {
       );
       // find what are the delegations TO the member
       member.userIsDelegated = delegated;
-      // update  userVotingPower = userShares + userIsDelegated + lockedRewards - unlockedRewards
+      member.userVotingPower = new Prisma.Decimal(member.userShare).add(member.userIsDelegated);
+      if (member.userDelegates > new Prisma.Decimal(0.0)) member.userVotingPower =  new Prisma.Decimal(0.0);
       // console.log("updateTotals member", addrIndex, JSON.stringify(member));
       Batch.ensureUpdated(member);
     }
@@ -521,12 +522,15 @@ export const Batch = {
     verbose: boolean
   ) => {
     const verboseDelegation = false;
+    const verboseTotals = false;
     switch (signature) {
       case "Deposited(address,uint256,uint256)": {
         const m0 = Batch.addSupporter(member, blockDt, verbose);
         const m1 = Batch.addBadge(m0, "deposited", blockDt, verbose);
-        const tokens = withDecimals(BigNumber.from(args[1]).toString(), 18);
-        m1.userDeposited = m1.userDeposited.add(new Prisma.Decimal(tokens));
+        const tokens = new Prisma.Decimal(
+          withDecimals(ethers.BigNumber.from(args[1]).toString(), 18)
+        );
+        m1.userDeposited = m1.userDeposited.add(tokens);
         return Batch.ensureUpdated(m1);
       }
       case "Staked(address,uint256,uint256,uint256,uint256,uint256,uint256)": {
@@ -536,18 +540,22 @@ export const Batch = {
         // const totalShares = new Prisma.Decimal(withDecimals(ethers.BigNumber.from(args[5]).toString(), 18));
         const m0 = Batch.removeBadge(member, "deposited", blockDt, verbose);
         m0.userShare = m0.userShare.add(userShares);
-        m0.userVotingPower = new Prisma.Decimal(0.0); // we will calculate it on fly
         const m1 = Batch.removeBadge(member, "deposited", blockDt, verbose);
-        return Batch.ensureUpdated(m1);
+        Batch.ensureUpdated(m1);
+        Batch.updateTotals(Address.asBuffer(m1.address), verboseTotals);
+        return m1;
       }
       case "Unstaked(address,uint256,uint256,uint256,uint256)": {
         const userShares = new Prisma.Decimal(
           withDecimals(ethers.BigNumber.from(args[1]).toString(), 18)
         );
         member.userShare = member.userShare.sub(userShares);
-        return Batch.ensureUpdated(member);
+        Batch.ensureUpdated(member);
+        Batch.updateTotals(Address.asBuffer(member.address), verboseTotals);
+        return member;
       }
       case "ScheduledUnstake(address,uint256,uint256,uint256,uint256)":
+        // TODO: member actually loses voting power at this point
         return Batch.addBadge(member, "unstaking", blockDt, verbose);
       case "Delegated(address,address,uint256,uint256)":
         const userShares = new Prisma.Decimal(
@@ -569,7 +577,7 @@ export const Batch = {
           blockDt,
           new Prisma.Decimal(0),
           verboseDelegation
-        );
+        ).toString();
         return member;
       }
       case "Undelegated(address,address,uint256,uint256)": {
@@ -598,7 +606,7 @@ export const Batch = {
         );
         const m0 = Batch.removeBadge(member, "supporter", blockDt, verbose);
         const m1 = Batch.addBadge(m0, "vested", blockDt, verbose);
-        m1.userDeposited = m1.userDeposited.add(new Prisma.Decimal(tokens));
+        m1.userDeposited = m1.userDeposited.add(tokens);
         return Batch.ensureUpdated(m1);
       }
       case "Withdrawn(address,uint256)":
@@ -607,8 +615,13 @@ export const Batch = {
         const m1 = Batch.removeBadge(member, "supporter", blockDt, verbose);
         const m2 = Batch.removeBadge(m1, "unstaking", blockDt, verbose);
         const m3 = Batch.addBadge(m2, "withdrawn", blockDt, verbose);
-        const tokens = withDecimals(BigNumber.from(args[1]).toString(), 18);
-        m3.userWithdrew = m3.userWithdrew.add(new Prisma.Decimal(tokens));
+        const tokens = withDecimals(
+          ethers.BigNumber.from(args[1]).toString(),
+          18
+        );
+        m3.userWithdrew = m3.userWithdrew.add(
+          new Prisma.Decimal(tokens.toString())
+        );
         return Batch.ensureUpdated(m3);
       }
     }
