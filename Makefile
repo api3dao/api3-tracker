@@ -24,7 +24,7 @@ validate:
 	terraform validate
 
 burak:
-	API3TRACKER_ENDPOINT=none yarn state:update --stop-block 12786817 --verbose-blocks false --verbose-member 0x5846711b4b7485392c1f0feaec203aa889071717
+	API3TRACKER_ENDPOINT=none yarn state:update --stop-block 12800000 --verbose-blocks false --verbose-member 0x5846711b4b7485392c1f0feaec203aa889071717
 sasa:
 	API3TRACKER_ENDPOINT=none yarn state:update --stop-block 15610110 --verbose-blocks true --verbose-member 0x74e3591425325a35e41e0e230d7d8686c7912ab4
 heikki:

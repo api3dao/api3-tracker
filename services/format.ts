@@ -24,17 +24,25 @@ export const noDecimals = (x: string): string => {
   return x.replace(/\..+$/g, "");
 };
 
+export const zerosRight = (x: string, len: number): string => {
+  let out = x;
+  while (out.length < len) out += '0';
+  return out;
+};
+
 export const justDecimals = (x: string, l: number): string => {
-  return x.replace(/^.+\./g, "").substring(0, l);
+  const w = x.replace(/^.+\./g, "");
+  return (w.length > l) ? w.substring(0, l) : zerosRight(w, l);
 };
 
 export const toPct4= (x: any): string => {
   if (typeof x === "undefined" || toCurrency(x) === "") return "";
   if (typeof x === "object" || typeof x === "string") {
        if (x.toString().indexOf("e-") !== -1) return "0.0000%";
-       return noDecimals(x.toString()) + "." + justDecimals(x.toString(), 4) + "%"
+       return noDecimals(x.toString()) + "." + justDecimals(x.toString(), 4) + "%";
   }
   if (typeof x === "number" && x < 1) return x.toString() + "%";
+  if (x == 0.0) return x.toString() + "?";
   return `${toCurrency(x).replace(/0*$/g, "").replace(/\.$/, "")}%`;
 };
 
