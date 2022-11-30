@@ -1207,7 +1207,7 @@ export const Events = {
         },
       })
     );
-    if (!termination.epoch && termination.block == blockNumber) {
+    if (!termination.epoch && termination.block && termination.block <= blockNumber) {
       // stop on a certain block
       shouldTerminate = true;
       included = false;

@@ -559,7 +559,7 @@ export const Batch = {
         return Batch.addBadge(member, "unstaking", blockDt, verbose);
       case "Delegated(address,address,uint256,uint256)":
         const userShares = new Prisma.Decimal(
-          withDecimals(ethers.BigNumber.from(args[3]).toString(), 18)
+          withDecimals(ethers.BigNumber.from(args[2]).toString(), 18)
         );
         const m1 = Address.asBuffer(args[0]);
         const m2 = Address.asBuffer(args[1]);
@@ -602,7 +602,7 @@ export const Batch = {
       }
       case "DepositedVesting(address,uint256,uint256,uint256,uint256,uint256)": {
         const tokens = new Prisma.Decimal(
-          withDecimals(ethers.BigNumber.from(args[0]).toString(), 18)
+          withDecimals(ethers.BigNumber.from(args[1]).toString(), 18)
         );
         const m0 = Batch.removeBadge(member, "supporter", blockDt, verbose);
         const m1 = Batch.addBadge(m0, "vested", blockDt, verbose);
