@@ -595,22 +595,21 @@ export const Events = {
         })
       );
       const member: IWallet = m;
-      if (userMintedShares > new Prisma.Decimal(0.0)) {
-        member.userReward.add(userMintedShares);
-      member.userLockedReward.add(userMintedShares);
-      Batch.ensureUpdated(member);
-      console.log("REWARD", member.address, member.userReward, member.userLockedReward);
+      if (userMintedShares && userMintedShares > new Prisma.Decimal(0.0)) {
+        member.userReward = member.userReward.add(userMintedShares);
+        member.userLockedReward = member.userLockedReward.add(userMintedShares);
+        Batch.ensureUpdated(member);
 
-      tx.push(
-        prisma.member.updateMany({
-          where: { address: Address.asBuffer(member.address) },
-          data: {
-            userReward: member.userReward,
-            userLockedReward: member.userLockedReward,
-          },
-        })
-      );
-}
+        tx.push(
+          prisma.member.updateMany({
+            where: { address: Address.asBuffer(member.address) },
+            data: {
+              userReward: member.userReward,
+              userLockedReward: member.userLockedReward,
+            },
+          })
+        );
+      }
 
       tx.push(
         prisma.memberEpoch.create({
