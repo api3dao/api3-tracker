@@ -547,13 +547,17 @@ export const Batch = {
       }
       case "Staked(address,uint256,uint256,uint256,uint256,uint256,uint256)": {
         const userShares = new Prisma.Decimal(
-          withDecimals(ethers.BigNumber.from(args[3]).toString(), 18)
+          withDecimals(ethers.BigNumber.from(args[4]).toString(), 18)
         );
         const m0 = Batch.removeBadge(member, "deposited", blockDt, verbose);
         m0.userShare = userShares;
         const m1 = Batch.removeBadge(member, "deposited", blockDt, verbose);
         Batch.ensureUpdated(m1);
         await Batch.updateTotals(Address.asBuffer(m1.address), verboseTotals);
+
+        const totalShares = new Prisma.Decimal(
+          withDecimals(ethers.BigNumber.from(args[4]).toString(), 18)
+        ); // TODO: totalShares can be compared with totalshares over all the members
         return m1;
       }
       case "Unstaked(address,uint256,uint256,uint256,uint256)": {
@@ -629,9 +633,9 @@ export const Batch = {
         m1.userDeposited = m1.userDeposited.add(tokens);
         return Batch.ensureUpdated(m1);
       }
-      case "Withdrawn(address,uint256)":
+      // case "Withdrawn(address,uint256)": // this is some unrelated withdrawal by timelock manager
+      // case "WithdrawnToPool(address,address,address)":  // unrelated
       case "Withdrawn(address,uint256,uint256)": {
-        // case "WithdrawnToPool(address,address,address)":
         const m1 = Batch.removeBadge(member, "supporter", blockDt, verbose);
         const m2 = Batch.removeBadge(m1, "unstaking", blockDt, verbose);
         const m3 = Batch.addBadge(m2, "withdrawn", blockDt, verbose);
