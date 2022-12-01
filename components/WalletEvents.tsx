@@ -436,10 +436,15 @@ const EventDetails = (props: IEventDetails) => {
       const amount = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[1]).toString(), 18)
       );
+      const userUnstaked = noDecimals(
+        withDecimals(ethers.BigNumber.from(props.data[2]).toString(), 18)
+      );
       return (
         <div className="text-xs darken leading-4">
-          <span className="text-color-panel-title">{toCurrency(amount)}</span>{" "}
-          tokens
+          <span className="text-color-panel-title">{noDecimals(toCurrency(amount))}</span>{" "}
+          tokens,
+          <span className="text-color-panel-title">{noDecimals(toCurrency(userUnstaked))}</span>{" "}
+          unstaked
         </div>
       );
     }

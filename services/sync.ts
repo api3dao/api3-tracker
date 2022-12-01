@@ -595,8 +595,22 @@ export const Events = {
         })
       );
       const member: IWallet = m;
-      member.userReward.add(userMintedShares);
+      if (userMintedShares > new Prisma.Decimal(0.0)) {
+        member.userReward.add(userMintedShares);
       member.userLockedReward.add(userMintedShares);
+      Batch.ensureUpdated(member);
+      console.log("REWARD", member.address, member.userReward, member.userLockedReward);
+
+      tx.push(
+        prisma.member.updateMany({
+          where: { address: Address.asBuffer(member.address) },
+          data: {
+            userReward: member.userReward,
+            userLockedReward: member.userLockedReward,
+          },
+        })
+      );
+}
 
       tx.push(
         prisma.memberEpoch.create({
@@ -620,40 +634,8 @@ export const Events = {
       totalWithdrawals = totalWithdrawals.add(m.userWithdrew);
       totalUnlocked = totalUnlocked.add(m.userReward.sub(m.userLockedReward));
       totalLocked = totalLocked.add(m.userLockedReward);
-
-      Batch.ensureUpdated(member);
     }
 
-    /*
-    if (currentEpoch.length == 0) {
-      const prevDt = new Date(blockInfo.block.timestamp * 1000);
-      prevDt.setDate(prevDt.getDate() - 7);
-      const prevReleaseDt = new Date(blockInfo.block.timestamp * 1000);
-      prevReleaseDt.setFullYear(prevReleaseDt.getFullYear() + 1);
-      prevReleaseDt.setDate(prevReleaseDt.getDate() - 7);
-      // for the very first epoch
-      tx.push(
-        prisma.epoch.create({
-          data: {
-            epoch: parseInt(epochIndex.toString()) - 1,
-            blockNumber: 0,
-            chainId: 0,
-            txHash,
-            apr: oldApr,
-            rewardsPct: rewardsPct(parseFloat(oldApr + "")),
-            members: 0,
-            totalStake: 0,
-            totalShares: 0,
-            mintedShares: 0,
-            releaseDate: prevReleaseDt,
-            createdAt: prevDt,
-            isCurrent: 1,
-            stakedRewards: 0,
-          },
-        })
-      );
-    } else {
-  */
     tx.push(
       prisma.epoch.updateMany({
         where: {
@@ -1202,7 +1184,11 @@ export const Events = {
         },
       })
     );
-    if (!termination.epoch && termination.block && termination.block <= blockNumber) {
+    if (
+      !termination.epoch &&
+      termination.block &&
+      termination.block <= blockNumber
+    ) {
       // stop on a certain block
       shouldTerminate = true;
       included = false;
