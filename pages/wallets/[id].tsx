@@ -23,7 +23,7 @@ export async function getServerSideProps(context: any) {
     WalletEvents.fetchList(address),
     Blocks.fetchLast(),
     Votings.fetchAll(),
-    Supply.fetch(),
+    Wallets.totalShares(),
     Delegations.fetchFrom(address),
     Delegations.fetchTo(address),
   ]);
@@ -31,7 +31,7 @@ export async function getServerSideProps(context: any) {
   const events: Array<IWalletEvent> = results[1];
   const lastBlock: IBlockNumber = results[2];
   const votings: Array<IVoting> = results[3];
-  const supply: ISupply | null = results[4];
+  const totalShares: any= results[4];
   const delegationsFrom: Array<IDelegation> = results[5];
   const delegationsTo: Array<IDelegation> = results[6];
   return {
@@ -42,7 +42,7 @@ export async function getServerSideProps(context: any) {
       events: serializable(events),
       votings: serializable(votings),
       lastBlock: serializable(lastBlock),
-      supply: serializable(supply),
+      totalShares: serializable(totalShares),
       delegationsFrom: serializable(delegationsFrom),
       delegationsTo: serializable(delegationsTo),
     }, // will be passed to the page component as props
@@ -50,9 +50,9 @@ export async function getServerSideProps(context: any) {
 }
 
 const WalletDetailsPage: NextPage = (props: any) => {
-  const { lastBlock, wallet, events, supply, votings, webconfig } = props;
+  const { lastBlock, wallet, events, totalShares, votings, webconfig } = props;
   const { delegationsFrom, delegationsTo } = props;
-  const total = supply.totalStaked;
+  const total = totalShares;
   return (
     <div>
       <Meta webconfig={webconfig} page="wallet" />

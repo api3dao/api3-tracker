@@ -1,4 +1,5 @@
 import prisma from "./db";
+import { Prisma } from "@prisma/client";
 import {
   Decimal,
   IBlockNumber,
@@ -254,6 +255,14 @@ export const Wallets = {
     })) as IWallet | null;
     if (out) return Wallets.from(out);
     return null;
+  },
+  // fetch total shares for all members
+  totalShares: async (): Promise<Prisma.Decimal> => {
+    const out = (await prisma.member.aggregate({
+      _sum: { userShare: true },
+    }));
+    if (!out) return new Prisma.Decimal(0.0);
+    return out._sum.userShare || new Prisma.Decimal(0.0);
   },
   // fetch total number of members
   total: async (): Promise<number> => {
