@@ -556,61 +556,64 @@ export const Events = {
       const userReleasedShares = new Prisma.Decimal(0);
 
       // save mintedEvent for each member
-      const eventId =
-        event.blockNumber.toString(16) +
-        "-" +
-        logIndex.toString(16) +
-        "." +
-        m.address.replace("0x", "") +
-        "." +
-        Math.random().toString().replace("0.", "");
-      const args: any = [
-        userShare,
-        userSharePct,
-        userMintedShares,
-        userReleasedShares,
-        totalShares,
-        mintedShares,
-      ];
-      tx.push(
-        prisma.memberEvent.create({
-          data: {
-            id: eventId,
-            createdAt: blockDt,
-            address: Address.asBuffer(m.address),
-            chainId: 0,
-            txHash,
-            blockNumber,
-            txIndex: transactionIndex,
-            logIndex: logIndex,
-            eventName: "Rewards",
-            data: args,
-            // we do not want the gas price to be included in totals
-            // because of this event
-            gasPrice: BigNumber.from(0).toNumber(),
-            gasUsed: BigNumber.from(0).toNumber(),
-            fee: BigInt(0),
-            feeUsd: "0",
-          },
-        })
-      );
       const member: IWallet = m;
-      if (userMintedShares && userMintedShares > new Prisma.Decimal(0.0)) {
-        member.userReward = member.userReward.add(userMintedShares);
-        member.userLockedReward = member.userLockedReward.add(userMintedShares);
-        Batch.ensureUpdated(member);
-
+      if (userShare && userShare > new Prisma.Decimal(0.0)) {
+        const eventId =
+          event.blockNumber.toString(16) +
+          "-" +
+          logIndex.toString(16) +
+          "." +
+          m.address.replace("0x", "") +
+          "." +
+          Math.random().toString().replace("0.", "");
+        const args: any = [
+          userShare,
+          userSharePct,
+          userMintedShares,
+          userReleasedShares,
+          totalShares,
+          mintedShares,
+        ];
         tx.push(
-          prisma.member.updateMany({
-            where: { address: Address.asBuffer(member.address) },
+          prisma.memberEvent.create({
             data: {
-              userReward: member.userReward,
-              userLockedReward: member.userLockedReward,
+              id: eventId,
+              createdAt: blockDt,
+              address: Address.asBuffer(m.address),
+              chainId: 0,
+              txHash,
+              blockNumber,
+              txIndex: transactionIndex,
+              logIndex: logIndex,
+              eventName: "Rewards",
+              data: args,
+              // we do not want the gas price to be included in totals
+              // because of this event
+              gasPrice: BigNumber.from(0).toNumber(),
+              gasUsed: BigNumber.from(0).toNumber(),
+              fee: BigInt(0),
+              feeUsd: "0",
             },
           })
         );
-      }
 
+        if (userMintedShares && userMintedShares > new Prisma.Decimal(0.0)) {
+          member.userReward = member.userReward.add(userMintedShares);
+          member.userLockedReward =
+            member.userLockedReward.add(userMintedShares);
+          Batch.ensureUpdated(member);
+
+          tx.push(
+            prisma.member.updateMany({
+              where: { address: Address.asBuffer(member.address) },
+              data: {
+                userReward: member.userReward,
+                userLockedReward: member.userLockedReward,
+              },
+            })
+          );
+        }
+      }
       tx.push(
         prisma.memberEpoch.create({
           data: {
