@@ -572,9 +572,19 @@ export const Batch = {
         );
         return member;
       }
-      case "ScheduledUnstake(address,uint256,uint256,uint256,uint256)":
-        // TODO: member actually loses voting power at this point
-        return Batch.addBadge(member, "unstaking", blockDt, verbose);
+      case "ScheduledUnstake(address,uint256,uint256,uint256,uint256)": {
+        const m1 = Batch.addBadge(member, "unstaking", blockDt, verbose);
+        const userShares = new Prisma.Decimal(
+          withDecimals(ethers.BigNumber.from(args[1]).toString(), 18)
+        );
+        m1.userShare = m1.userShare.sub(userShares);
+        Batch.ensureUpdated(m1);
+        await Batch.updateTotals(
+          Address.asBuffer(m1.address),
+          verboseTotals
+        );
+        return m1;
+      }
       case "Delegated(address,address,uint256,uint256)":
         const userShares = new Prisma.Decimal(
           withDecimals(ethers.BigNumber.from(args[2]).toString(), 18)

@@ -336,7 +336,7 @@ const EventDetails = (props: IEventDetails) => {
       return (
         <div className="text-xs darken leading-4">
           <span className="text-color-panel-title">{toCurrency(amount)}</span>{" "}
-          tokens,
+          tokens,{" "}
           <span className="text-color-panel-title">
             {toCurrency(shares)}
           </span>{" "}
