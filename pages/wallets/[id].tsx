@@ -1,4 +1,6 @@
 import type { NextPage } from "next";
+import { useState } from "react"
+import { VoteGas } from "../../services/gas";
 import { Footer, Header, Meta } from "../../components/";
 import { WalletSummary } from "../../components/WalletSummary";
 import { WalletDelegation } from "../../components/WalletDelegation";
@@ -53,6 +55,7 @@ const WalletDetailsPage: NextPage = (props: any) => {
   const { lastBlock, wallet, events, totalShares, votings, webconfig } = props;
   const { delegationsFrom, delegationsTo } = props;
   const total = totalShares;
+  const [gas, setGas] = useState<boolean>(VoteGas.appearance);
   return (
     <div>
       <Meta webconfig={webconfig} page="wallet" />
@@ -63,6 +66,7 @@ const WalletDetailsPage: NextPage = (props: any) => {
         <WalletSummary wallet={Wallets.from(wallet)} total={total} />
         <WalletDelegation userIsDelegated={wallet.userIsDelegated} from={delegationsFrom} to={delegationsTo} />
         <WalletEventsList
+          showGas={gas}
           wallet={wallet}
           webconfig={webconfig}
           votings={votings}
@@ -70,7 +74,12 @@ const WalletDetailsPage: NextPage = (props: any) => {
         />
       </main>
 
-      <Footer github={webconfig.github} blockNumber={lastBlock.blockNumber} />
+      <Footer
+        showGas={gas}
+        changeGas={setGas}
+        github={webconfig.github}
+        blockNumber={lastBlock.blockNumber}
+      />
     </div>
   );
 };

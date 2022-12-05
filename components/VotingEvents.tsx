@@ -16,6 +16,7 @@ export interface IVotingEventsListProps {
   list: Array<IVotingEvent>;
   totalStake: number;
   members: Array<IWallet>;
+  showGas: boolean;
 }
 
 export const VotingEventsListThead = () => (
@@ -51,7 +52,7 @@ const EventDetails = (props: IEventDetails) => {
       withDecimals(ethers.BigNumber.from(props.data[3]).toString(), 18)
     );
     return (
-      <div className="text-xs darken leading-4">
+      <div className="text-xs darken mt-1 leading-4">
         {supports ? "Supported" : "Voted against"} with{" "}
         <span className="text-color-panel-title">{toCurrency(votes)}</span>{" "}
         tokens
@@ -130,12 +131,12 @@ export const VotingEventsListTr = (row: IVotingEvent) => {
           </div>
         </Link>
         <MemberBadges badges={row.badges || ''} />
-        <EventGasTotals
+        <EventDetails data={row.data} eventName={row.eventName} />
+        {row.showGas ? <EventGasTotals
           gasUsed={row.gasUsed}
           gasPrice={row.gasPrice}
           feeUsd={parseFloat(row.feeUsd + "")}
-        />
-        <EventDetails data={row.data} eventName={row.eventName} />
+        />: null}
       </td>
       <td className="text-right text-sm darken">{supports}</td>
       <td className="text-right text-sm">{votes}</td>
@@ -159,6 +160,7 @@ export const VotingEventsList = (props: IVotingEventsListProps) => {
                 {...member[0]}
                 {...row}
                 index={index}
+                showGas={props.showGas}
                 totalStake={props.totalStake}
               />
             );

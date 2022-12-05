@@ -1,4 +1,6 @@
 import type { NextPage } from "next";
+import { useState } from "react";
+import { VoteGas } from "../../services/gas";
 import { Footer, Header, Meta } from "../../components/";
 import { VotingSummary } from "../../components/VotingSummary";
 import { VotingEventsList } from "../../components/VotingEvents";
@@ -41,6 +43,7 @@ export async function getServerSideProps(context: any) {
 
 const VotingDetailsPage: NextPage = (props: any) => {
   const { voting, events, lastBlock, webconfig, members } = props;
+  const [gas, setGas] = useState<boolean>(VoteGas.appearance);
 
   return (
     <div>
@@ -53,13 +56,19 @@ const VotingDetailsPage: NextPage = (props: any) => {
         <div className="max-w-screen-lg mx-auto">
           <VotingEventsList
             members={members}
+            showGas={gas}
             list={VotingEvents.fromList(events)}
             totalStake={voting.totalStaked}
           />
         </div>
       </main>
 
-      <Footer github={webconfig.github} blockNumber={lastBlock.blockNumber} />
+      <Footer
+        showGas={gas}
+        changeGas={setGas}
+        github={webconfig.github}
+        blockNumber={lastBlock.blockNumber}
+      />
     </div>
   );
 };

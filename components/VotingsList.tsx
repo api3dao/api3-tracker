@@ -7,6 +7,7 @@ import { Address } from "./Ethscan";
 
 export interface IVotingListProps {
   list: Array<IVoting>;
+  showGas: boolean;
 }
 
 export const VotingsListThead = () => (
@@ -48,6 +49,7 @@ export const TransferDetails = (props: ITransferProps) => {
 interface IVotingItem {
   index: number;
   item: IVoting;
+  showGas: boolean;
 }
 
 interface IVotingGasTotals {
@@ -93,8 +95,7 @@ export const VotingsListTr = (props: IVotingItem) => {
           {item.name}
         </Link>
         {item.transferValue ? <TransferDetails {...item} /> : null}
-        <VotingGasTotals {...item} />
-        {/*<div>{JSON.stringify(item, null, 2)}</div>*/}
+        {props.showGas ? <VotingGasTotals {...item} />: null}
       </td>
       <td className="text-right accent">
         {item.totalFor.toNumber() > 0 ? (
@@ -125,7 +126,7 @@ export const VotingsList = (props: IVotingListProps) => {
           <VotingsListThead />
           <tbody>
             {props.list.map((item, index) => (
-              <VotingsListTr key={item.id} item={item} index={index} />
+              <VotingsListTr showGas={props.showGas} key={item.id} item={item} index={index} />
             ))}
           </tbody>
         </table>

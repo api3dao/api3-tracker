@@ -9,6 +9,11 @@ export interface GasUsage {
 export const VoteGas = {
   VOTES: new Map<number, Map<string, GasUsage>>(),
 
+  appearance: (): boolean => {
+    const v = (typeof global.localStorage != "undefined" ) ? global.localStorage.getItem("GAS") : "";
+    return v != "HIDDEN";
+  },
+
   reset: () => {
     VoteGas.VOTES = new Map<number, Map<string, GasUsage>>();
   },

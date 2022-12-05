@@ -1,4 +1,6 @@
 import type { NextPage } from "next";
+import { useState } from "react";
+import { VoteGas } from "../services/gas";
 import { Footer, Header, Meta } from "../components/";
 import { Prisma } from "@prisma/client";
 import { fetchWebconfig } from "../services/webconfig";
@@ -34,6 +36,7 @@ export async function getServerSideProps() {
 const RewardsPage: NextPage = (props: any) => {
   const { latest, supply, lastBlock, webconfig } = props;
   const isEmpty: boolean = latest.length === 0;
+  const [gas, setGas] = useState<boolean>(VoteGas.appearance);
   return (
     <div>
       <Meta webconfig={webconfig} page="rewards" />
@@ -51,7 +54,12 @@ const RewardsPage: NextPage = (props: any) => {
         {(!isEmpty) ? <RewardsList list={latest} />: null}
       </main>
 
-      <Footer github={webconfig.github} blockNumber={lastBlock.blockNumber} />
+      <Footer
+        showGas={gas}
+        changeGas={setGas}
+        github={webconfig.github}
+        blockNumber={lastBlock.blockNumber}
+      />
     </div>
   );
 };

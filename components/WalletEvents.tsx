@@ -23,6 +23,7 @@ export interface IWalletEventsListProps {
   list: Array<IWalletEvent>;
   votings: Array<IVoting>;
   webconfig: IWebConfig;
+  showGas: boolean;
 }
 
 interface IEventDetails {
@@ -40,6 +41,7 @@ interface IWalletEventsRowProps {
   index: number;
   votings: Array<IVoting>;
   webconfig: IWebConfig;
+  showGas: boolean;
 }
 
 interface IEventGasTotals {
@@ -526,7 +528,7 @@ export const WalletEventsListTr = (props: IWalletEventsRowProps) => {
   return (
     <tr>
       <td className="text-center">{(index || 0) + 1}.</td>
-      <td className="text-center text-sm darken">
+      <td className="text-center text-xs darken">
         {" "}
         {niceDateTime(row.createdAt)}{" "}
       </td>
@@ -544,11 +546,12 @@ export const WalletEventsListTr = (props: IWalletEventsRowProps) => {
             votings={votings}
             webconfig={webconfig}
           />
+          {props.showGas ? (
           <EventGasTotals
             gasUsed={row.gasUsed}
             gasPrice={row.gasPrice}
             feeUsd={parseFloat(row.feeUsd + "")}
-          />
+          />): null}
         </div>
       </td>
     </tr>
@@ -566,6 +569,7 @@ export const WalletEventsList = (props: IWalletEventsListProps) => {
               key={row.id}
               row={row}
               index={index}
+              showGas={props.showGas}
               wallet={props.wallet}
               votings={props.votings}
               webconfig={props.webconfig}

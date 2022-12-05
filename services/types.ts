@@ -174,6 +174,7 @@ export interface IVotingEvent {
   badges?: string;
   ensName?: string;
   supports?: number;
+  showGas: boolean;
   totalStake?: number;
   userShare?: Prisma.Decimal;
   userVotingPower?: Prisma.Decimal;

@@ -1,4 +1,6 @@
 import type { NextPage } from "next";
+import { useState } from "react";
+import { VoteGas } from "../services/gas";
 import React from "react";
 import { useRouter } from "next/router";
 import InfiniteScroll from "react-infinite-scroller";
@@ -63,6 +65,7 @@ const WalletsPage: NextPage = (props: any) => {
   const router = useRouter();
   const q = stringQuery(router.query.q, "");
 
+  const [gas, setGas] = useState<boolean>(VoteGas.appearance);
   const [isLoading, setLoading] = React.useState(false);
   const [isLoadingMore, setLoadingMore] = React.useState(false);
   const [state, setState] = React.useState<WalletsPageState>({
@@ -149,8 +152,13 @@ const WalletsPage: NextPage = (props: any) => {
         ) : null}
         <div className="pb-20">&nbsp;</div>
       </main>
+      <Footer
+        showGas={gas}
+        changeGas={setGas}
+        github={webconfig.github}
+        blockNumber={lastBlock.blockNumber}
+      />
 
-      <Footer github={webconfig.github} blockNumber={lastBlock.blockNumber} />
     </div>
   );
 };
