@@ -90,7 +90,7 @@ const VotingLink = (props: IVotingLinkProps) => {
 };
 
 const EventDetails = (props: IEventDetails) => {
-  const thisWallet = props.wallet.address;
+  const thisWallet = props.wallet.address.replace("0x", "").toLowerCase();
   switch (props.eventName) {
     case "Rewards": {
       const userShare = props.data[0];
@@ -173,11 +173,11 @@ const EventDetails = (props: IEventDetails) => {
       );
       return (
         <div className="text-xs darken leading-4">
-          {from == thisWallet ? " to " : " from "}
+          {from.replace("0x", "").toLowerCase() == thisWallet ? " to " : " from "}
           <InternalAddress
             className="text-xs"
             inline={true}
-            address={from == thisWallet ? to : from}
+            address={from.replace("0x", "").toLowerCase() == thisWallet ? to : from}
           />{" "}
           <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
           shares. Total:{" "}
@@ -199,11 +199,11 @@ const EventDetails = (props: IEventDetails) => {
       );
       return (
         <div className="text-xs darken leading-4">
-          {from == thisWallet ? " to " : " from "}{" "}
+          {from.replace("0x", "").toLowerCase() == thisWallet ? " to " : " from "}{" "}
           <InternalAddress
             className="text-xs"
             inline={true}
-            address={from == thisWallet ? to : from}
+            address={from.replace("0x", "").toLowerCase() == thisWallet ? to : from}
           />{" "}
           <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
           shares. Delta:{" "}
