@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "epochs" ADD COLUMN     "newApr" DECIMAL(10,2) NOT NULL DEFAULT 0.0,
+ADD COLUMN     "newRewardsPct" DECIMAL(10,4) NOT NULL DEFAULT 0.0;

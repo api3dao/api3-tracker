@@ -18,6 +18,9 @@ model Epoch {
   chainId       Int // Chain ID
   txHash        Bytes // Transaction hash
   apr           Decimal  @db.Decimal(10, 2) // APR during this epoch
+  rewardsPct    Decimal  @db.Decimal(10, 4) // real epoch rewards (calculated from APR)
+  newApr           Decimal  @default(0.0) @db.Decimal(10, 2) // APR for the next epoch
+  newRewardsPct    Decimal  @default(0.0) @db.Decimal(10, 4) // real new epoch rewards (calculated from APR)
   members       Int // Number of members
   totalStake    Decimal  @db.Decimal(60, 18) // Total stake
   totalShares   Decimal  @db.Decimal(60, 18) // Total shares
@@ -25,7 +28,6 @@ model Epoch {
   releaseDate   DateTime // Date when minted tokens will be released
   isCurrent     Int // whether this epoch is current
   isReleased    Int @default(0) // whether rewards of the epoch are released
-  rewardsPct    Decimal  @db.Decimal(10, 4) // real epoch rewards (calculated from APR)
   stakedRewards Decimal  @db.Decimal(60, 18) // total staked rewards at the moment of the epoch
 
   totalDeposits    Decimal @default(0.0) @db.Decimal(60, 18) // total deposits of the user at the moment of this epoch

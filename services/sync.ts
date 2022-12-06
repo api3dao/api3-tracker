@@ -528,8 +528,8 @@ export const Events = {
       where: { isCurrent: 1 },
     });
 
-    const oldApr = currentEpoch.length > 0 ? currentEpoch[0].apr : 38.75;
-    const oldAprPct = rewardsPct(parseFloat(oldApr + ""));
+    const oldApr = currentEpoch.length > 0 ? currentEpoch[0].newApr : 38.75;
+    const oldAprPct = parseFloat(oldApr + "") * 0.01;
 
     const newAprPct = parseFloat(
       new Prisma.Decimal(withDecimals(newApr.toString(), 18)).toString()
@@ -656,10 +656,10 @@ export const Events = {
           blockNumber,
           chainId: 0,
           txHash,
-          apr: new Prisma.Decimal(withDecimals(newApr.toString(), 16)),
-          rewardsPct: rewardsPct(newAprPct),
-          // apr: oldApr,
-          // rewardsPct: rewardsPct(oldAprPct),
+          newApr: new Prisma.Decimal(withDecimals(newApr.toString(), 16)),
+          newRewardsPct: rewardsPct(newAprPct),
+          apr: oldApr,
+          rewardsPct: rewardsPct(oldAprPct),
           members: totalMembers,
           totalStake: new Prisma.Decimal(
             noDecimals(withDecimals(total.toString(), 18))

@@ -47,6 +47,8 @@ export interface IEpoch {
   createdAt: string; // date of epoch event
   apr: Prisma.Decimal; // APR during this epoch
   rewardsPct: Prisma.Decimal;
+  newApr: Prisma.Decimal; // APR for the next epoch
+  newRewardsPct: Prisma.Decimal;
   members: number; // Number of members
   totalStake: Prisma.Decimal; // Total stake
   stakedRewards: Prisma.Decimal;

@@ -23,15 +23,15 @@ export const RewardsSummary = (props: IRewardsSummaryProps) => (
     <p className="text-center text-color-grey my-2">
       Current Epoch is{" "}
       <span className="text-bold text-color-panel-title">
-        {toCurrency(props.latest.epoch)}
+        {toCurrency(props.latest.epoch + 1)}
       </span>{" "}
       with APR{" "}
       <span className="text-bold text-color-panel-title">
-        {toPct(props.latest.apr)}
+        {toPct(props.latest.newApr)}
       </span>{" "}
       which means the next reward will be{" "}
       <span className="text-bold text-color-panel-title">
-        {toPct(props.latest.rewardsPct)}
+        {toPct(props.latest.newRewardsPct)}
       </span>{" "}
       to your current stake and your locked rewards.
     </p>
