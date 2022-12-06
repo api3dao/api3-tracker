@@ -15,7 +15,7 @@ import { serializable } from "../services/format";
 
 export async function getServerSideProps() {
   const results = await Promise.all([
-    Epochs.fetchLatest(3),
+    Epochs.fetchLatest(2, true),
     Supply.fetch(),
     Wallets.total(),
     Votings.total(),

@@ -33,14 +33,21 @@ export const Blocks = {
 
 export const Epochs = {
   // fetch a few latest epochs
-  fetchLatest: async (limit: number): Promise<Array<IEpoch>> => {
-    return (
+  fetchLatest: async (limit: number, withCurrent: boolean): Promise<Array<IEpoch>> => {
+    const res = (
       await prisma.epoch.findMany({
         take: limit,
         where: { NOT: { blockNumber: 0 } },
         orderBy: { epoch: "desc" },
       })
     ).map((x: any) => Epochs.from(x));
+   if (!withCurrent) return res;
+   const out = new Array<IEpoch>();
+   if (res.length > 0) {
+     out.push(res[0]);
+     res.forEach((x: IEpoch) => out.push({ ...x, isCurrent: 0 }));
+   }
+   return out;
   },
   // fetch one epoch by its ID
   fetch: async (epoch: number) => {
