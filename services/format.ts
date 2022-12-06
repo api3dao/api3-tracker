@@ -20,6 +20,16 @@ export const toCurrency = (x: any): string => {
   return val;
 };
 
+export const toBool = (x: any): boolean => {
+  if (typeof x === "number") {
+    return x == 1;
+  }
+  if (typeof x === "string") {
+    return x == "1" || x == "true";
+  }
+  return false;
+};
+
 export const noDecimals = (x: string): string => {
   return x.replace(/\..+$/g, "");
 };

@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { IDelegation, IWallet } from "./types";
 import { Delegations, Wallets } from "./api";
 import { BigNumber, ethers } from "ethers";
-import { noDecimals, withDecimals } from "./../services/format";
+import { toBool, noDecimals, withDecimals } from "./../services/format";
 
 export type Badge =
   | "grant"
@@ -600,6 +600,7 @@ export const Batch = {
         );
         return member;
       case "UpdatedDelegation(address,address,bool,uint256,uint256)": {
+        const delta: boolean = toBool(args[2]);
         const userShares = new Prisma.Decimal(
           withDecimals(ethers.BigNumber.from(args[3]).toString(), 18)
         );
@@ -609,7 +610,7 @@ export const Batch = {
           m1,
           m2,
           blockDt,
-          new Prisma.Decimal(0),
+          userShares,
           verboseDelegation
         );
         return member;
