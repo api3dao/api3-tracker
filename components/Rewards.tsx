@@ -136,7 +136,7 @@ export const RewardsListTr = (epoch: IEpoch) => (
       {noDecimals(toCurrency(epoch.mintedShares))}
     </td>
     <td className="text-center">
-      {new Date().toISOString() < epoch.releaseDate
+      {(!epoch.isReleased)
         ? niceDate(epoch.releaseDate)
         : <span className="text-sm darken">released</span>}
     </td>

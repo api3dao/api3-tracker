@@ -55,6 +55,7 @@ export interface IEpoch {
   totalShares: Prisma.Decimal; // Total shares
   mintedShares: Prisma.Decimal; // # of minted tokens
   releaseDate: string; // Date when minted tokens will be released
+  isReleased: number;
 
   totalDeposits: Prisma.Decimal;
   totalWithdrawals: Prisma.Decimal;
