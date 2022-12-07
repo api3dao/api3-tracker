@@ -105,33 +105,37 @@ const EventDetails = (props: IEventDetails) => {
             User shares:{" "}
             <span className="text-color-panel-title">
               {noDecimals(toCurrency(userShare))}
-            </span>{" (owns "}
+            </span>
+            {" (owns "}
             <span className="text-color-panel-title">
               {toPct4(userSharePct)}
             </span>{" "}
             out of{" "}
             <span className="text-color-panel-title">
               {noDecimals(toCurrency(totalShares))}
-            </span>{" shares). "}
+            </span>
+            {" shares). "}
           </div>
           <div key={1} className="text-xs darken">
             Rewarded with{" "}
             <span className="text-color-panel-title">
               {noDecimals(toCurrency(userMintedShares))}
             </span>{" "}
-            locked tokens out of {" "}
+            locked tokens out of{" "}
             <span className="text-color-panel-title">
               {noDecimals(toCurrency(mintedShares))}
             </span>{" "}
-            minted shares {" "}
+            minted shares{" "}
           </div>
-         {(userReleasedShares > 0) ? (
-          <div key={2} className="text-xs darken">
-            Released {" "}
-            <span className="text-color-panel-title">
-              {noDecimals(toCurrency(userReleasedShares))}
-            </span>{" shares "}
-          </div>) : null}
+          {userReleasedShares > 0 ? (
+            <div key={2} className="text-xs darken">
+              Released{" "}
+              <span className="text-color-panel-title">
+                {noDecimals(toCurrency(userReleasedShares))}
+              </span>
+              {" shares "}
+            </div>
+          ) : null}
         </div>
       );
     }
@@ -173,11 +177,15 @@ const EventDetails = (props: IEventDetails) => {
       );
       return (
         <div className="text-xs darken leading-4">
-          {from.replace("0x", "").toLowerCase() == thisWallet ? " to " : " from "}
+          {from.replace("0x", "").toLowerCase() == thisWallet
+            ? " to "
+            : " from "}
           <InternalAddress
             className="text-xs"
             inline={true}
-            address={from.replace("0x", "").toLowerCase() == thisWallet ? to : from}
+            address={
+              from.replace("0x", "").toLowerCase() == thisWallet ? to : from
+            }
           />{" "}
           <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
           shares. Total:{" "}
@@ -199,11 +207,15 @@ const EventDetails = (props: IEventDetails) => {
       );
       return (
         <div className="text-xs darken leading-4">
-          {from.replace("0x", "").toLowerCase() == thisWallet ? " to " : " from "}{" "}
+          {from.replace("0x", "").toLowerCase() == thisWallet
+            ? " to "
+            : " from "}{" "}
           <InternalAddress
             className="text-xs"
             inline={true}
-            address={from.replace("0x", "").toLowerCase() == thisWallet ? to : from}
+            address={
+              from.replace("0x", "").toLowerCase() == thisWallet ? to : from
+            }
           />{" "}
           <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
           shares. Delta:{" "}
@@ -339,9 +351,7 @@ const EventDetails = (props: IEventDetails) => {
         <div className="text-xs darken leading-4">
           <span className="text-color-panel-title">{toCurrency(amount)}</span>{" "}
           tokens,{" "}
-          <span className="text-color-panel-title">
-            {toCurrency(shares)}
-          </span>{" "}
+          <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
           shares. Scheduled for{" "}
           <span className="text-color-panel-title">
             {niceDateTime(dt.toISOString())}
@@ -438,17 +448,32 @@ const EventDetails = (props: IEventDetails) => {
       const amount = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[1]).toString(), 18)
       );
-      const userUnstaked = noDecimals(
-        withDecimals(ethers.BigNumber.from(props.data[2]).toString(), 18)
-      );
-      return (
-        <div className="text-xs darken leading-4">
-          <span className="text-color-panel-title">{noDecimals(toCurrency(amount))}</span>{" "}
-          tokens,
-          <span className="text-color-panel-title">{noDecimals(toCurrency(userUnstaked))}</span>{" "}
-          unstaked
-        </div>
-      );
+      if (props.data.length == 3) {
+        const userUnstaked = noDecimals(
+          withDecimals(ethers.BigNumber.from(props.data[2]).toString(), 18)
+        );
+        return (
+          <div className="text-xs darken leading-4">
+            <span className="text-color-panel-title">
+              {noDecimals(toCurrency(amount))}
+            </span>{" "}
+            tokens,
+            <span className="text-color-panel-title">
+              {noDecimals(toCurrency(userUnstaked))}
+            </span>{" "}
+            unstaked
+          </div>
+        );
+      } else {
+        return (
+          <div className="text-xs darken leading-4">
+            <span className="text-color-panel-title">
+              {noDecimals(toCurrency(amount))}
+            </span>{" "}
+            tokens from TimelockManager
+          </div>
+        );
+      }
     }
     case "UpdatedLastProposalTimestamp": {
       const tm = parseInt(ethers.BigNumber.from(props.data[1]).toString());
@@ -547,11 +572,12 @@ export const WalletEventsListTr = (props: IWalletEventsRowProps) => {
             webconfig={webconfig}
           />
           {props.showGas ? (
-          <EventGasTotals
-            gasUsed={row.gasUsed}
-            gasPrice={row.gasPrice}
-            feeUsd={parseFloat(row.feeUsd + "")}
-          />): null}
+            <EventGasTotals
+              gasUsed={row.gasUsed}
+              gasPrice={row.gasPrice}
+              feeUsd={parseFloat(row.feeUsd + "")}
+            />
+          ) : null}
         </div>
       </td>
     </tr>
