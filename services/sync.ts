@@ -525,7 +525,8 @@ export const Events = {
     );
 
     const currentEpoch = await prisma.epoch.findMany({
-      where: { isCurrent: 1 },
+      orderBy: { createdAt: "desc" },
+      take: 1,
     });
 
     const oldApr = currentEpoch.length > 0 ? currentEpoch[0].newApr : 38.75;
@@ -583,7 +584,8 @@ export const Events = {
         userShare = new Prisma.Decimal(0.0);
       const userSharePct = userShare.mul(100).div(totalShares);
       const userMintedShares = mintedShares.mul(userSharePct).div(100); // rewards are proportional
-      const userReleasedShares = releaseMap.get(addrIndex) || new Prisma.Decimal(0);
+      const userReleasedShares =
+        releaseMap.get(addrIndex) || new Prisma.Decimal(0);
 
       // save mintedEvent for each member
       const member: IWallet = m;
