@@ -631,9 +631,10 @@ export const Events = {
 
         if (userMintedShares > new Prisma.Decimal(0.0)) {
           member.userReward = member.userReward.add(userMintedShares);
-          member.userReward = member.userReward.add(userReleasedShares);
           member.userLockedReward =
             member.userLockedReward.add(userMintedShares);
+          member.userLockedReward =
+            member.userLockedReward.sub(userReleasedShares);
 
           Batch.ensureUpdated(member);
 

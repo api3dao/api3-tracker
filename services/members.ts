@@ -601,10 +601,19 @@ export const Batch = {
         return member;
       case "UpdatedDelegation(address,address,bool,uint256,uint256)": {
         const delta: boolean = toBool(args[2]);
-        const userShares = new Prisma.Decimal(
+        let userShares = new Prisma.Decimal(
           withDecimals(ethers.BigNumber.from(args[3]).toString(), 18)
         );
         const m1 = Address.asBuffer(args[0]);
+        const d = await Batch.readMemberDelegates(m1);
+        if (d) {
+          if (delta) {
+            userShares = userShares.add(d.userShares);
+          } else {
+            userShares = userShares.sub(d.userShares);
+          }
+        }
+
         const m2 = Address.asBuffer(args[1]);
         await Batch.updateDelegation(
           m1,

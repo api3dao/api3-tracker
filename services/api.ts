@@ -44,7 +44,7 @@ export const Epochs = {
    if (!withCurrent) return res;
    const out = new Array<IEpoch>();
    if (res.length > 0) {
-     out.push(res[0]);
+     out.push({ ...res[0], isCurrent: 1 });
      res.forEach((x: IEpoch) => out.push({ ...x, isCurrent: 0 }));
    }
    return out;

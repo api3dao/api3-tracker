@@ -23,7 +23,7 @@
     "state:reset": "TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts state reset",
     "state:next": "API3TRACKER_ENDPOINT=${API3TRACKER_ENDPOINT:-`chainstate --endpoints -t alchemy,mainnet`} TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts state next",
     "state:update": "API3TRACKER_ENDPOINT=${API3TRACKER_ENDPOINT:-`chainstate --endpoints -t alchemy,mainnet`} TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts state update",
-    "state:unlogged": "PGPASSWORD=test psql -U postgres -h 127.0.0.1 api3dao -c 'ALTER TABLE \"member_delegations\" SET UNLOGGED; ALTER TABLE \"member_events\" SET UNLOGGED; ALTER TABLE \"member_epochs\" SET UNLOGGED; ALTER TABLE \"voting_event\" SET UNLOGGED; ALTER TABLE \"voting\" SET UNLOGGED; ALTER TABLE \"members\" SET UNLOGGED; ALTER TABLE \"epochs\" SET UNLOGGED';",
+    "state:unlogged": "docker exec -i pgapi3dao psql -U postgres -h 127.0.0.1 -d api3dao -c 'ALTER TABLE \"member_delegations\" SET UNLOGGED; ALTER TABLE \"member_events\" SET UNLOGGED; ALTER TABLE \"member_epochs\" SET UNLOGGED; ALTER TABLE \"voting_event\" SET UNLOGGED; ALTER TABLE \"voting\" SET UNLOGGED; ALTER TABLE \"members\" SET UNLOGGED; ALTER TABLE \"epochs\" SET UNLOGGED';",
     "ens:reset": "TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts ens reset",
     "ens:import": "TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts ens import",
     "ens:download": "API3TRACKER_ENDPOINT=${API3TRACKER_ENDPOINT:-`chainstate --endpoints -t alchemy,mainnet`} TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts ens download",
@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "1.0.5",
-    "@prisma/client": "4.6.1",
+    "@prisma/client": "^4.7.1",
     "@types/js-yaml": "4.0.5",
     "assert": "2.0.0",
     "axios": "0.27.2",
@@ -75,7 +75,7 @@
     "postcss-loader": "7.0.1",
     "prettier": "2.8.0",
     "prettier-plugin-prisma": "3.14.0",
-    "prisma": "4.6.1",
+    "prisma": "^4.7.1",
     "tailwindcss": "3.2.4",
     "ts-node": "10.9.1",
     "typescript": "4.9.3"
