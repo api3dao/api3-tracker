@@ -1,8 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ethers } from "ethers";
-import { ITreasuryType, Treasuries, Blocks } from "../../services/api";
+import { Supply, ITreasuryType, Treasuries } from "../../services/api";
 import { toHex, serializable } from "../../services/format";
 import { ITreasury, IBlockNumber } from "../../services/types";
+import superjson from "superjson";
 
 // This function is used for comparison of the chain state sync with cloudflare
 const getHeadBlock = async (): Promise<BigInt> => {
@@ -42,7 +43,7 @@ export default async function handler(
 
     out.push("# HELP processed_block_number: latest processed block number");
     out.push("# TYPE processed_block_number gauge");
-    out.push("processed_block_number  " + status[0].processed);
+    out.push("processed_block_number " + status[0].processed);
   }
 
   // 2. treasuries balances
@@ -66,7 +67,39 @@ export default async function handler(
     out.push('treasury_usdc{name="' + ttype + '"} ' + valueUSDC);
   }
 
-  // 3. TODO: supply
+  // 3. supply
+  const supply = await Supply.fetch();
+  if (supply) {
+    out.push("# HELP cirulating_supply Circulating Supply");
+    out.push("# TYPE cirulating_supply gauge");
+    out.push("circulating_supply " + supply.circulatingSupply.toString());
+
+    out.push("# HELP total_staked Total Staked Tokens");
+    out.push("# TYPE total_staked gauge");
+    out.push("total_staked " + supply.totalStaked.toString());
+
+    out.push("# HELP staking_target Staking Target");
+    out.push("# TYPE staking_target gauge");
+    out.push("staking_target " + supply.stakingTarget.toString());
+
+    out.push("# HELP staking_target_pct Reaching staking target, in percents");
+    out.push("# TYPE staking_target_pct gauge");
+    out.push(
+      "staking_target_pct " +
+        supply.totalStaked.mul(100).div(supply.stakingTarget).toString()
+    );
+
+    // out.push("total_locked " + supply.totalLocked.toString());
+    out.push("# HELP locked number of locked tokens");
+    out.push("# TYPE locked gauge");
+    out.push(
+      'locked{where="governance"} ' + supply.lockedByGovernance.toString()
+    );
+    out.push('locked{where="vestings"} ' + supply.lockedVestings.toString());
+    out.push('locked{where="rewards"} ' + supply.lockedRewards.toString());
+    out.push('locked{where="time"} ' + supply.timeLocked.toString());
+  }
+
   // 4. TODO: Number of members (per tag)
   // 5. TODO: Number of votes (per status)
   // 6. TODO: Shares estimates
