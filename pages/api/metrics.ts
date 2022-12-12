@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ethers } from "ethers";
-import { Supply, ITreasuryType, Treasuries } from "../../services/api";
+import { Wallets, Supply, ITreasuryType, Treasuries } from "../../services/api";
 import { toHex, serializable } from "../../services/format";
 import { ITreasury, IBlockNumber } from "../../services/types";
 import superjson from "superjson";
@@ -100,8 +100,26 @@ export default async function handler(
     out.push('locked{where="time"} ' + supply.timeLocked.toString());
   }
 
-  // 4. TODO: Number of members (per tag)
+  // 4. Number of members (per tag)
+  out.push("");
+  const total = await Wallets.fetchCount("");
+  out.push("# TYPE members_total gauge");
+  out.push("members_total " + total);
+  const vested = await Wallets.fetchCount("vested");
+  out.push("# TYPE members_total_vested gauge");
+  out.push("members_total_vested " + vested);
+  const voters = await Wallets.fetchCount("voter");
+  out.push("# TYPE members_total_voters gauge");
+  out.push("members_total_voters " + voters);
+  const supports = await Wallets.fetchCount("supports");
+  out.push("# TYPE members_total_supports gauge");
+  out.push("members_total_supports " + supports);
+  const withdrawn = await Wallets.fetchCount("withdrawn");
+  out.push("# TYPE members_total_withdrawn gauge");
+  out.push("members_total_withdrawn " + withdrawn);
+
   // 5. TODO: Number of votes (per status)
+
   // 6. TODO: Shares estimates
 
   res.status(200).send(out.join("\n"));

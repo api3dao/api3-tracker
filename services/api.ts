@@ -249,6 +249,10 @@ export const Wallets = {
     });
     return list.map((x: any) => Wallets.from(x));
   },
+  fetchCount: async (q: string): Promise<number> => {
+    const where = q.length > 0 ? { tags: { search: q } } : {};
+    return await prisma.member.count({ where });
+  },
   // fetch a list of wallets for the certain search query
   fetchList: async (q: string, cursor: ICursor): Promise<WalletsList> => {
     const where = q.length > 0 ? { tags: { search: q } } : {};
