@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import prisma from "./db";
 
 export interface GasUsage {
@@ -8,6 +8,11 @@ export interface GasUsage {
 
 export const VoteGas = {
   VOTES: new Map<number, Map<string, GasUsage>>(),
+
+  appearance: (): boolean => {
+    const v = (typeof global.localStorage != "undefined" ) ? global.localStorage.getItem("GAS") : "";
+    return v != "HIDDEN";
+  },
 
   reset: () => {
     VoteGas.VOTES = new Map<number, Map<string, GasUsage>>();
@@ -26,7 +31,7 @@ export const VoteGas = {
       });
       if (foundVote.length > 0) {
         VoteGas.VOTES.get(voteId)?.set("0x0", {
-          gasUsed: BigNumber.from(foundVote[0].totalGasUsed),
+          gasUsed: ethers.BigNumber.from(foundVote[0].totalGasUsed),
           feeUsd: parseFloat(foundVote[0].totalUsd?.toString() || "0"),
         });
       }

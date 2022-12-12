@@ -1,7 +1,9 @@
 import prisma from "./db";
+import { Prisma } from "@prisma/client";
 import {
   Decimal,
   IBlockNumber,
+  IDelegation,
   IWallet,
   IWalletEvent,
   IVoting,
@@ -31,14 +33,21 @@ export const Blocks = {
 
 export const Epochs = {
   // fetch a few latest epochs
-  fetchLatest: async (limit: number): Promise<Array<IEpoch>> => {
-    return (
+  fetchLatest: async (limit: number, withCurrent: boolean): Promise<Array<IEpoch>> => {
+    const res = (
       await prisma.epoch.findMany({
         take: limit,
         where: { NOT: { blockNumber: 0 } },
         orderBy: { epoch: "desc" },
       })
     ).map((x: any) => Epochs.from(x));
+   if (!withCurrent) return res;
+   const out = new Array<IEpoch>();
+   if (res.length > 0) {
+     out.push({ ...res[0], isCurrent: 1 });
+     res.forEach((x: IEpoch) => out.push({ ...x, isCurrent: 0 }));
+   }
+   return out;
   },
   // fetch one epoch by its ID
   fetch: async (epoch: number) => {
@@ -190,14 +199,46 @@ export interface WalletsList {
   page: IPage;
 }
 
+export const Delegations = {
+  fetchFrom: async (from: Buffer): Promise<Array<IDelegation>> => {
+    const out = (await prisma.memberDelegation.findMany({
+      where: { from },
+    })).map((x: any) => (Delegations.from(x)));
+    return out;
+  },
+  fetchTo: async (to: Buffer): Promise<Array<IDelegation>> => {
+    const out = (await prisma.memberDelegation.findMany({
+      where: { to },
+    })).map((x: any) => (Delegations.from(x)));
+    return out;
+  },
+  // object mapper
+  from: (input: any): IDelegation => {
+    const from =
+      typeof input.from == "string"
+        ? input.from.replace("0x", "")
+        : "0x" + Buffer.from(input.from.toString("hex").toLowerCase());
+    const to =
+      typeof input.to == "string"
+        ? input.to.replace("0x", "")
+        : "0x" + Buffer.from(input.to.toString("hex").toLowerCase());
+    return { ...input, from, to };
+  },
+};
+
 export const Wallets = {
-  // fetch a list of votings for the certain status
+  // fetch all members
+  fetchAll: async (): Promise<Array<IWallet>> => {
+      const list = await  prisma.member.findMany({ });
+      return list.map((x: any) => (Wallets.from(x)));
+  },
+  // fetch a list of wallets for the certain search query
   fetchList: async (q: string, cursor: ICursor): Promise<WalletsList> => {
     const where = q.length > 0 ? { tags: { search: q } } : {};
     const [list, total] = await prisma.$transaction([
       prisma.member.findMany({
         where,
-        orderBy: [{ userShare: "desc"},{ createdAt: "asc" }],
+        orderBy: [{ userVotingPower: "desc"}, { userShare: "desc" },{ createdAt: "asc" }],
         take: cursor.take || 100,
         skip: cursor.skip || 0,
       }),
@@ -222,6 +263,14 @@ export const Wallets = {
     if (out) return Wallets.from(out);
     return null;
   },
+  // fetch total shares for all members
+  totalShares: async (): Promise<Prisma.Decimal> => {
+    const out = (await prisma.member.aggregate({
+      _sum: { userShare: true },
+    }));
+    if (!out) return new Prisma.Decimal(0.0);
+    return out._sum.userShare || new Prisma.Decimal(0.0);
+  },
   // fetch total number of members
   total: async (): Promise<number> => {
     return await prisma.member.count();
@@ -231,7 +280,7 @@ export const Wallets = {
     const address =
       typeof input.address == "string"
         ? input.address.replace("0x", "")
-        : "0x" + Buffer.from(input.address).toString("hex");
+        : "0x" + Buffer.from(input.address).toString("hex").toLowerCase();
     return { ...input, address };
   },
   // list mapper

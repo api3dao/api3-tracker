@@ -15,7 +15,8 @@ export const WalletSummary = (props: IWalletSummaryProps) => {
     "text-sm text-center text-color-grey py-4 border-t border-solid border-color-cell-border uppercase";
   const classValue = "text-2xl mb-10 text-color-panel-title font-bold";
   const { wallet } = props;
-  const userVotingPower = new Prisma.Decimal(wallet.userShare).div(props.total);
+  const userVotingPower = new Prisma.Decimal(wallet.userVotingPower).mul(100).div(props.total);
+  const userUnlocked = new Prisma.Decimal(wallet.userReward).sub(wallet.userLockedReward);
   return (
     <div className="max-w-screen-lg text-center mx-auto my-10">
       {wallet.ensName ? (
@@ -31,7 +32,7 @@ export const WalletSummary = (props: IWalletSummaryProps) => {
         <BorderedPanel title="Voting Power" big={true}>
           <div className="my-4">
             <span className="text-2xl text-color-panel-title">
-              {noDecimals(toCurrency(wallet.userShare))}
+              {noDecimals(toCurrency(wallet.userVotingPower))}
             </span>{" "}
             shares
           </div>
@@ -40,33 +41,40 @@ export const WalletSummary = (props: IWalletSummaryProps) => {
               {toPct4(userVotingPower)}
             </span>
           </div>
-          <div className="text-color-grey my-8 mt-4">
+          <div className="text-color-grey mt-4">
             owning{" "}
             <span className="text-color-panel-title">
               {noDecimals(toCurrency(wallet.userShare))}
             </span>{" "}
             shares
           </div>
+          <div className="text-xs text-color-grey mb-4">
+            unlocked{" "}
+            <span className="text-color-panel-title">
+              {noDecimals(toCurrency(userUnlocked))}
+            </span>{" "}
+            rewards
+          </div>
         </BorderedPanel>
         <div>
           <div className="lg:mt-6 lg:flex border-t border-b border-solid border-color-panel-border">
             <div className="flex-1">
-              <div className={classTitle}>Withdrawn</div>
-              <div className={classValue}>{noDecimals(toCurrency(wallet.userWithdrew))}</div>
+              <div className={classTitle}>Deposited</div>
+              <div className={classValue}>
+                {noDecimals(toCurrency(wallet.userDeposited))}
+              </div>
             </div>
-            {/*props.userLockedReward ? (
+            {wallet.userLockedReward ? (
               <div className="flex-1">
                 <div className={classTitle}>Locked Rewards</div>
                 <div className={classValue}>
                   {noDecimals(toCurrency(wallet.userLockedReward))}
                 </div>
               </div>
-            ): null*/}
+            ): null}
             <div className="flex-1">
-              <div className={classTitle}>Deposited</div>
-              <div className={classValue}>
-                {noDecimals(toCurrency(wallet.userDeposited))}
-              </div>
+              <div className={classTitle}>Withdrawn</div>
+              <div className={classValue}>{noDecimals(toCurrency(wallet.userWithdrew))}</div>
             </div>
           </div>
           <MemberClassification badges={wallet.badges} />

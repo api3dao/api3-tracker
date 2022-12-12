@@ -59,6 +59,8 @@ crash.log
 # storybook
 storybook-static/
 
+cache.sql
+cache.sql.gz
 pgapi3dao.sql
 pgapi3dao.sql.gz
 /.cache

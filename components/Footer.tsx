@@ -4,10 +4,16 @@ import { toCurrency } from "../services/format";
 export interface IFooterProps {
   blockNumber?: number;
   github?: string;
+  showGas: boolean;
+  changeGas: Function;
 }
 
 export const Footer = (props: IFooterProps) => {
-  const { blockNumber, github } = props;
+  const { blockNumber, github, showGas } = props;
+  const onToggleGas = () => {
+    localStorage.setItem("GAS", showGas ? "HIDDEN" : "VISIBLE");
+    props.changeGas(!showGas);
+  };
   return (
     <footer>
       <div className="bg-color-body text-color-text md:fixed md:bottom-0 md:left-0 md:z-20 w-full">
@@ -26,6 +32,12 @@ export const Footer = (props: IFooterProps) => {
               </a>
             </span>
           ) : null}
+          <span className="hidden md:inline">&nbsp; | &nbsp;</span>
+          <span className="darken">
+            &nbsp;
+            <input type="checkbox" checked={showGas} onClick={onToggleGas} />
+            {" "}Gas{" "}
+          </span>
           {blockNumber ? (
             <span className="hidden md:inline">&nbsp; | &nbsp;</span>
           ) : null}

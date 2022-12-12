@@ -1,10 +1,14 @@
 import type { NextPage } from "next";
+import { useState } from "react"
+import { VoteGas } from "../../services/gas";
 import { Footer, Header, Meta } from "../../components/";
 import { WalletSummary } from "../../components/WalletSummary";
+import { WalletDelegation } from "../../components/WalletDelegation";
 import { WalletEventsList } from "../../components/WalletEvents";
 import { fetchWebconfig } from "../../services/webconfig";
-import { Supply, Votings, Wallets, WalletEvents, Blocks } from "../../services/api";
+import { Supply, Delegations, Votings, Wallets, WalletEvents, Blocks } from "../../services/api";
 import {
+  IDelegation,
   IWallet,
   IVoting,
   ISupply,
@@ -21,13 +25,17 @@ export async function getServerSideProps(context: any) {
     WalletEvents.fetchList(address),
     Blocks.fetchLast(),
     Votings.fetchAll(),
-    Supply.fetch(),
+    Wallets.totalShares(),
+    Delegations.fetchFrom(address),
+    Delegations.fetchTo(address),
   ]);
   const wallet: IWallet | null = results[0];
   const events: Array<IWalletEvent> = results[1];
   const lastBlock: IBlockNumber = results[2];
   const votings: Array<IVoting> = results[3];
-  const supply: ISupply | null = results[4];
+  const totalShares: any= results[4];
+  const delegationsFrom: Array<IDelegation> = results[5];
+  const delegationsTo: Array<IDelegation> = results[6];
   return {
     props: {
       webconfig: fetchWebconfig(),
@@ -36,14 +44,18 @@ export async function getServerSideProps(context: any) {
       events: serializable(events),
       votings: serializable(votings),
       lastBlock: serializable(lastBlock),
-      supply: serializable(supply),
+      totalShares: serializable(totalShares),
+      delegationsFrom: serializable(delegationsFrom),
+      delegationsTo: serializable(delegationsTo),
     }, // will be passed to the page component as props
   };
 }
 
 const WalletDetailsPage: NextPage = (props: any) => {
-  const { lastBlock, wallet, events, supply, votings, webconfig } = props;
-  const total = supply.totalStaked;
+  const { lastBlock, wallet, events, totalShares, votings, webconfig } = props;
+  const { delegationsFrom, delegationsTo } = props;
+  const total = totalShares;
+  const [gas, setGas] = useState<boolean>(VoteGas.appearance);
   return (
     <div>
       <Meta webconfig={webconfig} page="wallet" />
@@ -52,7 +64,9 @@ const WalletDetailsPage: NextPage = (props: any) => {
       <main>
         <h1>API3 DAO WALLET</h1>
         <WalletSummary wallet={Wallets.from(wallet)} total={total} />
+        <WalletDelegation userIsDelegated={wallet.userIsDelegated} from={delegationsFrom} to={delegationsTo} />
         <WalletEventsList
+          showGas={gas}
           wallet={wallet}
           webconfig={webconfig}
           votings={votings}
@@ -60,7 +74,12 @@ const WalletDetailsPage: NextPage = (props: any) => {
         />
       </main>
 
-      <Footer github={webconfig.github} blockNumber={lastBlock.blockNumber} />
+      <Footer
+        showGas={gas}
+        changeGas={setGas}
+        github={webconfig.github}
+        blockNumber={lastBlock.blockNumber}
+      />
     </div>
   );
 };

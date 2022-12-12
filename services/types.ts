@@ -47,12 +47,20 @@ export interface IEpoch {
   createdAt: string; // date of epoch event
   apr: Prisma.Decimal; // APR during this epoch
   rewardsPct: Prisma.Decimal;
+  newApr: Prisma.Decimal; // APR for the next epoch
+  newRewardsPct: Prisma.Decimal;
   members: number; // Number of members
   totalStake: Prisma.Decimal; // Total stake
   stakedRewards: Prisma.Decimal;
   totalShares: Prisma.Decimal; // Total shares
   mintedShares: Prisma.Decimal; // # of minted tokens
   releaseDate: string; // Date when minted tokens will be released
+  isReleased: number;
+
+  totalDeposits: Prisma.Decimal;
+  totalWithdrawals: Prisma.Decimal;
+  totalUnlocked: Prisma.Decimal;
+  totalLocked: Prisma.Decimal;
 
   txHash?: string;
   blockNumber?: number;
@@ -120,7 +128,16 @@ export interface IWallet {
   userLockedReward: Prisma.Decimal; // how much of the reward is still locked
   userDeposited: Prisma.Decimal;
   userWithdrew: Prisma.Decimal;
+  userDelegates: Prisma.Decimal;
+  userIsDelegated: Prisma.Decimal;
   createdAt: string;
+  updatedAt: string;
+}
+
+export interface IDelegation {
+  from: string;
+  to: string;
+  userShares: Prisma.Decimal;
   updatedAt: string;
 }
 
@@ -160,6 +177,7 @@ export interface IVotingEvent {
   badges?: string;
   ensName?: string;
   supports?: number;
+  showGas: boolean;
   totalStake?: number;
   userShare?: Prisma.Decimal;
   userVotingPower?: Prisma.Decimal;

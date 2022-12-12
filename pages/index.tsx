@@ -1,4 +1,6 @@
 import type { NextPage } from "next";
+import { useState } from "react";
+import { VoteGas } from "../services/gas";
 import { Footer, Header, Meta } from "../components/";
 import { Epoch } from "../components/Overview";
 import { TokenSupply } from "../components/TokenSupply";
@@ -13,7 +15,7 @@ import { serializable } from "../services/format";
 
 export async function getServerSideProps() {
   const results = await Promise.all([
-    Epochs.fetchLatest(3),
+    Epochs.fetchLatest(2, true),
     Supply.fetch(),
     Wallets.total(),
     Votings.total(),
@@ -39,9 +41,18 @@ export async function getServerSideProps() {
 }
 
 const HomePage: NextPage = (props: any) => {
-  const { latest, lastBlock, current, supply, totalWallets, totalVotings, webconfig } = props;
+  const {
+    latest,
+    lastBlock,
+    current,
+    supply,
+    totalWallets,
+    totalVotings,
+    webconfig,
+  } = props;
   const isEmpty: boolean = !current;
   const noSupply: boolean = !supply;
+  const [gas, setGas] = useState<boolean>(VoteGas.appearance);
   return (
     <div>
       <Meta webconfig={webconfig} />
@@ -57,8 +68,7 @@ const HomePage: NextPage = (props: any) => {
             <div>
               <p className="mb-8 text-center">
                 API3 DAO currently involves{" "}
-                <a href="./wallets">{totalWallets} members</a> participated
-                in{" "}
+                <a href="./wallets">{totalWallets} members</a> participated in{" "}
                 <a href="./votings">
                   {totalVotings} voting{totalVotings > 1 ? "s" : ""}
                 </a>
@@ -103,7 +113,12 @@ const HomePage: NextPage = (props: any) => {
           )}
         </div>
       </main>
-      <Footer github={webconfig.github} blockNumber={lastBlock.blockNumber} />
+      <Footer
+        showGas={gas}
+        changeGas={setGas}
+        github={webconfig.github}
+        blockNumber={lastBlock.blockNumber}
+      />
     </div>
   );
 };

@@ -12,14 +12,21 @@ CREATE TABLE "epochs" (
     "chainId" INTEGER NOT NULL,
     "txHash" BYTEA NOT NULL,
     "apr" DECIMAL(10,2) NOT NULL,
+    "rewardsPct" DECIMAL(10,4) NOT NULL,
+    "newApr" DECIMAL(10,2) NOT NULL DEFAULT 0.0,
+    "newRewardsPct" DECIMAL(10,4) NOT NULL DEFAULT 0.0,
     "members" INTEGER NOT NULL,
-    "totalStake" DECIMAL(60, 18) NOT NULL,
-    "totalShares" DECIMAL(60, 18) NOT NULL,
-    "mintedShares" DECIMAL(60, 18) NOT NULL,
+    "totalStake" DECIMAL(60,18) NOT NULL,
+    "totalShares" DECIMAL(60,18) NOT NULL,
+    "mintedShares" DECIMAL(60,18) NOT NULL,
     "releaseDate" TIMESTAMP(3) NOT NULL,
     "isCurrent" INTEGER NOT NULL,
-    "rewardsPct" DECIMAL(10,4) NOT NULL,
-    "stakedRewards" DECIMAL(60, 18) NOT NULL,
+    "isReleased" INTEGER NOT NULL DEFAULT 0,
+    "stakedRewards" DECIMAL(60,18) NOT NULL,
+    "totalDeposits" DECIMAL(60,18) NOT NULL DEFAULT 0.0,
+    "totalWithdrawals" DECIMAL(60,18) NOT NULL DEFAULT 0.0,
+    "totalUnlocked" DECIMAL(60,18) NOT NULL DEFAULT 0.0,
+    "totalLocked" DECIMAL(60,18) NOT NULL DEFAULT 0.0,
 
     CONSTRAINT "epochs_pkey" PRIMARY KEY ("epoch")
 );
@@ -32,6 +39,11 @@ CREATE TABLE "member_epochs" (
     "userStake" DECIMAL(60,18) NOT NULL,
     "userVotingPower" DECIMAL(10,2) NOT NULL,
     "userReward" DECIMAL(60,18) NOT NULL,
+    "isReleased" INTEGER NOT NULL DEFAULT 0,
+    "userTotalDeposits" DECIMAL(60,18) NOT NULL DEFAULT 0.0,
+    "userTotalWithdrawals" DECIMAL(60,18) NOT NULL DEFAULT 0.0,
+    "userTotalUnlocked" DECIMAL(60,18) NOT NULL DEFAULT 0.0,
+    "userTotalLocked" DECIMAL(60,18) NOT NULL DEFAULT 0.0,
 
     CONSTRAINT "member_epochs_pkey" PRIMARY KEY ("epoch","address")
 );
@@ -77,6 +89,8 @@ CREATE TABLE "members" (
     "userVotingPower" DECIMAL(10,2) NOT NULL,
     "userReward" DECIMAL(60,18) NOT NULL,
     "userLockedReward" DECIMAL(60,18) NOT NULL,
+    "userDelegates" DECIMAL(60,18) NOT NULL DEFAULT 0.0,
+    "userIsDelegated" DECIMAL(60,18) NOT NULL DEFAULT 0.0,
     "userDeposited" DECIMAL(60,18) NOT NULL,
     "userWithdrew" DECIMAL(60,18) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -116,8 +130,8 @@ CREATE TABLE "voting" (
     "name" TEXT NOT NULL,
     "status" TEXT NOT NULL,
     "transferValue" DECIMAL(60,18),
-    "transferAddress" BYTEA,
     "transferToken" TEXT,
+    "transferAddress" BYTEA,
     "totalGasUsed" BIGINT,
     "totalUsd" DECIMAL(10,2),
     "totalFor" DECIMAL(60,18) NOT NULL,
@@ -148,8 +162,8 @@ CREATE TABLE "treasuries" (
     "ttype" "TreasuryType" NOT NULL,
     "address" BYTEA NOT NULL,
     "token" TEXT NOT NULL,
-    "tokenAddress" BYTEA  NOT NULL,
-    "value" DECIMAL(60, 18)  NOT NULL,
+    "tokenAddress" BYTEA NOT NULL,
+    "value" DECIMAL(60,18) NOT NULL,
     "current" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "treasuries_pkey" PRIMARY KEY ("ts","ttype","token")
@@ -159,47 +173,75 @@ CREATE TABLE "treasuries" (
 CREATE TABLE "api3_supply" (
     "ts" TIMESTAMP(3) NOT NULL,
     "blockNumber" BIGINT NOT NULL,
-    "circulatingSupply" DECIMAL(60, 18) NOT NULL,
-    "totalLocked" DECIMAL(60, 18) NOT NULL,
-    "totalStaked" DECIMAL(60, 18) NOT NULL,
-    "stakingTarget" DECIMAL(60, 18) NOT NULL,
-    "lockedByGovernance" DECIMAL(60, 18) NOT NULL,
-    "lockedVestings" DECIMAL(60, 18) NOT NULL,
-    "lockedRewards" DECIMAL(60, 18) NOT NULL,
-    "timeLocked" DECIMAL(60, 18) NOT NULL,
+    "circulatingSupply" DECIMAL(60,18) NOT NULL,
+    "totalLocked" DECIMAL(60,18) NOT NULL,
+    "totalStaked" DECIMAL(60,18) NOT NULL,
+    "stakingTarget" DECIMAL(60,18) NOT NULL,
+    "lockedByGovernance" DECIMAL(60,18) NOT NULL,
+    "lockedVestings" DECIMAL(60,18) NOT NULL,
+    "lockedRewards" DECIMAL(60,18) NOT NULL,
+    "timeLocked" DECIMAL(60,18) NOT NULL,
 
     CONSTRAINT "api3_supply_pkey" PRIMARY KEY ("ts")
 );
 
--- CreateIndex
-CREATE UNIQUE INDEX "member_delegations_to_key" ON "member_delegations"("to");
+-- CreateTable
+CREATE TABLE "cache_blocks" (
+    "hash" BYTEA NOT NULL,
+    "height" BIGINT NOT NULL,
+    "data" JSONB NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL,
+    "price" DECIMAL(10,2) NOT NULL,
+
+    CONSTRAINT "cache_blocks_pkey" PRIMARY KEY ("hash")
+);
+
+-- CreateTable
+CREATE TABLE "cache_tx" (
+    "hash" BYTEA NOT NULL,
+    "data" JSONB NOT NULL,
+
+    CONSTRAINT "cache_tx_pkey" PRIMARY KEY ("hash")
+);
+
+-- CreateTable
+CREATE TABLE "cache_receipts" (
+    "hash" BYTEA NOT NULL,
+    "receipt" JSONB NOT NULL,
+
+    CONSTRAINT "cache_receipts_pkey" PRIMARY KEY ("hash")
+);
+
+-- CreateTable
+CREATE TABLE "cache_logs" (
+    "hash" BYTEA NOT NULL,
+    "contract" BYTEA NOT NULL,
+    "logs" JSONB NOT NULL,
+
+    CONSTRAINT "cache_logs_pkey" PRIMARY KEY ("hash","contract")
+);
+
+-- CreateTable
+CREATE TABLE "cache_ens" (
+    "address" BYTEA NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "cache_ens_pkey" PRIMARY KEY ("address")
+);
+
+-- CreateTable
+CREATE TABLE "sync_status" (
+    "id" INTEGER NOT NULL,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "downloaded" INTEGER NOT NULL DEFAULT 0,
+    "processed" INTEGER NOT NULL DEFAULT 0,
+
+    CONSTRAINT "sync_status_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateIndex
 CREATE UNIQUE INDEX "members_address_key" ON "members"("address");
 
 -- AddForeignKey
-ALTER TABLE "member_epochs" ADD CONSTRAINT "member_epochs_address_fkey" FOREIGN KEY ("address") REFERENCES "members"("address") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "member_events" ADD CONSTRAINT "member_events_address_fkey" FOREIGN KEY ("address") REFERENCES "members"("address") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "member_delegations" ADD CONSTRAINT "member_delegations_from_fkey" FOREIGN KEY ("from") REFERENCES "members"("address") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "member_delegations" ADD CONSTRAINT "member_delegations_to_fkey" FOREIGN KEY ("to") REFERENCES "members"("address") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "voting_event" ADD CONSTRAINT "voting_event_address_fkey" FOREIGN KEY ("address") REFERENCES "members"("address") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "voting_event" ADD CONSTRAINT "voting_event_votingId_fkey" FOREIGN KEY ("votingId") REFERENCES "voting"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
-
--- The following is not auto-generated and allows full text search
-CREATE EXTENSION pg_trgm;
-CREATE EXTENSION btree_gin;
-
-CREATE INDEX members_tags_index
-   ON members USING GIN (to_tsvector('english', tags));
-

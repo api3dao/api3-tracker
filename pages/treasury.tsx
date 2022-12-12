@@ -1,4 +1,6 @@
 import type { NextPage } from "next";
+import { useState } from "react";
+import { VoteGas } from "../services/gas";
 import { Footer, Header, Meta } from "../components/";
 import { fetchWebconfig } from "../services/webconfig";
 import { IBlockNumber, ITreasury } from "../services/types";
@@ -44,6 +46,7 @@ export async function getServerSideProps() {
 
 const TreasuryPage: NextPage = (props: any) => {
   const { list, lastBlock, webconfig } = props;
+  const [gas, setGas] = useState<boolean>(VoteGas.appearance);
 
   return (
     <div>
@@ -71,7 +74,12 @@ const TreasuryPage: NextPage = (props: any) => {
         </div>
       </main>
 
-      <Footer github={webconfig.github} blockNumber={lastBlock.blockNumber} />
+      <Footer
+        showGas={gas}
+        changeGas={setGas}
+        github={webconfig.github}
+        blockNumber={lastBlock.blockNumber}
+      />
     </div>
   );
 };

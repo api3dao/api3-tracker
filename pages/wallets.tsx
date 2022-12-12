@@ -1,4 +1,6 @@
 import type { NextPage } from "next";
+import { useState } from "react";
+import { VoteGas } from "../services/gas";
 import React from "react";
 import { useRouter } from "next/router";
 import InfiniteScroll from "react-infinite-scroller";
@@ -23,12 +25,12 @@ export async function getServerSideProps(context: any) {
   const results = await Promise.all([
     Wallets.fetchList(q, cursor),
     Blocks.fetchLast(),
-    Supply.fetch(),
+    Wallets.totalShares(),
   ]);
   const list: Array<IWallet> = results[0].list;
   const total = results[0].page.total;
   const lastBlock: IBlockNumber = results[1];
-  const supply: ISupply | null = results[2];
+  const totalShares: any = results[2];
 
   return {
     props: {
@@ -38,7 +40,7 @@ export async function getServerSideProps(context: any) {
       list: serializable(list),
       total,
       lastBlock: serializable(lastBlock),
-      supply: serializable(supply),
+      totalShares: serializable(totalShares),
     }, // will be passed to the page component as props
   };
 }
@@ -59,10 +61,11 @@ const stringQuery = (input: any, defaultValue: string): string => {
 };
 
 const WalletsPage: NextPage = (props: any) => {
-  const { lastBlock, supply, webconfig } = props;
+  const { lastBlock, totalShares, webconfig } = props;
   const router = useRouter();
   const q = stringQuery(router.query.q, "");
 
+  const [gas, setGas] = useState<boolean>(VoteGas.appearance);
   const [isLoading, setLoading] = React.useState(false);
   const [isLoadingMore, setLoadingMore] = React.useState(false);
   const [state, setState] = React.useState<WalletsPageState>({
@@ -141,7 +144,7 @@ const WalletsPage: NextPage = (props: any) => {
             hasMore={state.hasMore}
             loader={<div key={0}></div>}
           >
-            <WalletsList total={supply.totalStaked} list={wallets} />
+            <WalletsList total={totalShares} list={wallets} />
           </InfiniteScroll>
         )}
         {isLoadingMore ? (
@@ -149,8 +152,13 @@ const WalletsPage: NextPage = (props: any) => {
         ) : null}
         <div className="pb-20">&nbsp;</div>
       </main>
+      <Footer
+        showGas={gas}
+        changeGas={setGas}
+        github={webconfig.github}
+        blockNumber={lastBlock.blockNumber}
+      />
 
-      <Footer github={webconfig.github} blockNumber={lastBlock.blockNumber} />
     </div>
   );
 };
