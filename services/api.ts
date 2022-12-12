@@ -128,6 +128,13 @@ export const Votings = {
       })
     ).map((x: any) => ({ ...x }));
   },
+  // fetch counts by each status
+  fetchCounts: async () => {
+    return (await prisma.voting.groupBy({
+      by: [ "status" ],
+      _count: { id: true },
+    })).map((x: any) => ({ total: x._count.id, status: x.status }));
+  },
   // fetch all existing votings
   fetchAll: async (): Promise<Array<IVoting>> => {
     return (

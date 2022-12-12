@@ -1,6 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ethers } from "ethers";
-import { Wallets, Supply, ITreasuryType, Treasuries } from "../../services/api";
+import {
+  Votings,
+  Wallets,
+  Supply,
+  ITreasuryType,
+  Treasuries,
+} from "../../services/api";
 import { toHex, serializable } from "../../services/format";
 import { ITreasury, IBlockNumber } from "../../services/types";
 import superjson from "superjson";
@@ -118,9 +124,16 @@ export default async function handler(
   out.push("# TYPE members_total_withdrawn gauge");
   out.push("members_total_withdrawn " + withdrawn);
 
-  // 5. TODO: Number of votes (per status)
+  // 5. Number of votes (per status)
+  out.push("");
+  out.push("# HELP votings number of votings");
+  out.push("# TYPE votings gauge");
+  const counts = await Votings.fetchCounts();
+  for (const v of counts) {
+    out.push('votings{status="' + v.status + '"} ' + v.total);
+  }
 
-  // 6. TODO: Shares estimates
+  // TODO: 6. Shares estimates
 
   res.status(200).send(out.join("\n"));
 }
