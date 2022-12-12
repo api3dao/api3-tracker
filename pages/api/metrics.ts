@@ -133,7 +133,30 @@ export default async function handler(
     out.push('votings{status="' + v.status + '"} ' + v.total);
   }
 
-  // TODO: 6. Shares estimates
+  // 6. Shares estimates - of downloaded user state history
+  out.push("");
+  const blocksWithShares = (await prisma.memberEvent.groupBy({
+      where: { eventName: "Shares" },
+      by: [ "blockNumber" ],
+  })).reduce((map: any, obj: any) => {
+      map[obj.blockNumber] = 1;
+      return map;
+  }, {});
+  const blocksWithRewardsTotal = (await prisma.memberEvent.groupBy({
+      where: { eventName: "Rewards" },
+      by: [ "blockNumber" ],
+  })).map((x: any) => (
+      blocksWithShares[x.blockNumber] || 0
+  )).reduce((partialSum, a) => (partialSum + a), 0);
+  out.push("# HELP blocks_without_shares returns the estimate amount of history to be downloaded");
+  out.push("# TYPE blocks_without_shares gauge");
+  out.push("blocks_without_shares "+ blocksWithRewardsTotal);
+  out.push("# HELP blocks_with_shares returns the estimate amount of blocks that were already downloaded");
+  out.push("# TYPE blocks_with_shares gauge");
+  out.push("blocks_with_shares " + Object.keys(blocksWithShares).length);
+
+  out.push("# HELP members_without_shares returns the amount of members that have no any shares history checked");
+  out.push("# TYPE members_without_shares gauge");
 
   res.status(200).send(out.join("\n"));
 }
