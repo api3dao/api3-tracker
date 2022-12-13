@@ -503,6 +503,7 @@ export const Events = {
     event: Log,
     tx: any
   ): Promise<boolean> => {
+    const start = new Date().getTime();
     const { transactionIndex, transactionHash, logIndex } = event;
     const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
@@ -587,7 +588,11 @@ export const Events = {
 
       // save mintedEvent for each member
       const member: IWallet = m;
-      if (userShare && userShare > new Prisma.Decimal(0.0)) {
+      const hasRewardsRecord  =
+        (userShare && userShare != new Prisma.Decimal(0.0)) ||
+        (userReleasedShares && userReleasedShares > new Prisma.Decimal(0.0)) ||
+        (userMintedShares && userMintedShares > new Prisma.Decimal(0.0));
+      if (hasRewardsRecord) {
         const eventId =
           event.blockNumber.toString(16) +
           "-" +
@@ -627,34 +632,25 @@ export const Events = {
           })
         );
 
-        if (
-          userReleasedShares ||
-          userMintedShares ||
-          userReleasedShares > new Prisma.Decimal(0.0) ||
-          userMintedShares > new Prisma.Decimal(0.0)
-        ) {
-          member.userReward = member.userReward.add(userMintedShares);
-          member.userLockedReward =
-            member.userLockedReward.add(userMintedShares);
+        member.userReward = member.userReward.add(userMintedShares);
+        member.userLockedReward = member.userLockedReward.add(userMintedShares);
 
-          member.userShare = member.userShare.add(userReleasedShares);
-          member.userVotingPower =
-            member.userVotingPower.add(userReleasedShares);
-          member.userLockedReward =
-            member.userLockedReward.sub(userReleasedShares);
+        member.userShare = member.userShare.add(userReleasedShares);
+        member.userVotingPower = member.userVotingPower.add(userReleasedShares);
+        member.userLockedReward =
+          member.userLockedReward.sub(userReleasedShares);
 
-          Batch.ensureUpdated(member);
+        Batch.ensureUpdated(member);
 
-          tx.push(
-            prisma.member.updateMany({
-              where: { address: Address.asBuffer(member.address) },
-              data: {
-                userReward: member.userReward,
-                userLockedReward: member.userLockedReward,
-              },
-            })
-          );
-        }
+        tx.push(
+          prisma.member.updateMany({
+            where: { address: Address.asBuffer(member.address) },
+            data: {
+              userReward: member.userReward,
+              userLockedReward: member.userLockedReward,
+            },
+          })
+        );
       }
       tx.push(
         prisma.memberEpoch.create({
@@ -680,17 +676,6 @@ export const Events = {
       totalLocked = totalLocked.add(m.userLockedReward);
     }
 
-    /*tx.push(
-      prisma.epoch.updateMany({
-        where: {
-          blockNumber: { lt: blockNumber },
-          isCurrent: 1,
-        },
-        data: {
-          isCurrent: 0,
-        },
-      })
-    ); */
     tx.push(
       prisma.epoch.create({
         data: {
@@ -729,6 +714,7 @@ export const Events = {
         data: { status: "rejected" },
       })
     );
+    console.log("Processing Epoch", "took " + elapsed(start));
     return true;
   },
 
@@ -856,7 +842,7 @@ export const Events = {
         },
       })
     );
-    console.log("New Voting", "took " + elapsed(start));
+    if (verboseVote) { console.log("New Voting", "took " + elapsed(start));}
     return false;
   },
 
@@ -953,6 +939,7 @@ export const Events = {
     verbose: SyncVerbosity,
     termination: SyncTermination
   ): Promise<SyncBlockResult> => {
+    const start = new Date().getTime();
     VoteGas.reset(); // gas accumulator for the block
     Batch.reset();
 
@@ -1267,6 +1254,9 @@ export const Events = {
 
     if (included) {
       await prisma.$transaction(tx);
+      if ((new Date().getTime() - start) > 1000) {
+        console.log("..DB Block", blockNumber, blockDt, "took " + elapsed(start));
+      }
     }
     return { shouldTerminate, included };
   },

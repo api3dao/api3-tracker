@@ -659,14 +659,18 @@ export const Batch = {
         const m1 = Batch.removeBadge(member, "supporter", blockDt, verbose);
         const m2 = Batch.removeBadge(m1, "unstaking", blockDt, verbose);
         const m3 = Batch.addBadge(m2, "withdrawn", blockDt, verbose);
-        const tokens = withDecimals(
+        const tokens = new Prisma.Decimal(withDecimals(
           ethers.BigNumber.from(args[1]).toString(),
           18
+        ));
+        m3.userWithdrew = m3.userWithdrew.add(tokens);
+        Batch.ensureUpdated(m3);
+
+        await Batch.updateTotals(
+          Address.asBuffer(member.address),
+          verboseTotals
         );
-        m3.userWithdrew = m3.userWithdrew.add(
-          new Prisma.Decimal(tokens.toString())
-        );
-        return Batch.ensureUpdated(m3);
+        return m3;
       }
     }
   },
