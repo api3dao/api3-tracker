@@ -503,6 +503,7 @@ export const Events = {
     event: Log,
     tx: any
   ): Promise<boolean> => {
+    const start = new Date().getTime();
     const { transactionIndex, transactionHash, logIndex } = event;
     const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
@@ -579,17 +580,19 @@ export const Events = {
     const allMembers = await Wallets.fetchAll();
     for (const m of allMembers) {
       const addrIndex = m.address.replace("0x", "").toLowerCase();
-      let userShare = m.userShare;
-      if (userShare < new Prisma.Decimal(0.0))
-        userShare = new Prisma.Decimal(0.0);
-      const userSharePct = userShare.mul(100).div(totalShares);
-      const userMintedShares = mintedShares.mul(userSharePct).div(100); // rewards are proportional
       const userReleasedShares =
         releaseMap.get(addrIndex) || new Prisma.Decimal(0);
+      const userShare = m.userShare;
+      const userSharePct = userShare.mul(100).div(totalShares);
+      const userMintedShares = mintedShares.mul(userSharePct).div(100); // rewards are proportional
 
       // save mintedEvent for each member
       const member: IWallet = m;
-      if (userShare && userShare > new Prisma.Decimal(0.0)) {
+      const hasRewardsRecord  =
+        (userShare && userShare != new Prisma.Decimal(0.0)) ||
+        (userReleasedShares && userReleasedShares > new Prisma.Decimal(0.0)) ||
+        (userMintedShares && userMintedShares > new Prisma.Decimal(0.0));
+      if (hasRewardsRecord) {
         const eventId =
           event.blockNumber.toString(16) +
           "-" +
@@ -629,25 +632,25 @@ export const Events = {
           })
         );
 
-        if (userMintedShares > new Prisma.Decimal(0.0)) {
-          member.userReward = member.userReward.add(userMintedShares);
-          member.userLockedReward =
-            member.userLockedReward.add(userMintedShares);
-          member.userLockedReward =
-            member.userLockedReward.sub(userReleasedShares);
+        member.userReward = member.userReward.add(userMintedShares);
+        member.userLockedReward = member.userLockedReward.add(userMintedShares);
 
-          Batch.ensureUpdated(member);
+        member.userShare = member.userShare.add(userReleasedShares);
+        member.userVotingPower = member.userVotingPower.add(userReleasedShares);
+        member.userLockedReward =
+          member.userLockedReward.sub(userReleasedShares);
 
-          tx.push(
-            prisma.member.updateMany({
-              where: { address: Address.asBuffer(member.address) },
-              data: {
-                userReward: member.userReward,
-                userLockedReward: member.userLockedReward,
-              },
-            })
-          );
-        }
+        Batch.ensureUpdated(member);
+
+        tx.push(
+          prisma.member.updateMany({
+            where: { address: Address.asBuffer(member.address) },
+            data: {
+              userReward: member.userReward,
+              userLockedReward: member.userLockedReward,
+            },
+          })
+        );
       }
       tx.push(
         prisma.memberEpoch.create({
@@ -673,17 +676,6 @@ export const Events = {
       totalLocked = totalLocked.add(m.userLockedReward);
     }
 
-    /*tx.push(
-      prisma.epoch.updateMany({
-        where: {
-          blockNumber: { lt: blockNumber },
-          isCurrent: 1,
-        },
-        data: {
-          isCurrent: 0,
-        },
-      })
-    ); */
     tx.push(
       prisma.epoch.create({
         data: {
@@ -722,6 +714,7 @@ export const Events = {
         data: { status: "rejected" },
       })
     );
+    console.log("Processing Epoch", "took " + elapsed(start));
     return true;
   },
 
@@ -735,7 +728,8 @@ export const Events = {
     verboseMember: string,
     tx: any
   ): Promise<boolean> => {
-    const { transactionHash } = event;
+    const start = new Date().getTime();
+    const transactionHash = event.transactionHash;
     const { voteId, metadata } = args;
     // const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
@@ -768,11 +762,36 @@ export const Events = {
         Events.ConvenienceABI,
         jsonRpc
       );
-      const result = await conv.getStaticVoteData(isPrimary ? 0 : 1, txSender, [
-        voteId.toString(),
-      ]);
-      const { script, votingPower, supportRequired } = result;
+      const cached = await prisma.cacheVoting.findMany({
+        where: {
+          hash: Buffer.from(transactionHash.replace("0x", ""), "hex"),
+        },
+      });
+
+      let script: any = {};
+      let scriptData: any = {};
+      let votingPower: any = "";
+
+      if (cached.length == 0) {
+        const result = await conv.getStaticVoteData(
+          isPrimary ? 0 : 1,
+          txSender,
+          [voteId.toString()]
+        );
+        await prisma.cacheVoting.create({
+          data: {
+            hash: Buffer.from(transactionHash.replace("0x", ""), "hex"),
+            data: result as any,
+          },
+        });
+        script = result.script;
+        votingPower = result.votingPower;
+      } else {
+        script = (cached[0].data as any)[4];
+        votingPower = ethers.BigNumber.from((cached[0].data as any)[3][0]);
+      }
       scriptData = VotingReader.parseScript(script[0]);
+
       totalStaked = new Prisma.Decimal(
         withDecimals(votingPower.toString(), 18)
       );
@@ -823,6 +842,7 @@ export const Events = {
         },
       })
     );
+    if (verboseVote) { console.log("New Voting", "took " + elapsed(start));}
     return false;
   },
 
@@ -919,6 +939,7 @@ export const Events = {
     verbose: SyncVerbosity,
     termination: SyncTermination
   ): Promise<SyncBlockResult> => {
+    const start = new Date().getTime();
     VoteGas.reset(); // gas accumulator for the block
     Batch.reset();
 
@@ -1233,6 +1254,9 @@ export const Events = {
 
     if (included) {
       await prisma.$transaction(tx);
+      if ((new Date().getTime() - start) > 1000) {
+        console.log("..DB Block", blockNumber, blockDt, "took " + elapsed(start));
+      }
     }
     return { shouldTerminate, included };
   },

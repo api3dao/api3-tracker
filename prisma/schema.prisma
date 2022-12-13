@@ -271,6 +271,14 @@ model CacheEns {
   @@map("cache_ens")
 }
 
+model CacheVoting {
+  hash Bytes // Hash of the transaction
+  data Json // JSON Data of the voting getStaticData
+
+  @@id([hash])
+  @@map("cache_votings")
+}
+
 model SyncStatus {
   id         Int // ID (always 1, this table should have just one record)
   updatedAt  DateTime // Date of the status update
