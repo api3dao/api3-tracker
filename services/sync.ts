@@ -579,13 +579,11 @@ export const Events = {
     const allMembers = await Wallets.fetchAll();
     for (const m of allMembers) {
       const addrIndex = m.address.replace("0x", "").toLowerCase();
-      let userShare = m.userShare;
-      if (userShare < new Prisma.Decimal(0.0))
-        userShare = new Prisma.Decimal(0.0);
-      const userSharePct = userShare.mul(100).div(totalShares);
-      const userMintedShares = mintedShares.mul(userSharePct).div(100); // rewards are proportional
       const userReleasedShares =
         releaseMap.get(addrIndex) || new Prisma.Decimal(0);
+      const userShare = m.userShare;
+      const userSharePct = userShare.mul(100).div(totalShares);
+      const userMintedShares = mintedShares.mul(userSharePct).div(100); // rewards are proportional
 
       // save mintedEvent for each member
       const member: IWallet = m;
@@ -629,10 +627,19 @@ export const Events = {
           })
         );
 
-        if (userMintedShares > new Prisma.Decimal(0.0)) {
+        if (
+          userReleasedShares ||
+          userMintedShares ||
+          userReleasedShares > new Prisma.Decimal(0.0) ||
+          userMintedShares > new Prisma.Decimal(0.0)
+        ) {
           member.userReward = member.userReward.add(userMintedShares);
           member.userLockedReward =
             member.userLockedReward.add(userMintedShares);
+
+          member.userShare = member.userShare.add(userReleasedShares);
+          member.userVotingPower =
+            member.userVotingPower.add(userReleasedShares);
           member.userLockedReward =
             member.userLockedReward.sub(userReleasedShares);
 
@@ -735,7 +742,8 @@ export const Events = {
     verboseMember: string,
     tx: any
   ): Promise<boolean> => {
-    const { transactionHash } = event;
+    const start = new Date().getTime();
+    const transactionHash = event.transactionHash;
     const { voteId, metadata } = args;
     // const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
@@ -768,11 +776,36 @@ export const Events = {
         Events.ConvenienceABI,
         jsonRpc
       );
-      const result = await conv.getStaticVoteData(isPrimary ? 0 : 1, txSender, [
-        voteId.toString(),
-      ]);
-      const { script, votingPower, supportRequired } = result;
+      const cached = await prisma.cacheVoting.findMany({
+        where: {
+          hash: Buffer.from(transactionHash.replace("0x", ""), "hex"),
+        },
+      });
+
+      let script: any = {};
+      let scriptData: any = {};
+      let votingPower: any = "";
+
+      if (cached.length == 0) {
+        const result = await conv.getStaticVoteData(
+          isPrimary ? 0 : 1,
+          txSender,
+          [voteId.toString()]
+        );
+        await prisma.cacheVoting.create({
+          data: {
+            hash: Buffer.from(transactionHash.replace("0x", ""), "hex"),
+            data: result as any,
+          },
+        });
+        script = result.script;
+        votingPower = result.votingPower;
+      } else {
+        script = (cached[0].data as any)[4];
+        votingPower = ethers.BigNumber.from((cached[0].data as any)[3][0]);
+      }
       scriptData = VotingReader.parseScript(script[0]);
+
       totalStaked = new Prisma.Decimal(
         withDecimals(votingPower.toString(), 18)
       );
@@ -823,6 +856,7 @@ export const Events = {
         },
       })
     );
+    console.log("New Voting", "took " + elapsed(start));
     return false;
   },
 
