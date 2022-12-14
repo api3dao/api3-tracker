@@ -3,6 +3,7 @@ import { hideBin } from "yargs/helpers";
 import { Events } from "./services/sync";
 import { Treasuries } from "./services/treasuries";
 import { Supply } from "./services/supply";
+import { Shares } from "./services/shares";
 import { ENS } from "./services/ens";
 
 yargs(hideBin(process.argv))
@@ -56,6 +57,35 @@ yargs(hideBin(process.argv))
       } else if (sub == "download") {
         const total = await Events.download(endpoint);
         console.log(`downloaded ${total} new events`);
+      } else {
+        console.error("ERROR: Unknown sub-command");
+        process.exit(1);
+      }
+    },
+  })
+  .command({
+    command: "shares [sub]",
+    describe: "Operations with API3 DAO shares cache",
+    builder: (yargs) => {
+      return yargs
+        .option(`sub`, {
+          choises: ["reset", "download"],
+          type: "string",
+          describe: `shares subcommand - reset or download new`,
+        })
+        .option("member", {
+          type: "string",
+          default: "",
+          description: "Hex address of the member to check its shares",
+        })
+    },
+    handler: async ({ endpoint, sub, block, member }) => {
+      if (sub == "reset") {
+        await Shares.resetAll();
+        console.log("shares cache records were deleted");
+      } else if (sub == "download") {
+        const total = await Shares.download(endpoint, member);
+        console.log(`downloaded ${total} new records`);
       } else {
         console.error("ERROR: Unknown sub-command");
         process.exit(1);
@@ -124,7 +154,7 @@ yargs(hideBin(process.argv))
         const blocks = await Events.processState(
           endpoint,
           verbose,
-          termination,
+          termination
         );
         console.log(`${blocks} blocks were processed`);
       } else if (sub == "update") {
@@ -138,7 +168,11 @@ yargs(hideBin(process.argv))
           epoch: false,
           block: stopBlock,
         };
-        const blocks = await Events.processState(endpoint, verbose, termination);
+        const blocks = await Events.processState(
+          endpoint,
+          verbose,
+          termination
+        );
         console.log(`${blocks} blocks were processed`);
       } else {
         console.error("ERROR: Unknown sub-command");

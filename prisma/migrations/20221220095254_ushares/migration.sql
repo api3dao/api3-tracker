@@ -12,8 +12,6 @@ CREATE TABLE "cache_user_shares" (
     "height" INTEGER NOT NULL,
     "shares" DECIMAL(60,18) NOT NULL,
     "votingPower" DECIMAL(60,18) NOT NULL,
-    "delegated" DECIMAL(60,18) NOT NULL,
-    "delegatedTo" DECIMAL(60,18) NOT NULL,
 
     CONSTRAINT "cache_user_shares_pkey" PRIMARY KEY ("addr","height")
 );

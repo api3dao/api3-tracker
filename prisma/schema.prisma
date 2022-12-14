@@ -286,8 +286,6 @@ model CacheUserShares {
 
   shares          Decimal  @db.Decimal(60, 18) // Number of shares
   votingPower     Decimal  @db.Decimal(60, 18) // Voting power of this user
-  delegated       Decimal  @db.Decimal(60, 18) // Delegation of this user
-  delegatedTo     Decimal  @db.Decimal(60, 18) // Delegation to this user
 
   @@id([addr, height])
   @@map("cache_user_shares")
