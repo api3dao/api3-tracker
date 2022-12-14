@@ -635,8 +635,7 @@ export const Events = {
         member.userReward = member.userReward.add(userMintedShares);
         member.userLockedReward = member.userLockedReward.add(userMintedShares);
 
-        member.userShare = member.userShare.add(userReleasedShares);
-        member.userVotingPower = member.userVotingPower.add(userReleasedShares);
+        member.userStake = member.userStake.add(userReleasedShares);
         member.userLockedReward =
           member.userLockedReward.sub(userReleasedShares);
 

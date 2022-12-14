@@ -96,11 +96,12 @@ model Member {
 
   badges String // comma-separated badges for this member
 
-  userShare        Decimal @db.Decimal(60, 18) // number of user shares at the moment of this epoch
-  userStake        Decimal @db.Decimal(60, 18) // number of user stake at the moment of this epoch
-  userVotingPower  Decimal @db.Decimal(10, 2) // user voting power at this epoch
-  userReward       Decimal @db.Decimal(60, 18) // user reqard for this epoch
-  userLockedReward Decimal @db.Decimal(60, 18) // how much of the reward is still locked
+  userShare        Decimal @db.Decimal(60, 18) @default(0.0)// number of user shares at the moment
+  userStake        Decimal @db.Decimal(60, 18) @default(0.0) // number of user stake at the moment
+  userUnstake      Decimal @db.Decimal(60, 19) @default(0.0) // number of user stake that is preparing to be released
+  userVotingPower  Decimal @db.Decimal(10, 2) @default(0.0)// user voting power at this epoch
+  userReward       Decimal @db.Decimal(60, 18) @default(0.0) // users total rewards
+  userLockedReward Decimal @db.Decimal(60, 18) @default(0.0) // how much of the reward is still locked
   userDelegates    Decimal @default(0.0) @db.Decimal(60, 18) // how much user delegates
   userIsDelegated  Decimal @default(0.0) @db.Decimal(60, 18) // how much user is delegated
   userDeposited    Decimal @db.Decimal(60, 18) // total user deposited over the time
@@ -277,6 +278,19 @@ model CacheVoting {
 
   @@id([hash])
   @@map("cache_votings")
+}
+
+model CacheUserShares {
+  addr     Bytes // Address of the member
+  height    Int   // Height of the block
+
+  shares          Decimal  @db.Decimal(60, 18) // Number of shares
+  votingPower     Decimal  @db.Decimal(60, 18) // Voting power of this user
+  delegated       Decimal  @db.Decimal(60, 18) // Delegation of this user
+  delegatedTo     Decimal  @db.Decimal(60, 18) // Delegation to this user
+
+  @@id([addr, height])
+  @@map("cache_user_shares")
 }
 
 model SyncStatus {

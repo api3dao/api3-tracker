@@ -232,6 +232,7 @@ export const Batch = {
           ensUpdated: blockDt.toISOString(),
           userShare: new Prisma.Decimal(0.0),
           userStake: new Prisma.Decimal(0.0),
+          userUnstake: new Prisma.Decimal(0.0),
           userVotingPower: new Prisma.Decimal(0.0),
           userReward: new Prisma.Decimal(0.0),
           userLockedReward: new Prisma.Decimal(0.0),

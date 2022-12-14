@@ -122,8 +122,9 @@ export interface IWallet {
   badges: string;
   tags?: string;
   userShare: Prisma.Decimal;
-  userStake: Prisma.Decimal; // number of user stake at the moment of this epoch
-  userVotingPower: Prisma.Decimal; // user voting power at this epoch
+  userStake: Prisma.Decimal; // number of user stake at the moment
+  userUnstake: Prisma.Decimal; // number of user stake at the moment
+  userVotingPower: Prisma.Decimal; // user voting power
   userReward: Prisma.Decimal; // user reqard for this epoch
   userLockedReward: Prisma.Decimal; // how much of the reward is still locked
   userDeposited: Prisma.Decimal;
