@@ -486,6 +486,17 @@ const EventDetails = (props: IEventDetails) => {
     }
     case "WithdrawnToPool":
       return null;
+    case "Shares": { // fake event for debugging
+      const shares = noDecimals(props.data.shares);
+      const votingPower = noDecimals(props.data.votingPower);
+      return (
+        <div className="text-xs darken leading-5">
+          <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
+          shares. Voting Power:{" "}
+          <span className="text-color-panel-title">{toCurrency(votingPower)}</span>{" "}
+        </div>
+      );
+    }
   }
 
   if (props.eventName == "StartVote" || props.eventName == "ExecuteVote") {

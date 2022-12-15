@@ -171,7 +171,7 @@ export const WalletEvents = {
     return (
       await prisma.memberEvent.findMany({
         where: { address },
-        orderBy: [{ createdAt: "desc" }, { logIndex: "desc" }],
+        orderBy: [{ createdAt: "desc" }, { txIndex: "desc" }, { logIndex: "desc" }],
       })
     ).map((x: any) => ({ ...x }));
   },
