@@ -63,20 +63,32 @@ export const Shares = {
     ).address;
 
     const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
-    const poolContract = new ethers.Contract(pool, PoolABI, jsonRpc);
     const found = await prisma.cacheTotalShares.findMany({
       where: { height: blockNumber },
     });
     if (found.length == 0) {
       console.log("Requesting Block", blockNumber, " totals");
-      const totalStake = withDecimals(
-        (await poolContract.totalStake(blockNumber)).toString(),
-        18
+      const blockHex = "0x" + blockNumber.toString(16);
+
+      const result = await ethers.utils.fetchJson(
+        jsonRpc.connection,
+        `[
+           {"method":"eth_call","params":[{"from":null,"to":"${pool}","data":"0x3a98ef39d75a0463a589a77e7570097b7e407deab0b5678402f964703022acc1"}, "${blockHex}"],"id":"totalShares","jsonrpc":"2.0"},
+           {"method":"eth_call","params":[{"from":null,"to":"${pool}","data":"0x8b0e9f3f74ca417eae2239691de899dcf9e89dd25acfd44380d195cbb069ebd1"}, "${blockHex}"],"id":"totalStake","jsonrpc":"2.0"}
+         ]`
       );
-      const totalShares = withDecimals(
-        (await poolContract.totalShares(blockNumber)).toString(),
-        18
-      );
+      result.forEach((item: any) => {
+        if (item.error) {
+          throw item.error;
+        }
+      }); // error handling
+      const totalShares = result
+        .filter((item: any) => item.id === "totalShares")
+        .map((item: any) => BigInt(item.result))[0].toString();
+      const totalStake = result
+        .filter((item: any) => item.id === "totalStake")
+        .map((item: any) => BigInt(item.result))[0].toString();
+
       await prisma.cacheTotalShares.create({
         data: {
           height: blockNumber,
@@ -150,12 +162,13 @@ export const Shares = {
     const events = await uniqueEvents(member);
     console.log("Found ", events.length, "events");
     for (const e of events) {
-      const argsUser = await Shares.downloadUserAt(
+      /*const argsUser = await Shares.downloadUserAt(
         endpoint,
         webconfig,
         member,
         e.blockNumber
-      );
+      ); */
+      const argsUser = {};
       const totals = await Shares.downloadTotalsAt(
         endpoint,
         webconfig,
@@ -186,9 +199,9 @@ export const Shares = {
           feeUsd: e.feeUsd,
         },
       });
+      count++;
     }
 
-    count++;
     return count;
   },
 };
