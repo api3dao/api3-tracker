@@ -63,6 +63,13 @@ const uniqueArray = (arr: Array<any>): Array<any> => {
   return a;
 };
 
+const adjustedLogIndex = (a: any): number => {
+  if (a.topics.length > 0 && a.topics[0] == "0xf310def5b4718cefe3603eb46259d8061fd58003695cf952de94c53e14dbb309") {
+    return 255;
+  }
+  return a.logIndex;
+}
+
 export const BlockLoader = {
   fromDatabase: async (
     blockRecord: any,
@@ -84,7 +91,7 @@ export const BlockLoader = {
     logsList.sort((a, b) => {
       const diff1 = a.transactionIndex - b.transactionIndex;
       if (diff1 != 0) return diff1;
-      return a.logIndex - b.logIndex;
+      return adjustedLogIndex(a) - adjustedLogIndex(b);
     });
 
     const receipts = new Map<string, any>();
