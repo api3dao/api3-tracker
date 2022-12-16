@@ -562,10 +562,10 @@ export const Batch = {
         return m1;
       }
       case "Unstaked(address,uint256,uint256,uint256,uint256)": {
-        const userShares = new Prisma.Decimal(
+        const userTokens = new Prisma.Decimal(
           withDecimals(ethers.BigNumber.from(args[1]).toString(), 18)
         );
-        member.userShare = member.userShare.sub(userShares);
+        member.userStake = userTokens;
         Batch.ensureUpdated(member);
         await Batch.updateTotals(
           Address.asBuffer(member.address),
@@ -576,9 +576,9 @@ export const Batch = {
       case "ScheduledUnstake(address,uint256,uint256,uint256,uint256)": {
         const m1 = Batch.addBadge(member, "unstaking", blockDt, verbose);
         const userShares = new Prisma.Decimal(
-          withDecimals(ethers.BigNumber.from(args[1]).toString(), 18)
+          withDecimals(ethers.BigNumber.from(args[3]).toString(), 18)
         );
-        m1.userShare = m1.userShare.sub(userShares);
+        m1.userShare = userShares;
         Batch.ensureUpdated(m1);
         await Batch.updateTotals(
           Address.asBuffer(m1.address),

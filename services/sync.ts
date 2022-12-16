@@ -556,7 +556,7 @@ export const Events = {
         where: { isReleased: 0, releaseDate: { lt: blockDt.toISOString() } },
       })
     ).map((x: any) => x.epoch as number);
-    if (epochsToBeReleased.length > 0) {
+    /*if (epochsToBeReleased.length > 0) {
       const rewards = await prisma.memberEpoch.findMany({
         where: { epoch: { in: epochsToBeReleased } },
       });
@@ -569,13 +569,13 @@ export const Events = {
           releaseMap.get(addrIndex) || new Prisma.Decimal(0.0);
         releaseMap.set(addrIndex, existingReward.add(r.userReward));
       }
-    }
-    tx.push(
+    }*/
+    /* tx.push(
       prisma.memberEpoch.updateMany({
         where: { epoch: { in: epochsToBeReleased } },
         data: { isReleased: 1 },
       })
-    );
+    ); */
     tx.push(
       prisma.epoch.updateMany({
         where: { epoch: { in: epochsToBeReleased } },
@@ -658,7 +658,7 @@ export const Events = {
           })
         );
       }
-      tx.push(
+      /*tx.push(
         prisma.memberEpoch.create({
           data: {
             epoch: parseInt(epochIndex.toString()),
@@ -674,7 +674,7 @@ export const Events = {
             userTotalLocked: member.userLockedReward,
           },
         })
-      );
+      ); */
 
       totalDeposits = totalDeposits.add(m.userDeposited);
       totalWithdrawals = totalWithdrawals.add(m.userWithdrew);
@@ -862,6 +862,7 @@ export const Events = {
     tx: any
   ) => {
     const { voteId, supports, stake } = args;
+
     const isPrimary = VotingReader.isPrimary(config, event.address);
     const voteInternalId = voteId * 2 + (isPrimary ? 1 : 0);
     const supported: boolean = supports === "true" || supports === true;
