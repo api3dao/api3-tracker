@@ -559,8 +559,16 @@ export const WalletEventsListThead = () => (
   </thead>
 );
 
+const isSpecial = (name: string): boolean => {
+   return (
+     name == "Rewards" ||
+     name == "Shares"
+   );
+};
+
 export const WalletEventsListTr = (props: IWalletEventsRowProps) => {
   const { row, index, wallet, votings, webconfig } = props;
+  const eventNameClass = (isSpecial(row.eventName)) ? "text-center text-xs ps-2 darken" : "text-center text-xs px-2 font-bold";
   return (
     <tr>
       <td className="text-center">{(index || 0) + 1}.</td>
@@ -571,7 +579,7 @@ export const WalletEventsListTr = (props: IWalletEventsRowProps) => {
       <td className="text-center">
         <BlockNumber blockNumber={row.blockNumber} txId={toHex(row.txHash)} />
       </td>
-      <td className="text-center text-xs px-2 font-bold"> {row.eventName} </td>
+      <td className={eventNameClass}> {row.eventName} </td>
       <td className="text-left px-5">
         <div className="text-xs pt-1">
           <EventDetails
