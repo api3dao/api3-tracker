@@ -9,6 +9,7 @@ import { fetchWebconfig } from "./webconfig";
 import { IWallet, IContract } from "./types";
 import { Filter, Block, Log, Provider } from "@ethersproject/abstract-provider";
 import { EthereumPrice } from "./../services/price";
+import { Shares } from "./../services/shares";
 import { VotingReader } from "./../services/voting";
 import { VoteGas } from "./../services/gas";
 import { Batch } from "./../services/members";
@@ -506,6 +507,8 @@ export const Events = {
   },
 
   processEpoch: async (
+    endpoint: string,
+    pool: string,
     blockInfo: BlockFullInfo,
     event: Log,
     tx: any
@@ -513,6 +516,7 @@ export const Events = {
     const start = new Date().getTime();
     const { transactionIndex, transactionHash, logIndex } = event;
     const blockNumber = blockInfo.block.number;
+
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
 
     const releaseDt = new Date(blockInfo.block.timestamp * 1000);
@@ -550,13 +554,13 @@ export const Events = {
     let totalLocked = new Prisma.Decimal(0);
 
     // scanning epochs that should be released and build the map of release for each member
-    const releaseMap = new Map<string, Prisma.Decimal>();
+    /*const releaseMap = new Map<string, Prisma.Decimal>();
     const epochsToBeReleased = (
       await prisma.epoch.findMany({
         where: { isReleased: 0, releaseDate: { lt: blockDt.toISOString() } },
       })
     ).map((x: any) => x.epoch as number);
-    /*if (epochsToBeReleased.length > 0) {
+    if (epochsToBeReleased.length > 0) {
       const rewards = await prisma.memberEpoch.findMany({
         where: { epoch: { in: epochsToBeReleased } },
       });
@@ -575,20 +579,22 @@ export const Events = {
         where: { epoch: { in: epochsToBeReleased } },
         data: { isReleased: 1 },
       })
-    ); */
+    );
     tx.push(
       prisma.epoch.updateMany({
         where: { epoch: { in: epochsToBeReleased } },
         data: { isReleased: 1 },
       })
-    );
+    );*/
 
     // members distribution: save snapshots
+    await Shares.downloadTotalsAt(endpoint, pool, blockNumber);
     const allMembers = await Wallets.fetchAll();
     for (const m of allMembers) {
+
+      await Shares.downloadUserAt(endpoint, pool, m.address, blockNumber);
+
       const addrIndex = m.address.replace("0x", "").toLowerCase();
-      const userReleasedShares =
-        releaseMap.get(addrIndex) || new Prisma.Decimal(0);
       const userShare = m.userShare;
       const userSharePct = userShare.mul(100).div(totalShares);
       const userMintedShares = mintedShares.mul(userSharePct).div(100); // rewards are proportional
@@ -597,7 +603,6 @@ export const Events = {
       const member: IWallet = m;
       const hasRewardsRecord  =
         (userShare && userShare != new Prisma.Decimal(0.0)) ||
-        (userReleasedShares && userReleasedShares > new Prisma.Decimal(0.0)) ||
         (userMintedShares && userMintedShares > new Prisma.Decimal(0.0));
       if (hasRewardsRecord) {
         const eventId =
@@ -612,7 +617,7 @@ export const Events = {
           userShare,
           userSharePct,
           userMintedShares,
-          userReleasedShares,
+          0,
           totalShares,
           mintedShares,
         ];
@@ -641,11 +646,6 @@ export const Events = {
 
         member.userReward = member.userReward.add(userMintedShares);
         member.userLockedReward = member.userLockedReward.add(userMintedShares);
-
-        member.userStake = member.userStake.add(userReleasedShares);
-        member.userLockedReward =
-          member.userLockedReward.sub(userReleasedShares);
-
         Batch.ensureUpdated(member);
 
         tx.push(
@@ -950,6 +950,12 @@ export const Events = {
     VoteGas.reset(); // gas accumulator for the block
     Batch.reset();
 
+    const pool: string = (
+      config.contracts?.find(
+        ({ name }) => name.toLowerCase() === "api3pool"
+      ) || { address: "" }
+    ).address;
+
     const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
     const tx = new Array();
@@ -1142,7 +1148,7 @@ export const Events = {
           if (
             decoded.signature == "MintedReward(uint256,uint256,uint256,uint256)"
           ) {
-            if (await Events.processEpoch(blockInfo, event, tx)) {
+            if (await Events.processEpoch(endpoint, pool, blockInfo, event, tx)) {
               if (termination.epoch) {
                 shouldTerminate = true;
                 included = true;

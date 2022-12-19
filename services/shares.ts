@@ -53,14 +53,9 @@ export const Shares = {
   },
   downloadTotalsAt: async (
     endpoint: string,
-    webconfig: IWebConfig,
+    pool: string,
     blockNumber: number
   ) => {
-    const pool: string = (
-      webconfig.contracts?.find(
-        ({ name }) => name.toLowerCase() === "api3pool"
-      ) || { address: "" }
-    ).address;
 
     const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
     const found = await prisma.cacheTotalShares.findMany({
@@ -105,15 +100,10 @@ export const Shares = {
 
   downloadUserAt: async (
     endpoint: string,
-    webconfig: IWebConfig,
+    pool: String,
     member: string,
     blockNumber: number
   ) => {
-    const pool: string = (
-      webconfig.contracts?.find(
-        ({ name }) => name.toLowerCase() === "api3pool"
-      ) || { address: "" }
-    ).address;
 
     const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
     const userAddress = member;
@@ -189,6 +179,11 @@ export const Shares = {
   },
   download: async (endpoint: string, member: string) => {
     const webconfig = fetchWebconfig();
+    const pool: string = (
+      webconfig.contracts?.find(
+        ({ name }) => name.toLowerCase() === "api3pool"
+      ) || { address: "" }
+    ).address;
 
     let count = 0;
     const events = await uniqueEvents(member);
@@ -196,13 +191,13 @@ export const Shares = {
     for (const e of events) {
       const argsUser = await Shares.downloadUserAt(
         endpoint,
-        webconfig,
+        pool,
         member,
         e.blockNumber
       );
       const totals = await Shares.downloadTotalsAt(
         endpoint,
-        webconfig,
+        pool,
         e.blockNumber
       );
       console.log(
