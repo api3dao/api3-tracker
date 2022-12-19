@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { Prisma } from "@prisma/client";
 import { ethers } from "ethers";
 import {
   IWallet,
@@ -87,6 +88,68 @@ const VotingLink = (props: IVotingLinkProps) => {
     }
   }
   return <span> {title}</span>;
+};
+
+interface ISharesOfUserProps {
+  user: Array<string>;
+}
+
+const SharesOfUser = (props: ISharesOfUserProps) => {
+  if (!props.user || !props.user.length) return null;
+  const unstaked = noDecimals(withDecimals(props.user[0], 18));
+  const vesting = noDecimals(withDecimals(props.user[1], 18));
+  const unstakeAmount = noDecimals(withDecimals(props.user[2], 18));
+  const unstakeShares = noDecimals(withDecimals(props.user[3], 18));
+  if (
+    unstaked === "0" &&
+    vesting == "0" &&
+    unstakeAmount == "0" &&
+    unstakeShares == "0"
+  )
+    return null;
+  const unstakeScheduledFor = parseInt(props.user[4]);
+  // lastDelegationUpdateTimestamp   uint256 :  0
+  // lastProposalTimestamp   uint256 :  1669559759
+  return (
+    <div className="text-xs darken">
+      {unstaked != "0" ? (
+        <span>
+          Unstaked:{" "}
+          <span className="text-color-panel-title">{toCurrency(unstaked)}</span>{" "}
+        </span>
+      ) : null}
+      {vesting != "0" ? (
+        <span>
+          Vesting:{" "}
+          <span className="text-color-panel-title">{toCurrency(vesting)}</span>.{" "}
+        </span>
+      ) : null}
+      {unstakeAmount != "0" ? (
+        <span>
+          Unstake Amount:{" "}
+          <span className="text-color-panel-title">
+            {toCurrency(unstakeAmount)}
+          </span>{" "}
+        </span>
+      ) : null}
+      {unstakeShares != "0" ? (
+        <span>
+          Unstake Shares:{" "}
+          <span className="text-color-panel-title">
+            {toCurrency(unstakeShares)}
+          </span>{" "}
+        </span>
+      ) : null}
+      {unstakeScheduledFor ? (
+        <span>
+          Unstake Scheduled For:{" "}
+          <span className="text-color-panel-title">
+            {new Date(unstakeScheduledFor).toISOString()}
+          </span>{" "}
+        </span>
+      ) : null}
+    </div>
+  );
 };
 
 const EventDetails = (props: IEventDetails) => {
@@ -486,14 +549,44 @@ const EventDetails = (props: IEventDetails) => {
     }
     case "WithdrawnToPool":
       return null;
-    case "Shares": { // fake event for debugging
+    case "Shares": {
+      // fake event for debugging
+      const stake = noDecimals(props.data.stake);
+      const totalStake = noDecimals(props.data.totalStake);
+      const locked = noDecimals(props.data.locked);
       const shares = noDecimals(props.data.shares);
+      const totalShares = noDecimals(props.data.totalShares);
       const votingPower = noDecimals(props.data.votingPower);
+      const votingPowerPct = new Prisma.Decimal(props.data.votingPower)
+        .mul(100)
+        .div(new Prisma.Decimal(props.data.totalShares));
       return (
-        <div className="text-xs darken leading-5">
-          <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
-          shares. Voting Power:{" "}
-          <span className="text-color-panel-title">{toCurrency(votingPower)}</span>{" "}
+        <div className="text-xs darken leading-4">
+          <div className="text-xs darken">
+            Owns{" "}
+            <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
+            shares out of{" "}
+            <span className="text-color-panel-title">
+              {toCurrency(totalShares)}
+            </span>
+            . Voting Power:{" "}
+            <span className="text-color-panel-title">
+              {toCurrency(votingPower)}
+            </span>{" "}
+            ({toPct4(votingPowerPct)})
+          </div>
+          <div className="text-xs darken">
+            Staked:{" "}
+            <span className="text-color-panel-title">{toCurrency(stake)}</span>{" "}
+            tokens out of{" "}
+            <span className="text-color-panel-title">
+              {toCurrency(totalStake)}
+            </span>
+            . Locked:{" "}
+            <span className="text-color-panel-title">{toCurrency(locked)}</span>{" "}
+            tokens.
+          </div>
+          <SharesOfUser user={props.data.user} />
         </div>
       );
     }
@@ -560,15 +653,14 @@ export const WalletEventsListThead = () => (
 );
 
 const isSpecial = (name: string): boolean => {
-   return (
-     name == "Rewards" ||
-     name == "Shares"
-   );
+  return name == "Rewards" || name == "Shares";
 };
 
 export const WalletEventsListTr = (props: IWalletEventsRowProps) => {
   const { row, index, wallet, votings, webconfig } = props;
-  const eventNameClass = (isSpecial(row.eventName)) ? "text-center text-xs ps-2 darken" : "text-center text-xs px-2 font-bold";
+  const eventNameClass = isSpecial(row.eventName)
+    ? "text-center text-xs ps-2 darken"
+    : "text-center text-xs px-2 font-bold";
   return (
     <tr>
       <td className="text-center">{(index || 0) + 1}.</td>
