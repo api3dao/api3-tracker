@@ -116,7 +116,6 @@ export const Shares = {
     ).address;
 
     const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
-    const poolContract = new ethers.Contract(pool, PoolABI, jsonRpc);
     const userAddress = member;
     const found = await prisma.cacheUserShares.findMany({
       where: { addr: Address.asBuffer(userAddress), height: blockNumber },

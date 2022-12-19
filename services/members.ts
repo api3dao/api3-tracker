@@ -575,10 +575,15 @@ export const Batch = {
       }
       case "ScheduledUnstake(address,uint256,uint256,uint256,uint256)": {
         const m1 = Batch.addBadge(member, "unstaking", blockDt, verbose);
+        const amount = noDecimals(
+          withDecimals(ethers.BigNumber.from(args[1]).toString(), 18)
+        );
         const userShares = new Prisma.Decimal(
-          withDecimals(ethers.BigNumber.from(args[3]).toString(), 18)
+          withDecimals(ethers.BigNumber.from(args[4]).toString(), 18)
         );
         m1.userShare = userShares;
+        m1.userStake = m1.userStake.sub(amount);
+
         Batch.ensureUpdated(m1);
         await Batch.updateTotals(
           Address.asBuffer(m1.address),

@@ -140,11 +140,11 @@ const SharesOfUser = (props: ISharesOfUserProps) => {
           </span>{" "}
         </span>
       ) : null}
-      {unstakeScheduledFor ? (
+      {(unstakeScheduledFor > 0)? (
         <span>
           Unstake Scheduled For:{" "}
           <span className="text-color-panel-title">
-            {new Date(unstakeScheduledFor).toISOString()}
+            {new Date(1000*unstakeScheduledFor).toISOString().substring(0, 10)}
           </span>{" "}
         </span>
       ) : null}
