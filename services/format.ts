@@ -34,6 +34,12 @@ export const noDecimals = (x: string): string => {
   return x.replace(/\..+$/g, "");
 };
 
+export const zerosLeft = (x: string, len: number): string => {
+  let out = x;
+  while (out.length < len) out = '0' + out;
+  return out;
+};
+
 export const zerosRight = (x: string, len: number): string => {
   let out = x;
   while (out.length < len) out += '0';
@@ -166,3 +172,14 @@ export const withDecimals = (input: string, decimals: number): string => {
   while (pad.length + input.length < decimals) pad += "0";
   return "0." + pad + input;
 };
+
+// Parses single HEX string into array of big integers
+export const toBigIntArray = (hex: string): Array<BigInt> => {
+   const out = new Array<BigInt>();
+   // split hex string into chunks of 32 bytes
+   const chunks = hex.match(/.{1,64}/g) || [];
+   chunks.forEach((chunk: string) => {
+      out.push(BigInt("0x" + chunk));
+   });
+   return out;
+}

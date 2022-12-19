@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import fs from "fs";
 import { ethers, BigNumber } from "ethers";
 import { fetchWebconfig } from "./webconfig";
-import { withDecimals } from "./format";
+import { zerosLeft, toBigIntArray, withDecimals } from "./format";
 import { IWebConfig } from "./types";
 
 const PoolABI = new ethers.utils.Interface(
@@ -67,14 +67,14 @@ export const Shares = {
       where: { height: blockNumber },
     });
     if (found.length == 0) {
-      console.log("Requesting Block", blockNumber, " totals");
+      console.log("Requesting totals at", blockNumber);
       const blockHex = "0x" + blockNumber.toString(16);
 
       const result = await ethers.utils.fetchJson(
         jsonRpc.connection,
         `[
-           {"method":"eth_call","params":[{"from":null,"to":"${pool}","data":"0x3a98ef39d75a0463a589a77e7570097b7e407deab0b5678402f964703022acc1"}, "${blockHex}"],"id":"totalShares","jsonrpc":"2.0"},
-           {"method":"eth_call","params":[{"from":null,"to":"${pool}","data":"0x8b0e9f3f74ca417eae2239691de899dcf9e89dd25acfd44380d195cbb069ebd1"}, "${blockHex}"],"id":"totalStake","jsonrpc":"2.0"}
+           {"id":"totalShares","method":"eth_call","params":[{"from":null,"to":"${pool}","data":"0x3a98ef39d75a0463a589a77e7570097b7e407deab0b5678402f964703022acc1"}, "${blockHex}"],"jsonrpc":"2.0"},
+           {"id":"totalStake","method":"eth_call","params":[{"from":null,"to":"${pool}","data":"0x8b0e9f3f74ca417eae2239691de899dcf9e89dd25acfd44380d195cbb069ebd1"}, "${blockHex}"],"jsonrpc":"2.0"}
          ]`
       );
       result.forEach((item: any) => {
@@ -82,12 +82,14 @@ export const Shares = {
           throw item.error;
         }
       }); // error handling
-      const totalShares = result
+      const totalShares = withDecimals(result
         .filter((item: any) => item.id === "totalShares")
-        .map((item: any) => BigInt(item.result))[0].toString();
-      const totalStake = result
+        .map((item: any) => BigInt(item.result))[0]
+        .toString(), 18);
+      const totalStake = withDecimals(result
         .filter((item: any) => item.id === "totalStake")
-        .map((item: any) => BigInt(item.result))[0].toString();
+        .map((item: any) => BigInt(item.result))[0]
+        .toString(), 18);
 
       await prisma.cacheTotalShares.create({
         data: {
@@ -120,26 +122,57 @@ export const Shares = {
       where: { addr: Address.asBuffer(userAddress), height: blockNumber },
     });
     if (found.length == 0) {
-      console.log("Requesting Block", blockNumber, " for ", member);
-      const shares = withDecimals(
-        (await poolContract.userSharesAt(userAddress, blockNumber)).toString(),
-        18
+      console.log("Requesting user state at", blockNumber, "for", member);
+      const blockHex = "0x" + blockNumber.toString(16);
+      const memberHex = zerosLeft(member.replace("0x", ""), 64);
+
+      // 4-byte keccak hashes for calling methods are below:
+      const methodUserShares = "de69b3aa";
+      const methodUserVotingPower = "36b1b6a4";
+      const methodUserStake = "68e5585d";
+      const methodUserLocked = "bba05384";
+      const methodUsers = "a87430ba";
+
+      const result = await ethers.utils.fetchJson(
+        jsonRpc.connection,
+        `[
+           {"id":"userShares","method":"eth_call","params":[{"from":null,"to":"${pool}","data":"0x${methodUserShares}${memberHex}"}, "${blockHex}"],"jsonrpc":"2.0"},
+           {"id":"userVotingPower","method":"eth_call","params":[{"from":null,"to":"${pool}","data":"0x${methodUserVotingPower}${memberHex}"}, "${blockHex}"],"jsonrpc":"2.0"},
+           {"id":"userStake","method":"eth_call","params":[{"from":null,"to":"${pool}","data":"0x${methodUserStake}${memberHex}"}, "${blockHex}"],"jsonrpc":"2.0"},
+           {"id":"userLocked","method":"eth_call","params":[{"from":null,"to":"${pool}","data":"0x${methodUserLocked}${memberHex}"}, "${blockHex}"],"jsonrpc":"2.0"},
+           {"id":"users","method":"eth_call","params":[{"from":null,"to":"${pool}","data":"0x${methodUsers}${memberHex}"}, "${blockHex}"],"jsonrpc":"2.0"}
+         ]`
       );
-      const votingPower = withDecimals(
-        (
-          await poolContract.userVotingPowerAt(userAddress, blockNumber)
-        ).toString(),
-        18
-      );
-      const stake = withDecimals(
-        (await poolContract.userStake(userAddress, blockNumber)).toString(),
-        18
-      );
-      const locked = withDecimals(
-        (await poolContract.userLocked(userAddress, blockNumber)).toString(),
-        18
-      );
-      const user = await poolContract.users(userAddress, blockNumber);
+      result.forEach((item: any) => {
+        if (item.error) {
+          throw item.error;
+        }
+      }); // error handling
+
+      const shares = withDecimals(result
+        .filter((item: any) => item.id === "userShares")
+        .map((item: any) => BigInt(item.result))[0]
+        .toString(), 18);
+
+      const votingPower = withDecimals(result
+        .filter((item: any) => item.id === "userVotingPower")
+        .map((item: any) => BigInt(item.result))[0]
+        .toString(), 18);
+
+      const stake = withDecimals(result
+        .filter((item: any) => item.id === "userStake")
+        .map((item: any) => BigInt(item.result))[0]
+        .toString(), 18);
+
+      const locked = withDecimals(result
+        .filter((item: any) => item.id === "userLocked")
+        .map((item: any) => BigInt(item.result))[0]
+        .toString(), 18);
+
+      const user = result
+        .filter((item: any) => item.id === "users")
+        .map((item: any) => toBigIntArray(item.result.replace("0x", "")).map((bn: BigInt) => bn.toString()))[0];
+
       await prisma.cacheUserShares.create({
         data: {
           addr: Address.asBuffer(userAddress),
@@ -162,13 +195,12 @@ export const Shares = {
     const events = await uniqueEvents(member);
     console.log("Found ", events.length, "events");
     for (const e of events) {
-      /*const argsUser = await Shares.downloadUserAt(
+      const argsUser = await Shares.downloadUserAt(
         endpoint,
         webconfig,
         member,
         e.blockNumber
-      ); */
-      const argsUser = {};
+      );
       const totals = await Shares.downloadTotalsAt(
         endpoint,
         webconfig,
