@@ -106,6 +106,11 @@ yargs(hideBin(process.argv))
           type: "boolean",
           description: "Run with verbose epochs logging",
         })
+        .option("use-archive", {
+          type: "boolean",
+          default: false,
+          description: "Run with using features of Ethereum archive node",
+        })
         .option("stop-block", {
           type: "number",
           default: 0,
@@ -136,6 +141,7 @@ yargs(hideBin(process.argv))
       verboseVotings,
       verboseMember,
       stopBlock,
+      useArchive,
     }) => {
       if (sub == "reset") {
         await Events.resetState();
@@ -154,7 +160,8 @@ yargs(hideBin(process.argv))
         const blocks = await Events.processState(
           endpoint,
           verbose,
-          termination
+          termination,
+          useArchive,
         );
         console.log(`${blocks} blocks were processed`);
       } else if (sub == "update") {
@@ -171,7 +178,8 @@ yargs(hideBin(process.argv))
         const blocks = await Events.processState(
           endpoint,
           verbose,
-          termination
+          termination,
+          useArchive,
         );
         console.log(`${blocks} blocks were processed`);
       } else {

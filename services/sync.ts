@@ -65,11 +65,15 @@ const uniqueArray = (arr: Array<any>): Array<any> => {
 };
 
 const adjustedLogIndex = (a: any): number => {
-  if (a.topics.length > 0 && a.topics[0] == "0xf310def5b4718cefe3603eb46259d8061fd58003695cf952de94c53e14dbb309") {
+  if (
+    a.topics.length > 0 &&
+    a.topics[0] ==
+      "0xf310def5b4718cefe3603eb46259d8061fd58003695cf952de94c53e14dbb309"
+  ) {
     return 255;
   }
   return a.logIndex;
-}
+};
 
 export const BlockLoader = {
   fromDatabase: async (
@@ -511,7 +515,8 @@ export const Events = {
     pool: string,
     blockInfo: BlockFullInfo,
     event: Log,
-    tx: any
+    tx: any,
+    useArchive: boolean,
   ): Promise<boolean> => {
     const start = new Date().getTime();
     const { transactionIndex, transactionHash, logIndex } = event;
@@ -588,12 +593,14 @@ export const Events = {
     );*/
 
     // members distribution: save snapshots
-    await Shares.downloadTotalsAt(endpoint, pool, blockNumber);
+    if (useArchive) {
+      await Shares.downloadTotalsAt(endpoint, pool, blockNumber);
+      for (const m of await Wallets.fetchAll()) {
+        await Shares.downloadUserAt(endpoint, pool, m.address, blockNumber);
+      }
+    }
     const allMembers = await Wallets.fetchAll();
     for (const m of allMembers) {
-
-      await Shares.downloadUserAt(endpoint, pool, m.address, blockNumber);
-
       const addrIndex = m.address.replace("0x", "").toLowerCase();
       const userShare = m.userShare;
       const userSharePct = userShare.mul(100).div(totalShares);
@@ -601,7 +608,7 @@ export const Events = {
 
       // save mintedEvent for each member
       const member: IWallet = m;
-      const hasRewardsRecord  =
+      const hasRewardsRecord =
         (userShare && userShare != new Prisma.Decimal(0.0)) ||
         (userMintedShares && userMintedShares > new Prisma.Decimal(0.0));
       if (hasRewardsRecord) {
@@ -848,7 +855,9 @@ export const Events = {
         },
       })
     );
-    if (verboseVote) { console.log("New Voting", "took " + elapsed(start));}
+    if (verboseVote) {
+      console.log("New Voting", "took " + elapsed(start));
+    }
     return false;
   },
 
@@ -944,7 +953,8 @@ export const Events = {
     config: IWebConfig,
     endpoint: string,
     verbose: SyncVerbosity,
-    termination: SyncTermination
+    termination: SyncTermination,
+    useArchive: boolean,
   ): Promise<SyncBlockResult> => {
     const start = new Date().getTime();
     VoteGas.reset(); // gas accumulator for the block
@@ -1148,7 +1158,9 @@ export const Events = {
           if (
             decoded.signature == "MintedReward(uint256,uint256,uint256,uint256)"
           ) {
-            if (await Events.processEpoch(endpoint, pool, blockInfo, event, tx)) {
+            if (
+              await Events.processEpoch(endpoint, pool, blockInfo, event, tx, useArchive)
+            ) {
               if (termination.epoch) {
                 shouldTerminate = true;
                 included = true;
@@ -1267,8 +1279,13 @@ export const Events = {
 
     if (included) {
       await prisma.$transaction(tx);
-      if ((new Date().getTime() - start) > 1000) {
-        console.log("..DB Block", blockNumber, blockDt, "took " + elapsed(start));
+      if (new Date().getTime() - start > 1000) {
+        console.log(
+          "..DB Block",
+          blockNumber,
+          blockDt,
+          "took " + elapsed(start)
+        );
       }
     }
     return { shouldTerminate, included };
@@ -1277,7 +1294,8 @@ export const Events = {
   processState: async (
     endpoint: string,
     verbose: SyncVerbosity,
-    terminate: SyncTermination
+    terminate: SyncTermination,
+    useArchive: boolean,
   ) => {
     let total = 0;
     const webconfig = fetchWebconfig();
@@ -1289,7 +1307,8 @@ export const Events = {
           webconfig,
           endpoint,
           verbose,
-          terminate
+          terminate,
+          useArchive,
         );
         if (result.shouldTerminate) {
           return result.included ? ++total : total;
