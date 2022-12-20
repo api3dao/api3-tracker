@@ -265,7 +265,7 @@ export const Wallets = {
       }),
       prisma.member.count({ where }),
     ]);
-    return { list: list.map((x: any) => ({ ...x })), page: { total } };
+    return { list: list.map((x: any) => (Wallets.from({ ...x }))), page: { total } };
   },
   // fetch and return map
   fetchByAddresses: async (

@@ -73,19 +73,29 @@ yargs(hideBin(process.argv))
           type: "string",
           describe: `shares subcommand - reset or download new`,
         })
+        .option("tag", {
+          type: "string",
+          default: "",
+          description: "if present, all members with this tag will be scanned",
+        })
         .option("member", {
           type: "string",
           default: "",
-          description: "Hex address of the member to check its shares",
-        })
+          description: "hex address of the member to check its shares",
+        });
     },
-    handler: async ({ endpoint, sub, block, member }) => {
+    handler: async ({ endpoint, sub, block, member, tag }) => {
       if (sub == "reset") {
         await Shares.resetAll();
         console.log("shares cache records were deleted");
       } else if (sub == "download") {
-        const total = await Shares.download(endpoint, member);
-        console.log(`downloaded ${total} new records`);
+        if (!tag) {
+          const total = await Shares.download(endpoint, member);
+          console.log(`downloaded ${total} new records`);
+        } else {
+          const total = await Shares.downloadMembers(endpoint, tag);
+          console.log(`scanned ${total} members`);
+        }
       } else {
         console.error("ERROR: Unknown sub-command");
         process.exit(1);
@@ -161,7 +171,7 @@ yargs(hideBin(process.argv))
           endpoint,
           verbose,
           termination,
-          useArchive,
+          useArchive
         );
         console.log(`${blocks} blocks were processed`);
       } else if (sub == "update") {
@@ -179,7 +189,7 @@ yargs(hideBin(process.argv))
           endpoint,
           verbose,
           termination,
-          useArchive,
+          useArchive
         );
         console.log(`${blocks} blocks were processed`);
       } else {

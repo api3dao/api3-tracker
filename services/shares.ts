@@ -5,6 +5,7 @@ import { ethers, BigNumber } from "ethers";
 import { fetchWebconfig } from "./webconfig";
 import { zerosLeft, toBigIntArray, withDecimals } from "./format";
 import { IWebConfig } from "./types";
+import { Wallets } from "./api";
 
 const PoolABI = new ethers.utils.Interface(
   fs.readFileSync("./abi/api3pool.json", "utf-8")
@@ -57,7 +58,6 @@ export const Shares = {
     blockNumber: number
   ) => {
 
-    const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
     const found = await prisma.cacheTotalShares.findMany({
       where: { height: blockNumber },
     });
@@ -65,6 +65,7 @@ export const Shares = {
       console.log("Requesting totals at", blockNumber);
       const blockHex = "0x" + blockNumber.toString(16);
 
+      const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
       const result = await ethers.utils.fetchJson(
         jsonRpc.connection,
         `[
@@ -104,14 +105,14 @@ export const Shares = {
     member: string,
     blockNumber: number
   ) => {
-
-    const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
     const userAddress = member;
     const found = await prisma.cacheUserShares.findMany({
       where: { addr: Address.asBuffer(userAddress), height: blockNumber },
     });
     if (found.length == 0) {
       console.log("Requesting user state at", blockNumber, "for", member);
+
+      const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
       const blockHex = "0x" + blockNumber.toString(16);
       const memberHex = zerosLeft(member.replace("0x", ""), 64);
 
@@ -177,6 +178,19 @@ export const Shares = {
     }
     return found[0];
   },
+
+  downloadMembers : async (endpoint: string, tag: string) => {
+    const cursor = { take: 1000000, skip: 0 };
+    const wallets = await Wallets.fetchList(tag, cursor);
+    console.log("Found ", wallets.list.length, "members");
+    let count = 0;
+    for (const w of wallets.list) {
+      await Shares.download(endpoint, w.address.toString());
+      count ++;
+    }
+    return count;
+  },
+
   download: async (endpoint: string, member: string) => {
     const webconfig = fetchWebconfig();
     const pool: string = (
@@ -187,7 +201,7 @@ export const Shares = {
 
     let count = 0;
     const events = await uniqueEvents(member);
-    console.log("Found ", events.length, "events");
+    console.log("Found ", events.length, "events for", member.toString());
     for (const e of events) {
       const argsUser = await Shares.downloadUserAt(
         endpoint,
