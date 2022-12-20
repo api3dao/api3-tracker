@@ -695,13 +695,27 @@ export const WalletEventsListTr = (props: IWalletEventsRowProps) => {
   );
 };
 
+const filteredEvents = (props: IWalletEventsListProps): Array<IWalletEvent> => {
+  const blocksWithShares = new Map<number, number>();
+  return props.list.filter((item: IWalletEvent) => {
+    if (item.eventName === 'Shares') {
+      blocksWithShares.set(item.blockNumber, 1);
+    }
+    if (item.eventName === 'Rewards' && blocksWithShares.has(item.blockNumber)) {
+      // skip "Rewards" that have "Shares" event in its block
+      return false;
+    }
+    return true;
+  });
+};
+
 export const WalletEventsList = (props: IWalletEventsListProps) => {
   return (
     <div className="max-w-screen-lg mx-auto mb-20">
       <table className="table invisible lg:visible">
         <WalletEventsListThead />
         <tbody>
-          {props.list.map((row: any, index: number) => (
+          {filteredEvents(props).map((row: any, index: number) => (
             <WalletEventsListTr
               key={row.id}
               row={row}
