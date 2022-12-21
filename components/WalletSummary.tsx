@@ -41,21 +41,15 @@ export const WalletSummary = (props: IWalletSummaryProps) => {
               {toPct4(userVotingPower)}
             </span>
           </div>
-          <div className="text-color-grey mt-4">
+          <div className="text-color-grey mt-4 mb-6">
             owning{" "}
             <span className="text-color-panel-title">
               {noDecimals(toCurrency(wallet.userShare))}
             </span>{" "}
             shares
           </div>
-          <div className="text-xs text-color-grey mb-4">
-            unlocked{" "}
-            <span className="text-color-panel-title">
-              {noDecimals(toCurrency(userUnlocked))}
-            </span>{" "}
-            rewards
-          </div>
         </BorderedPanel>
+        <div>
         <div>
           <div className="lg:mt-6 lg:flex border-t border-b border-solid border-color-panel-border">
             <div className="flex-1">
@@ -64,21 +58,36 @@ export const WalletSummary = (props: IWalletSummaryProps) => {
                 {noDecimals(toCurrency(wallet.userDeposited))}
               </div>
             </div>
-            {wallet.userLockedReward ? (
-              <div className="flex-1">
-                <div className={classTitle}>Locked Rewards</div>
-                <div className={classValue}>
-                  {noDecimals(toCurrency(wallet.userLockedReward))}
-                </div>
-              </div>
-            ): null}
             <div className="flex-1">
               <div className={classTitle}>Withdrawn</div>
               <div className={classValue}>{noDecimals(toCurrency(wallet.userWithdrew))}</div>
             </div>
           </div>
+        </div>
+        <div>
+          <div className="lg:flex border-b border-solid border-color-panel-border">
+            <div className="flex-1">
+              <div className={classTitle}>Stake</div>
+              <div className={classValue}>
+                {noDecimals(toCurrency(wallet.userStake))}
+              </div>
+            </div>
+            <div className="flex-1">
+              <div className={classTitle}>Unstake</div>
+              <div className={classValue}>{noDecimals(toCurrency(wallet.userUnstake))}</div>
+            </div>
+            {wallet.userLockedReward ? (
+              <div className="flex-1">
+                <div className={classTitle}>Locked</div>
+                <div className={classValue}>
+                  {noDecimals(toCurrency(wallet.userLockedReward))}
+                </div>
+              </div>
+            ): null}
+          </div>
           <MemberClassification badges={wallet.badges} />
         </div>
+           </div>
       </div>
     </div>
   );
