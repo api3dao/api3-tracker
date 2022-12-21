@@ -17,10 +17,14 @@ export const Address = {
   },
 };
 
-const uniqueEvents = async (member: string): Promise<Array<any>> => {
+const uniqueEvents = async (
+  member: string
+): Promise<[Array<any>, any, number]> => {
   const blocks = new Map<number, number>();
   const disabledBlocks = new Map<number, number>();
   const out = new Array();
+  let lastEvent: any = null;
+  let lastBlockNumber: number = 0;
   const events = await prisma.memberEvent.findMany({
     where: { address: Address.asBuffer(member) },
     orderBy: { blockNumber: "asc" },
@@ -29,7 +33,9 @@ const uniqueEvents = async (member: string): Promise<Array<any>> => {
   for (const event of events) {
     if (event.eventName === "Shares") {
       disabledBlocks.set(event.blockNumber, 1);
+      lastEvent = event;
     }
+    lastBlockNumber = event.blockNumber;
   }
   // loop 2 - define blocks that should end
   for (const event of events) {
@@ -45,7 +51,7 @@ const uniqueEvents = async (member: string): Promise<Array<any>> => {
     out.push(event);
     blocks.set(event.blockNumber, 1);
   }
-  return out;
+  return [out, lastEvent, lastBlockNumber];
 };
 
 export const Shares = {
@@ -57,7 +63,6 @@ export const Shares = {
     pool: string,
     blockNumber: number
   ) => {
-
     const found = await prisma.cacheTotalShares.findMany({
       where: { height: blockNumber },
     });
@@ -78,14 +83,20 @@ export const Shares = {
           throw item.error;
         }
       }); // error handling
-      const totalShares = withDecimals(result
-        .filter((item: any) => item.id === "totalShares")
-        .map((item: any) => BigInt(item.result))[0]
-        .toString(), 18);
-      const totalStake = withDecimals(result
-        .filter((item: any) => item.id === "totalStake")
-        .map((item: any) => BigInt(item.result))[0]
-        .toString(), 18);
+      const totalShares = withDecimals(
+        result
+          .filter((item: any) => item.id === "totalShares")
+          .map((item: any) => BigInt(item.result))[0]
+          .toString(),
+        18
+      );
+      const totalStake = withDecimals(
+        result
+          .filter((item: any) => item.id === "totalStake")
+          .map((item: any) => BigInt(item.result))[0]
+          .toString(),
+        18
+      );
 
       await prisma.cacheTotalShares.create({
         data: {
@@ -139,29 +150,45 @@ export const Shares = {
         }
       }); // error handling
 
-      const shares = withDecimals(result
-        .filter((item: any) => item.id === "userShares")
-        .map((item: any) => BigInt(item.result))[0]
-        .toString(), 18);
+      const shares = withDecimals(
+        result
+          .filter((item: any) => item.id === "userShares")
+          .map((item: any) => BigInt(item.result))[0]
+          .toString(),
+        18
+      );
 
-      const votingPower = withDecimals(result
-        .filter((item: any) => item.id === "userVotingPower")
-        .map((item: any) => BigInt(item.result))[0]
-        .toString(), 18);
+      const votingPower = withDecimals(
+        result
+          .filter((item: any) => item.id === "userVotingPower")
+          .map((item: any) => BigInt(item.result))[0]
+          .toString(),
+        18
+      );
 
-      const stake = withDecimals(result
-        .filter((item: any) => item.id === "userStake")
-        .map((item: any) => BigInt(item.result))[0]
-        .toString(), 18);
+      const stake = withDecimals(
+        result
+          .filter((item: any) => item.id === "userStake")
+          .map((item: any) => BigInt(item.result))[0]
+          .toString(),
+        18
+      );
 
-      const locked = withDecimals(result
-        .filter((item: any) => item.id === "userLocked")
-        .map((item: any) => BigInt(item.result))[0]
-        .toString(), 18);
+      const locked = withDecimals(
+        result
+          .filter((item: any) => item.id === "userLocked")
+          .map((item: any) => BigInt(item.result))[0]
+          .toString(),
+        18
+      );
 
       const user = result
         .filter((item: any) => item.id === "users")
-        .map((item: any) => toBigIntArray(item.result.replace("0x", "")).map((bn: BigInt) => bn.toString()))[0];
+        .map((item: any) =>
+          toBigIntArray(item.result.replace("0x", "")).map((bn: BigInt) =>
+            bn.toString()
+          )
+        )[0];
 
       await prisma.cacheUserShares.create({
         data: {
@@ -179,14 +206,14 @@ export const Shares = {
     return found[0];
   },
 
-  downloadMembers : async (endpoint: string, tag: string) => {
+  downloadMembers: async (endpoint: string, tag: string) => {
     const cursor = { take: 1000000, skip: 0 };
     const wallets = await Wallets.fetchList(tag, cursor);
     console.log("Found ", wallets.list.length, "members");
     let count = 0;
     for (const w of wallets.list) {
       await Shares.download(endpoint, w.address.toString());
-      count ++;
+      count++;
     }
     return count;
   },
@@ -200,8 +227,15 @@ export const Shares = {
     ).address;
 
     let count = 0;
-    const events = await uniqueEvents(member);
-    console.log("Found ", events.length, "events for", member.toString());
+    const [events, lastEvent, lastBlockNumber] = await uniqueEvents(member);
+    console.log(
+      "Found ",
+      events.length,
+      "events till",
+      lastBlockNumber,
+      "for",
+      member.toString()
+    );
     for (const e of events) {
       const argsUser = await Shares.downloadUserAt(
         endpoint,
@@ -240,6 +274,24 @@ export const Shares = {
         },
       });
       count++;
+    }
+    if (lastEvent != null) {
+      console.log("UPDATING", JSON.stringify(lastEvent.data));
+      const data: any = lastEvent.data;
+      const unstaked = withDecimals(data.user[0], 18);
+      // const vesting = (withDecimals(data.user[1], 18));
+      // const unstakeAmount = (withDecimals(data.user[2], 18));
+      // const unstakeShares = (withDecimals(data.user[3], 18));
+      await prisma.member.update({
+        where: { address: lastEvent.address },
+        data: {
+          userLockedReward: data.locked,
+          userStake: data.stake,
+          userShare: data.shares,
+          userVotingPower: data.votingPower,
+          userUnstake: new Prisma.Decimal(unstaked),
+        },
+      });
     }
 
     return count;
