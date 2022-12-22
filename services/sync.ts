@@ -558,46 +558,9 @@ export const Events = {
     let totalUnlocked = new Prisma.Decimal(0);
     let totalLocked = new Prisma.Decimal(0);
 
-    // scanning epochs that should be released and build the map of release for each member
-    /*const releaseMap = new Map<string, Prisma.Decimal>();
-    const epochsToBeReleased = (
-      await prisma.epoch.findMany({
-        where: { isReleased: 0, releaseDate: { lt: blockDt.toISOString() } },
-      })
-    ).map((x: any) => x.epoch as number);
-    if (epochsToBeReleased.length > 0) {
-      const rewards = await prisma.memberEpoch.findMany({
-        where: { epoch: { in: epochsToBeReleased } },
-      });
-      for (const r of rewards) {
-        const addrIndex = r.address
-          .toString("hex")
-          .replace("0x", "")
-          .toLowerCase();
-        const existingReward =
-          releaseMap.get(addrIndex) || new Prisma.Decimal(0.0);
-        releaseMap.set(addrIndex, existingReward.add(r.userReward));
-      }
-    }*/
-    /* tx.push(
-      prisma.memberEpoch.updateMany({
-        where: { epoch: { in: epochsToBeReleased } },
-        data: { isReleased: 1 },
-      })
-    );
-    tx.push(
-      prisma.epoch.updateMany({
-        where: { epoch: { in: epochsToBeReleased } },
-        data: { isReleased: 1 },
-      })
-    );*/
-
     // members distribution: save snapshots
     if (useArchive) {
       await Shares.downloadTotalsAt(endpoint, pool, blockNumber);
-      for (const m of await Wallets.fetchAll()) {
-        await Shares.downloadUserAt(endpoint, pool, m.address, blockNumber);
-      }
     }
     const allMembers = await Wallets.fetchAll();
     for (const m of allMembers) {
@@ -650,43 +613,23 @@ export const Events = {
             },
           })
         );
-
-        member.userReward = member.userReward.add(userMintedShares);
-        member.userLockedReward = member.userLockedReward.add(userMintedShares);
-        Batch.ensureUpdated(member);
-
-        tx.push(
-          prisma.member.updateMany({
-            where: { address: Address.asBuffer(member.address) },
-            data: {
-              userReward: member.userReward,
-              userLockedReward: member.userLockedReward,
-            },
-          })
-        );
       }
-      /*tx.push(
-        prisma.memberEpoch.create({
-          data: {
-            epoch: parseInt(epochIndex.toString()),
-            address: Address.asBuffer(m.address),
-            userShare,
-            userStake: new Prisma.Decimal(0.0),
-            userVotingPower: member.userVotingPower,
-            userReward: userMintedShares,
-            isReleased: 0,
-            userTotalDeposits: member.userDeposited,
-            userTotalWithdrawals: member.userWithdrew,
-            userTotalUnlocked: member.userReward.sub(member.userLockedReward),
-            userTotalLocked: member.userLockedReward,
-          },
-        })
-      ); */
 
       totalDeposits = totalDeposits.add(m.userDeposited);
       totalWithdrawals = totalWithdrawals.add(m.userWithdrew);
       totalUnlocked = totalUnlocked.add(m.userReward.sub(m.userLockedReward));
       totalLocked = totalLocked.add(m.userLockedReward);
+
+      if (useArchive) {
+         const data = await Shares.downloadUserAt(endpoint, pool, member.address, blockNumber);
+         const unstaked = withDecimals(data.user[0], 18);
+         member.userLockedReward = new Prisma.Decimal(data.locked);
+         member.userStake = new Prisma.Decimal(data.stake);
+         member.userShare = new Prisma.Decimal(data.shares);
+         member.userVotingPower = new Prisma.Decimal(data.votingPower);
+         member.userUnstake = new Prisma.Decimal(unstaked);
+         Batch.ensureUpdated(member);
+      }
     }
 
     tx.push(
