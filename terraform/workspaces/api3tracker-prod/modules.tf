@@ -1,5 +1,10 @@
 variable aws_profile {
   type = string
+  default = "default"
+}
+
+variable api3tracker_archive_endpoint {
+  type = string
 }
 
 variable api3tracker_endpoint {
@@ -38,7 +43,10 @@ module "api3tracker" {
   ]
 
   // Hint: use TF_VAR_api3tracker_endpoint to set this up, pointing to Infura or Alchemy JSON+RPC provider
-  endpoint = var.api3tracker_endpoint
+  endpoints = {
+    default = var.api3tracker_endpoint
+    archive = var.api3tracker_archive_endpoint
+  }
 
   // backups s3 configuration
   aws_backup = {
