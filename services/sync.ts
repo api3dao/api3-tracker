@@ -622,7 +622,7 @@ export const Events = {
 
       if (useArchive) {
          const data = await Shares.downloadUserAt(endpoint, pool, member.address, blockNumber);
-         const unstaked = withDecimals(data.user[0], 18);
+         const unstaked = withDecimals(data.user[2], 18);
          member.userLockedReward = new Prisma.Decimal(data.locked);
          member.userStake = new Prisma.Decimal(data.stake);
          member.userShare = new Prisma.Decimal(data.shares);

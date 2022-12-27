@@ -278,10 +278,8 @@ export const Shares = {
     if (lastEvent != null) {
       console.log("UPDATING", JSON.stringify(lastEvent.data));
       const data: any = lastEvent.data;
-      const unstaked = withDecimals(data.user[0], 18);
+      const unstaked = withDecimals(data.user[2], 18);
       // const vesting = (withDecimals(data.user[1], 18));
-      // const unstakeAmount = (withDecimals(data.user[2], 18));
-      // const unstakeShares = (withDecimals(data.user[3], 18));
       await prisma.member.update({
         where: { address: lastEvent.address },
         data: {
