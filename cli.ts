@@ -3,6 +3,7 @@ import { hideBin } from "yargs/helpers";
 import { Events } from "./services/sync";
 import { Treasuries } from "./services/treasuries";
 import { Supply } from "./services/supply";
+import { Shares } from "./services/shares";
 import { ENS } from "./services/ens";
 
 yargs(hideBin(process.argv))
@@ -63,6 +64,45 @@ yargs(hideBin(process.argv))
     },
   })
   .command({
+    command: "shares [sub]",
+    describe: "Operations with API3 DAO shares cache",
+    builder: (yargs) => {
+      return yargs
+        .option(`sub`, {
+          choises: ["reset", "download"],
+          type: "string",
+          describe: `shares subcommand - reset or download new`,
+        })
+        .option("tag", {
+          type: "string",
+          default: "",
+          description: "if present, all members with this tag will be scanned",
+        })
+        .option("member", {
+          type: "string",
+          default: "",
+          description: "hex address of the member to check its shares",
+        });
+    },
+    handler: async ({ endpoint, sub, block, member, tag }) => {
+      if (sub == "reset") {
+        await Shares.resetAll();
+        console.log("shares cache records were deleted");
+      } else if (sub == "download") {
+        if (!tag) {
+          const total = await Shares.download(endpoint, member);
+          console.log(`downloaded ${total} new records`);
+        } else {
+          const total = await Shares.downloadMembers(endpoint, tag);
+          console.log(`scanned ${total} members`);
+        }
+      } else {
+        console.error("ERROR: Unknown sub-command");
+        process.exit(1);
+      }
+    },
+  })
+  .command({
     command: "state [sub]",
     describe: "Operations with API3 dao state (members and votings)",
     builder: (yargs) => {
@@ -75,6 +115,11 @@ yargs(hideBin(process.argv))
         .option("verbose-epochs", {
           type: "boolean",
           description: "Run with verbose epochs logging",
+        })
+        .option("use-archive", {
+          type: "boolean",
+          default: false,
+          description: "Run with using features of Ethereum archive node",
         })
         .option("stop-block", {
           type: "number",
@@ -106,6 +151,7 @@ yargs(hideBin(process.argv))
       verboseVotings,
       verboseMember,
       stopBlock,
+      useArchive,
     }) => {
       if (sub == "reset") {
         await Events.resetState();
@@ -125,6 +171,7 @@ yargs(hideBin(process.argv))
           endpoint,
           verbose,
           termination,
+          useArchive
         );
         console.log(`${blocks} blocks were processed`);
       } else if (sub == "update") {
@@ -138,7 +185,12 @@ yargs(hideBin(process.argv))
           epoch: false,
           block: stopBlock,
         };
-        const blocks = await Events.processState(endpoint, verbose, termination);
+        const blocks = await Events.processState(
+          endpoint,
+          verbose,
+          termination,
+          useArchive
+        );
         console.log(`${blocks} blocks were processed`);
       } else {
         console.error("ERROR: Unknown sub-command");

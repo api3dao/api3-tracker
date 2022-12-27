@@ -9,6 +9,7 @@ import { fetchWebconfig } from "./webconfig";
 import { IWallet, IContract } from "./types";
 import { Filter, Block, Log, Provider } from "@ethersproject/abstract-provider";
 import { EthereumPrice } from "./../services/price";
+import { Shares } from "./../services/shares";
 import { VotingReader } from "./../services/voting";
 import { VoteGas } from "./../services/gas";
 import { Batch } from "./../services/members";
@@ -63,6 +64,17 @@ const uniqueArray = (arr: Array<any>): Array<any> => {
   return a;
 };
 
+const adjustedLogIndex = (a: any): number => {
+  if (
+    a.topics.length > 0 &&
+    a.topics[0] ==
+      "0xf310def5b4718cefe3603eb46259d8061fd58003695cf952de94c53e14dbb309"
+  ) {
+    return 255;
+  }
+  return a.logIndex;
+};
+
 export const BlockLoader = {
   fromDatabase: async (
     blockRecord: any,
@@ -84,7 +96,7 @@ export const BlockLoader = {
     logsList.sort((a, b) => {
       const diff1 = a.transactionIndex - b.transactionIndex;
       if (diff1 != 0) return diff1;
-      return a.logIndex - b.logIndex;
+      return adjustedLogIndex(a) - adjustedLogIndex(b);
     });
 
     const receipts = new Map<string, any>();
@@ -499,13 +511,17 @@ export const Events = {
   },
 
   processEpoch: async (
+    endpoint: string,
+    pool: string,
     blockInfo: BlockFullInfo,
     event: Log,
-    tx: any
+    tx: any,
+    useArchive: boolean,
   ): Promise<boolean> => {
     const start = new Date().getTime();
     const { transactionIndex, transactionHash, logIndex } = event;
     const blockNumber = blockInfo.block.number;
+
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
 
     const releaseDt = new Date(blockInfo.block.timestamp * 1000);
@@ -542,55 +558,21 @@ export const Events = {
     let totalUnlocked = new Prisma.Decimal(0);
     let totalLocked = new Prisma.Decimal(0);
 
-    // scanning epochs that should be released and build the map of release for each member
-    const releaseMap = new Map<string, Prisma.Decimal>();
-    const epochsToBeReleased = (
-      await prisma.epoch.findMany({
-        where: { isReleased: 0, releaseDate: { lt: blockDt.toISOString() } },
-      })
-    ).map((x: any) => x.epoch as number);
-    if (epochsToBeReleased.length > 0) {
-      const rewards = await prisma.memberEpoch.findMany({
-        where: { epoch: { in: epochsToBeReleased } },
-      });
-      for (const r of rewards) {
-        const addrIndex = r.address
-          .toString("hex")
-          .replace("0x", "")
-          .toLowerCase();
-        const existingReward =
-          releaseMap.get(addrIndex) || new Prisma.Decimal(0.0);
-        releaseMap.set(addrIndex, existingReward.add(r.userReward));
-      }
-    }
-    tx.push(
-      prisma.memberEpoch.updateMany({
-        where: { epoch: { in: epochsToBeReleased } },
-        data: { isReleased: 1 },
-      })
-    );
-    tx.push(
-      prisma.epoch.updateMany({
-        where: { epoch: { in: epochsToBeReleased } },
-        data: { isReleased: 1 },
-      })
-    );
-
     // members distribution: save snapshots
+    if (useArchive) {
+      await Shares.downloadTotalsAt(endpoint, pool, blockNumber);
+    }
     const allMembers = await Wallets.fetchAll();
     for (const m of allMembers) {
       const addrIndex = m.address.replace("0x", "").toLowerCase();
-      const userReleasedShares =
-        releaseMap.get(addrIndex) || new Prisma.Decimal(0);
       const userShare = m.userShare;
       const userSharePct = userShare.mul(100).div(totalShares);
       const userMintedShares = mintedShares.mul(userSharePct).div(100); // rewards are proportional
 
       // save mintedEvent for each member
       const member: IWallet = m;
-      const hasRewardsRecord  =
+      const hasRewardsRecord =
         (userShare && userShare != new Prisma.Decimal(0.0)) ||
-        (userReleasedShares && userReleasedShares > new Prisma.Decimal(0.0)) ||
         (userMintedShares && userMintedShares > new Prisma.Decimal(0.0));
       if (hasRewardsRecord) {
         const eventId =
@@ -605,7 +587,7 @@ export const Events = {
           userShare,
           userSharePct,
           userMintedShares,
-          userReleasedShares,
+          0,
           totalShares,
           mintedShares,
         ];
@@ -631,49 +613,23 @@ export const Events = {
             },
           })
         );
-
-        member.userReward = member.userReward.add(userMintedShares);
-        member.userLockedReward = member.userLockedReward.add(userMintedShares);
-
-        member.userShare = member.userShare.add(userReleasedShares);
-        member.userVotingPower = member.userVotingPower.add(userReleasedShares);
-        member.userLockedReward =
-          member.userLockedReward.sub(userReleasedShares);
-
-        Batch.ensureUpdated(member);
-
-        tx.push(
-          prisma.member.updateMany({
-            where: { address: Address.asBuffer(member.address) },
-            data: {
-              userReward: member.userReward,
-              userLockedReward: member.userLockedReward,
-            },
-          })
-        );
       }
-      tx.push(
-        prisma.memberEpoch.create({
-          data: {
-            epoch: parseInt(epochIndex.toString()),
-            address: Address.asBuffer(m.address),
-            userShare,
-            userStake: new Prisma.Decimal(0.0),
-            userVotingPower: member.userVotingPower,
-            userReward: userMintedShares,
-            isReleased: 0,
-            userTotalDeposits: member.userDeposited,
-            userTotalWithdrawals: member.userWithdrew,
-            userTotalUnlocked: member.userReward.sub(member.userLockedReward),
-            userTotalLocked: member.userLockedReward,
-          },
-        })
-      );
 
       totalDeposits = totalDeposits.add(m.userDeposited);
       totalWithdrawals = totalWithdrawals.add(m.userWithdrew);
       totalUnlocked = totalUnlocked.add(m.userReward.sub(m.userLockedReward));
       totalLocked = totalLocked.add(m.userLockedReward);
+
+      if (useArchive) {
+         const data = await Shares.downloadUserAt(endpoint, pool, member.address, blockNumber);
+         const unstaked = withDecimals(data.user[0], 18);
+         member.userLockedReward = new Prisma.Decimal(data.locked);
+         member.userStake = new Prisma.Decimal(data.stake);
+         member.userShare = new Prisma.Decimal(data.shares);
+         member.userVotingPower = new Prisma.Decimal(data.votingPower);
+         member.userUnstake = new Prisma.Decimal(unstaked);
+         Batch.ensureUpdated(member);
+      }
     }
 
     tx.push(
@@ -842,7 +798,9 @@ export const Events = {
         },
       })
     );
-    if (verboseVote) { console.log("New Voting", "took " + elapsed(start));}
+    if (verboseVote) {
+      console.log("New Voting", "took " + elapsed(start));
+    }
     return false;
   },
 
@@ -856,6 +814,7 @@ export const Events = {
     tx: any
   ) => {
     const { voteId, supports, stake } = args;
+
     const isPrimary = VotingReader.isPrimary(config, event.address);
     const voteInternalId = voteId * 2 + (isPrimary ? 1 : 0);
     const supported: boolean = supports === "true" || supports === true;
@@ -937,11 +896,18 @@ export const Events = {
     config: IWebConfig,
     endpoint: string,
     verbose: SyncVerbosity,
-    termination: SyncTermination
+    termination: SyncTermination,
+    useArchive: boolean,
   ): Promise<SyncBlockResult> => {
     const start = new Date().getTime();
     VoteGas.reset(); // gas accumulator for the block
     Batch.reset();
+
+    const pool: string = (
+      config.contracts?.find(
+        ({ name }) => name.toLowerCase() === "api3pool"
+      ) || { address: "" }
+    ).address;
 
     const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
@@ -1135,7 +1101,9 @@ export const Events = {
           if (
             decoded.signature == "MintedReward(uint256,uint256,uint256,uint256)"
           ) {
-            if (await Events.processEpoch(blockInfo, event, tx)) {
+            if (
+              await Events.processEpoch(endpoint, pool, blockInfo, event, tx, useArchive)
+            ) {
               if (termination.epoch) {
                 shouldTerminate = true;
                 included = true;
@@ -1254,8 +1222,13 @@ export const Events = {
 
     if (included) {
       await prisma.$transaction(tx);
-      if ((new Date().getTime() - start) > 1000) {
-        console.log("..DB Block", blockNumber, blockDt, "took " + elapsed(start));
+      if (new Date().getTime() - start > 1000) {
+        console.log(
+          "..DB Block",
+          blockNumber,
+          blockDt,
+          "took " + elapsed(start)
+        );
       }
     }
     return { shouldTerminate, included };
@@ -1264,7 +1237,8 @@ export const Events = {
   processState: async (
     endpoint: string,
     verbose: SyncVerbosity,
-    terminate: SyncTermination
+    terminate: SyncTermination,
+    useArchive: boolean,
   ) => {
     let total = 0;
     const webconfig = fetchWebconfig();
@@ -1276,7 +1250,8 @@ export const Events = {
           webconfig,
           endpoint,
           verbose,
-          terminate
+          terminate,
+          useArchive,
         );
         if (result.shouldTerminate) {
           return result.included ? ++total : total;
