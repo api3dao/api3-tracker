@@ -17,6 +17,8 @@ export const Address = {
   },
 };
 
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+
 const uniqueEvents = async (
   member: string
 ): Promise<[Array<any>, any, number]> => {
@@ -201,24 +203,24 @@ export const Shares = {
           user,
         },
       });
-      return { shares, stake, locked, votingPower, user };
+      return { shares, stake, locked, votingPower, user, downloaded: true };
     }
-    return found[0];
+    return { ...found[0], downloaded: false };
   },
 
-  downloadMembers: async (endpoint: string, tag: string) => {
+  downloadMembers: async (endpoint: string, tag: string, rpsLimit: boolean) => {
     const cursor = { take: 1000000, skip: 0 };
     const wallets = await Wallets.fetchList(tag, cursor);
     console.log("Found ", wallets.list.length, "members");
     let count = 0;
     for (const w of wallets.list) {
-      await Shares.download(endpoint, w.address.toString());
+      await Shares.download(endpoint, w.address.toString(), rpsLimit);
       count++;
     }
     return count;
   },
 
-  download: async (endpoint: string, member: string) => {
+  download: async (endpoint: string, member: string, rpsLimit: boolean) => {
     const webconfig = fetchWebconfig();
     const pool: string = (
       webconfig.contracts?.find(
@@ -237,23 +239,34 @@ export const Shares = {
       member.toString()
     );
     for (const e of events) {
+      const started = new Date();
       const argsUser = await Shares.downloadUserAt(
         endpoint,
         pool,
         member,
-        e.blockNumber
+        e.blockNumber,
       );
       const totals = await Shares.downloadTotalsAt(
         endpoint,
         pool,
         e.blockNumber
       );
+      const took: number = (new Date()).getTime() - started.getTime();
       console.log(
-        "Block ",
+        "Block",
         e.blockNumber,
+        "took",
+        took + "ms",
         JSON.stringify(argsUser),
         JSON.stringify(totals)
       );
+      if (argsUser.downloaded) {
+        if (rpsLimit && took < 1000) {
+          console.log("RPS Limit: wait for", 1000 - took, "ms");
+          await sleep(1000 - took);
+        }
+      }
+      delete (argsUser as any).downloaded;
       const args = { ...argsUser, ...totals };
       await prisma.memberEvent.create({
         data: {

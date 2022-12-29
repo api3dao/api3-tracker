@@ -73,6 +73,11 @@ yargs(hideBin(process.argv))
           type: "string",
           describe: `shares subcommand - reset or download new`,
         })
+        .option("rps-limit", {
+          type: "boolean",
+          default: false,
+          description: "Limit requests to RPC as 1 per second",
+        })
         .option("tag", {
           type: "string",
           default: "",
@@ -84,16 +89,16 @@ yargs(hideBin(process.argv))
           description: "hex address of the member to check its shares",
         });
     },
-    handler: async ({ endpoint, sub, block, member, tag }) => {
+    handler: async ({ endpoint, sub, block, member, tag, rpsLimit }) => {
       if (sub == "reset") {
         await Shares.resetAll();
         console.log("shares cache records were deleted");
       } else if (sub == "download") {
         if (!tag) {
-          const total = await Shares.download(endpoint, member);
+          const total = await Shares.download(endpoint, member, rpsLimit);
           console.log(`downloaded ${total} new records`);
         } else {
-          const total = await Shares.downloadMembers(endpoint, tag);
+          const total = await Shares.downloadMembers(endpoint, tag, rpsLimit);
           console.log(`scanned ${total} members`);
         }
       } else {
