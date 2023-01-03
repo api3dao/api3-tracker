@@ -34,6 +34,8 @@ jobs:
       run: docker save api3tracker:latest | bzip2 | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'bunzip2 -d | docker load'
     - name: Apply Terraform plan
       run: |
+         echo "::add-mask::$TF_VAR_API3TRACKER_ENDPOINT"
+         echo "::add-mask::$TF_VAR_API3TRACKER_ARCHIVE_ENDPOINT"
          export REMOTE_CMD="cd $SSH_REMOTE_PATH && terraform init && terraform apply -auto-approve && docker system prune -af"
          ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST bash -c '"'$REMOTE_CMD'"'
 
