@@ -4,7 +4,7 @@ resource "local_file" "job_shares_download" {
 set -x
 docker exec -e TS_NODE_PROJECT=./tsconfig.cli.json \
    -e API3TRACKER_ENDPOINT=${var.endpoints.archive} \
-   -i ${local.hostname} yarn ts-node cli.ts shares download $@
+   -i ${local.hostname} yarn ts-node cli.ts shares download --rps-limit $@
 EOF
 
    filename = "./bin/job_shares_download.sh"
