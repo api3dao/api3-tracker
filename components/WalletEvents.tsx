@@ -140,11 +140,13 @@ const SharesOfUser = (props: ISharesOfUserProps) => {
           </span>{" "}
         </span>
       ) : null}
-      {(unstakeScheduledFor > 0)? (
+      {unstakeScheduledFor > 0 ? (
         <span>
           Unstake Scheduled For:{" "}
           <span className="text-color-panel-title">
-            {new Date(1000*unstakeScheduledFor).toISOString().substring(0, 10)}
+            {new Date(1000 * unstakeScheduledFor)
+              .toISOString()
+              .substring(0, 10)}
           </span>{" "}
         </span>
       ) : null}
@@ -695,13 +697,58 @@ export const WalletEventsListTr = (props: IWalletEventsRowProps) => {
   );
 };
 
+export const WalletEventsListRow = (props: IWalletEventsRowProps) => {
+  const { row, index, wallet, votings, webconfig } = props;
+  const eventNameClass = isSpecial(row.eventName)
+    ? "flex-1 text-left text-xs ps-2 darken"
+    : "flex-1 text-left text-xs px-2 font-bold";
+  return (
+    <li className="border-b pt-2 pb-2">
+      <div className="flex">
+        <div className="text-xs text-left w-8">{(index || 0) + 1}.</div>
+        <div className="text-xs text-left w-32 darken">
+          {" "}{niceDateTime(row.createdAt)}{" "}
+        </div>
+        <div className="text-xs text-left w-24">
+          <BlockNumber blockNumber={row.blockNumber} txId={toHex(row.txHash)} />
+        </div>
+        <div className={eventNameClass}> {row.eventName} </div>
+      </div>
+      <div className="text-xs pt-1 ml-12">
+        <EventDetails
+          eventName={row.eventName}
+          address={row.address}
+          data={row.data}
+          wallet={wallet}
+          votings={votings}
+          webconfig={webconfig}
+        />
+      </div>
+      <div className="text-xs ml-12">
+        {props.showGas ? (
+          <EventGasTotals
+            gasUsed={row.gasUsed}
+            gasPrice={row.gasPrice}
+            feeUsd={parseFloat(row.feeUsd + "")}
+          />
+        ) : null}
+      </div>
+    </li>
+  );
+};
+
 const filteredEvents = (props: IWalletEventsListProps): Array<IWalletEvent> => {
   const blocksWithShares = new Map<number, number>();
-  return props.list.filter((item: IWalletEvent) => {
-    if (item.eventName === 'Shares') {
+  props.list.forEach((item: IWalletEvent) => {
+    if (item.eventName === "Shares") {
       blocksWithShares.set(item.blockNumber, 1);
     }
-    if (item.eventName === 'Rewards' && blocksWithShares.has(item.blockNumber)) {
+  });
+  return props.list.filter((item: IWalletEvent) => {
+    if (
+      item.eventName === "Rewards" &&
+      blocksWithShares.has(item.blockNumber)
+    ) {
       // skip "Rewards" that have "Shares" event in its block
       return false;
     }
@@ -711,12 +758,11 @@ const filteredEvents = (props: IWalletEventsListProps): Array<IWalletEvent> => {
 
 export const WalletEventsList = (props: IWalletEventsListProps) => {
   return (
-    <div className="max-w-screen-lg mx-auto mb-20">
-      <table className="table invisible lg:visible">
-        <WalletEventsListThead />
-        <tbody>
+    <div className="mx-auto mb-20">
+      <div className="lg:hidden ml-5 mr-5">
+        <ol className="border-t">
           {filteredEvents(props).map((row: any, index: number) => (
-            <WalletEventsListTr
+            <WalletEventsListRow
               key={row.id}
               row={row}
               index={index}
@@ -726,8 +772,26 @@ export const WalletEventsList = (props: IWalletEventsListProps) => {
               webconfig={props.webconfig}
             />
           ))}
-        </tbody>
-      </table>
+        </ol>
+      </div>
+      <div className="hidden lg:block">
+        <table className="table">
+          <WalletEventsListThead />
+          <tbody>
+            {filteredEvents(props).map((row: any, index: number) => (
+              <WalletEventsListTr
+                key={row.id}
+                row={row}
+                index={index}
+                showGas={props.showGas}
+                wallet={props.wallet}
+                votings={props.votings}
+                webconfig={props.webconfig}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

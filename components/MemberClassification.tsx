@@ -53,11 +53,11 @@ export const MemberClassification = (props: IBadgerProps) => {
   return (
     <div className="mt-4">
       <div className="uppercase text-center text-sm">Member classification</div>
-      <ul className="mt-4">
+      <ul className="mt-4 ml-4 lg:ml-0">
         {badges.map((b: any) =>
           props.badges.indexOf(b.name) === -1 ? null : (
             <li
-              className="text-sm text-left leading-6 text-color-grey"
+              className="text-sm text-center lg:text-left leading-6 text-color-grey"
               key={b.name}
             >
               <span className={classBadge + b.className}>{b.name}</span> -{" "}
