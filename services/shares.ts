@@ -72,7 +72,7 @@ export const Shares = {
       console.log("Requesting totals at", blockNumber);
       const blockHex = "0x" + blockNumber.toString(16);
 
-      const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
+      const jsonRpc = new ethers.providers.JsonRpcProvider({ url: endpoint, throttleLimit: 5, timeout: 300000 });
       const result = await ethers.utils.fetchJson(
         jsonRpc.connection,
         `[
@@ -125,7 +125,7 @@ export const Shares = {
     if (found.length == 0) {
       console.log("Requesting user state at", blockNumber, "for", member);
 
-      const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
+      const jsonRpc = new ethers.providers.JsonRpcProvider({ url: endpoint, throttleLimit: 5, timeout: 300000 });
       const blockHex = "0x" + blockNumber.toString(16);
       const memberHex = zerosLeft(member.replace("0x", ""), 64);
 
