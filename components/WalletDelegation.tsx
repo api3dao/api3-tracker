@@ -47,13 +47,35 @@ export const WalletDelegationTr = (props: any) => {
     </tr>
   );
 };
+
+export const WalletDelegationRow = (props: any) => {
+  const { index } = props;
+  const row: IDelegation = props.row;
+  return (
+    <li className="border-b">
+      <div className="flex mr-5 ml-5">
+        <div className="text-center text-xs w-8">{(index || 0) + 1}.</div>
+        <div className="flex-1 text-xs text-left darken">
+          {" "}
+          {niceDateTime(row.updatedAt)}{" "}
+        </div>
+        <div className="text-right text-xs font-bold">
+          {noDecimals(toCurrency(row.userShares))}
+        </div>
+      </div>
+      <div className="text-center">
+        <InternalAddress className="text-xs" address={row.from} />
+      </div>
+    </li>
+  );
+};
 export const WalletDelegation = (props: IWalletDelegationProps) => {
   const { from, to } = props;
   const toNZ = to.filter((x: any) => x.userShares != new Prisma.Decimal(0));
   return (
-    <div className="max-w-screen-lg text-center mx-auto">
+    <div className="text-center mx-auto">
       {from.length > 0 ? (
-        <div className="text-xl text-center text-color-panel-title">
+        <div className="text-sm sm:mb-5 lg:text-xl text-center text-color-panel-title">
           This member delegates his {noDecimals(toCurrency(from[0].userShares))}{" "}
           shares to{" "}
           <InternalAddress
@@ -65,20 +87,29 @@ export const WalletDelegation = (props: IWalletDelegationProps) => {
       ) : null}
       {to.length > 0 ? (
         <div className="text-color-panel-title">
-          <h2 className="text-xl font-bold text-center">
+          <h2 className="text-sm lg:text-xl font-bold text-center">
             This member is delegated{" "}
             {noDecimals(toCurrency(props.userIsDelegated))}
             {" shares by "}
             {toNZ.length} members
           </h2>
-          <table className="table invisible lg:visible">
-            <WalletDelegationThead />
-            <tbody>
+          <div className="block sm:hidden">
+            <ol className="border-t mt-4">
               {to.map((row: IDelegation, index: number) => (
-                <WalletDelegationTr key={index} index={index} row={row} />
+                <WalletDelegationRow key={index} index={index} row={row} />
               ))}
-            </tbody>
-          </table>
+            </ol>
+          </div>
+          <div className="hidden sm:block ml-5 mr-5">
+            <table className="table">
+              <WalletDelegationThead />
+              <tbody>
+                {to.map((row: IDelegation, index: number) => (
+                  <WalletDelegationTr key={index} index={index} row={row} />
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : null}
     </div>

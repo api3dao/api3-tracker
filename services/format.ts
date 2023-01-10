@@ -13,6 +13,7 @@ export const shorten = (x: string, num: number): string => {
 export const toCurrency = (x: any): string => {
   if (typeof x === "undefined") return "";
   if (x === null) return "";
+  if (x.toString().indexOf("e-") > -1)  return "0";
   const val = x.toString().replace(/([a-zA-Z]|,)/g, "");
   if (!isNaN(parseInt(val, 10))) {
     return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
