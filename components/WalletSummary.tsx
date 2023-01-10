@@ -16,7 +16,7 @@ export const WalletSummary = (props: IWalletSummaryProps) => {
   const classValue = "text-2xl mb-10 text-color-panel-title font-bold";
   const { wallet } = props;
   const userVotingPower = new Prisma.Decimal(wallet.userVotingPower).mul(100).div(props.total);
-  const userUnlocked = new Prisma.Decimal(wallet.userReward).sub(wallet.userLockedReward);
+  // const userUnlocked = new Prisma.Decimal(wallet.userReward).sub(wallet.userLockedReward);
   return (
     <div className="max-w-screen-lg text-center mx-auto my-10">
       {wallet.ensName ? (

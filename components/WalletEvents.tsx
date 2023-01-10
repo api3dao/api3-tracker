@@ -28,6 +28,7 @@ export interface IWalletEventsListProps {
 }
 
 interface IEventDetails {
+  wide: boolean;
   wallet: IWallet;
   eventName: string;
   address: string;
@@ -217,16 +218,18 @@ const EventDetails = (props: IEventDetails) => {
       return (
         <div className="text-xs darken leading-4">
           source: <Address className="text-xs" inline={true} address={source} />{" "}
-          <span className="text-color-panel-title">{toCurrency(amount)}</span>{" "}
-          tokens. Release start:{" "}
-          <span className="text-color-panel-title">
-            {niceDate(dtStart.toISOString())}
+          <span className={props.wide ? "ml-1" : "block"}>
+            <span className="text-color-panel-title">{toCurrency(amount)}</span>{" "}
+            tokens. Release start:{" "}
+            <span className="text-color-panel-title">
+              {niceDate(dtStart.toISOString())}
+            </span>
+            {", "}
+            end:{" "}
+            <span className="text-color-panel-title">
+              {niceDate(dtEnd.toISOString())}
+            </span>{" "}
           </span>
-          {", "}
-          end:{" "}
-          <span className="text-color-panel-title">
-            {niceDate(dtEnd.toISOString())}
-          </span>{" "}
         </div>
       );
     }
@@ -253,9 +256,12 @@ const EventDetails = (props: IEventDetails) => {
             }
           />{" "}
           <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
-          shares. Total:{" "}
-          <span className="text-color-panel-title">{toCurrency(total)}</span>{" "}
-          shares.{" "}
+          shares.
+          <span className={props.wide ? "ml-1" : "block"}>
+            Total:{" "}
+            <span className="text-color-panel-title">{toCurrency(total)}</span>{" "}
+            shares.{" "}
+          </span>
         </div>
       );
     }
@@ -283,13 +289,16 @@ const EventDetails = (props: IEventDetails) => {
             }
           />{" "}
           <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
-          shares. Delta:{" "}
-          <span className="text-color-panel-title">
-            {JSON.stringify(delta)}
-          </span>{" "}
-          Total:{" "}
-          <span className="text-color-panel-title">{toCurrency(total)}</span>{" "}
-          shares.{" "}
+          shares.
+          <span className={props.wide ? "ml-1" : "block"}>
+            Delta:{" "}
+            <span className="text-color-panel-title">
+              {JSON.stringify(delta)}
+            </span>{" "}
+            Total:{" "}
+            <span className="text-color-panel-title">{toCurrency(total)}</span>{" "}
+            shares.{" "}
+          </span>
         </div>
       );
     }
@@ -350,19 +359,22 @@ const EventDetails = (props: IEventDetails) => {
           <span className="text-color-panel-title">
             {toCurrency(userUnstaked)}
           </span>{" "}
-          tokens. User has{" "}
-          <span className="text-color-panel-title">
-            {toCurrency(userShares)}
-          </span>{" "}
-          shares. Total:{" "}
-          <span className="text-color-panel-title">
-            {toCurrency(totalStake)}
-          </span>{" "}
-          stake,{" "}
-          <span className="text-color-panel-title">
-            {toCurrency(totalShares)}
-          </span>{" "}
-          shares.{" "}
+          tokens.
+          <span className={props.wide ? "ml-1" : "block"}>
+            User has{" "}
+            <span className="text-color-panel-title">
+              {toCurrency(userShares)}
+            </span>{" "}
+            shares. Total:{" "}
+            <span className="text-color-panel-title">
+              {toCurrency(totalStake)}
+            </span>{" "}
+            stake,{" "}
+            <span className="text-color-panel-title">
+              {toCurrency(totalShares)}
+            </span>{" "}
+            shares.{" "}
+          </span>
         </div>
       );
     }
@@ -421,11 +433,13 @@ const EventDetails = (props: IEventDetails) => {
           <span className="text-color-panel-title">
             {niceDateTime(dt.toISOString())}
           </span>{" "}
-          User:{" "}
-          <span className="text-color-panel-title">
-            {toCurrency(userShares)}
-          </span>{" "}
-          shares.{" "}
+          <span className={props.wide ? "ml-1" : "block"}>
+            User:{" "}
+            <span className="text-color-panel-title">
+              {toCurrency(userShares)}
+            </span>{" "}
+            shares.{" "}
+          </span>
         </div>
       );
     }
@@ -455,15 +469,17 @@ const EventDetails = (props: IEventDetails) => {
           <span className="text-color-panel-title">
             {niceDateTime(dtEnd.toISOString())}
           </span>{" "}
-          Unstaked{" "}
-          <span className="text-color-panel-title">
-            {toCurrency(userUnstaked)}
-          </span>{" "}
-          tokens. Vesting{" "}
-          <span className="text-color-panel-title">
-            {toCurrency(userVesting)}
-          </span>{" "}
-          tokens
+          <span className={props.wide ? "ml-1" : "block"}>
+            Unstaked{" "}
+            <span className="text-color-panel-title">
+              {toCurrency(userUnstaked)}
+            </span>{" "}
+            tokens. Vesting{" "}
+            <span className="text-color-panel-title">
+              {toCurrency(userVesting)}
+            </span>{" "}
+            tokens
+          </span>
         </div>
       );
     }
@@ -571,11 +587,14 @@ const EventDetails = (props: IEventDetails) => {
             <span className="text-color-panel-title">
               {toCurrency(totalShares)}
             </span>
-            . Voting Power:{" "}
-            <span className="text-color-panel-title">
-              {toCurrency(votingPower)}
-            </span>{" "}
-            ({toPct4(votingPowerPct)})
+            .
+            <span className={props.wide ? "ml-1" : "block"}>
+              Voting Power:{" "}
+              <span className="text-color-panel-title">
+                {toCurrency(votingPower)}
+              </span>{" "}
+              ({toPct4(votingPowerPct)})
+            </span>
           </div>
           <div className="text-xs darken">
             Staked:{" "}
@@ -584,9 +603,14 @@ const EventDetails = (props: IEventDetails) => {
             <span className="text-color-panel-title">
               {toCurrency(totalStake)}
             </span>
-            . Locked:{" "}
-            <span className="text-color-panel-title">{toCurrency(locked)}</span>{" "}
-            tokens.
+            .
+            <span className={props.wide ? "ml-1" : "block"}>
+              Locked:{" "}
+              <span className="text-color-panel-title">
+                {toCurrency(locked)}
+              </span>{" "}
+              tokens.
+            </span>
           </div>
           <SharesOfUser user={props.data.user} />
         </div>
@@ -677,6 +701,7 @@ export const WalletEventsListTr = (props: IWalletEventsRowProps) => {
       <td className="text-left px-5">
         <div className="text-xs pt-1">
           <EventDetails
+            wide={true}
             eventName={row.eventName}
             address={row.address}
             data={row.data}
@@ -707,7 +732,8 @@ export const WalletEventsListRow = (props: IWalletEventsRowProps) => {
       <div className="flex">
         <div className="text-xs text-left w-8">{(index || 0) + 1}.</div>
         <div className="text-xs text-left w-32 darken">
-          {" "}{niceDateTime(row.createdAt)}{" "}
+          {" "}
+          {niceDateTime(row.createdAt)}{" "}
         </div>
         <div className="text-xs text-left w-24">
           <BlockNumber blockNumber={row.blockNumber} txId={toHex(row.txHash)} />
@@ -716,6 +742,7 @@ export const WalletEventsListRow = (props: IWalletEventsRowProps) => {
       </div>
       <div className="text-xs pt-1 ml-12">
         <EventDetails
+          wide={false}
           eventName={row.eventName}
           address={row.address}
           data={row.data}
@@ -774,7 +801,7 @@ export const WalletEventsList = (props: IWalletEventsListProps) => {
           ))}
         </ol>
       </div>
-      <div className="hidden lg:block">
+      <div className="max-w-screen-lg mx-auto hidden lg:block">
         <table className="table">
           <WalletEventsListThead />
           <tbody>

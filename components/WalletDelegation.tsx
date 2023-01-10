@@ -1,16 +1,8 @@
 import React from "react";
-import { BorderedPanel } from "./BorderedPanel";
 import { InternalAddress } from "./../components/Ethscan";
-import {
-  toPct4,
-  toHex,
-  niceDateTime,
-  noDecimals,
-  toCurrency,
-} from "../services/format";
+import { niceDateTime, noDecimals, toCurrency } from "../services/format";
 import { Prisma } from "@prisma/client";
 import { IDelegation } from "../services/types";
-import { TxIcon } from "../components/Ethscan";
 
 export interface IWalletDelegationProps {
   from: Array<IDelegation>;
@@ -100,7 +92,7 @@ export const WalletDelegation = (props: IWalletDelegationProps) => {
               ))}
             </ol>
           </div>
-          <div className="hidden sm:block ml-5 mr-5">
+          <div className="max-w-screen-lg lg:mx-auto hidden sm:block sm:mx-5">
             <table className="table">
               <WalletDelegationThead />
               <tbody>
@@ -111,7 +103,9 @@ export const WalletDelegation = (props: IWalletDelegationProps) => {
             </table>
           </div>
         </div>
-      ) : null}
+      ) : (
+        <div className="sm:mb-1 text-xs">&nbsp;</div>
+      )}
     </div>
   );
 };
