@@ -6,12 +6,11 @@ import { WalletSummary } from "../../components/WalletSummary";
 import { WalletDelegation } from "../../components/WalletDelegation";
 import { WalletEventsList } from "../../components/WalletEvents";
 import { fetchWebconfig } from "../../services/webconfig";
-import { Supply, Delegations, Votings, Wallets, WalletEvents, Blocks } from "../../services/api";
+import { CacheTotals, Delegations, Votings, Wallets, WalletEvents, Blocks } from "../../services/api";
 import {
   IDelegation,
   IWallet,
   IVoting,
-  ISupply,
   IWalletEvent,
   IBlockNumber,
 } from "../../services/types";
@@ -25,7 +24,7 @@ export async function getServerSideProps(context: any) {
     WalletEvents.fetchList(address),
     Blocks.fetchLast(),
     Votings.fetchAll(),
-    Wallets.totalShares(),
+    CacheTotals.fetch(),
     Delegations.fetchFrom(address),
     Delegations.fetchTo(address),
   ]);
@@ -33,7 +32,7 @@ export async function getServerSideProps(context: any) {
   const events: Array<IWalletEvent> = results[1];
   const lastBlock: IBlockNumber = results[2];
   const votings: Array<IVoting> = results[3];
-  const totalShares: any= results[4];
+  const totalShares: any = results[4];
   const delegationsFrom: Array<IDelegation> = results[5];
   const delegationsTo: Array<IDelegation> = results[6];
   return {

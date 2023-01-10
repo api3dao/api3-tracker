@@ -64,6 +64,16 @@ export const Epochs = {
   },
 };
 
+export const CacheTotals = {
+  // fetch current supply
+  fetch: async (): Promise<number> => {
+    const record: Array<any> = await prisma.cacheTotalShares.findMany({
+      orderBy: { height: "desc" },
+    });
+    return record[0].totalShares;
+  },
+};
+
 export const Supply = {
   // fetch current supply
   fetch: async (): Promise<ISupply | null> => {
