@@ -77,8 +77,8 @@ export default async function handler(
   // 3. supply
   const supply = await Supply.fetch();
   if (supply) {
-    out.push("# HELP cirulating_supply Circulating Supply");
-    out.push("# TYPE cirulating_supply gauge");
+    out.push("# HELP circulating_supply Circulating Supply");
+    out.push("# TYPE circulating_supply gauge");
     out.push("circulating_supply " + supply.circulatingSupply.toString());
 
     out.push("# HELP total_staked Total Staked Tokens");
