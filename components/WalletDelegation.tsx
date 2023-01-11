@@ -44,7 +44,7 @@ export const WalletDelegationRow = (props: any) => {
   const { index } = props;
   const row: IDelegation = props.row;
   return (
-    <li className="border-b">
+    <li className="border-b border-color-grey py-2">
       <div className="flex mr-5 ml-5">
         <div className="text-center text-xs w-8">{(index || 0) + 1}.</div>
         <div className="flex-1 text-xs text-left darken">
@@ -86,7 +86,7 @@ export const WalletDelegation = (props: IWalletDelegationProps) => {
             {toNZ.length} members
           </h2>
           <div className="block sm:hidden">
-            <ol className="border-t mt-4">
+            <ol className="border-t border-color-grey mt-4">
               {to.map((row: IDelegation, index: number) => (
                 <WalletDelegationRow key={index} index={index} row={row} />
               ))}

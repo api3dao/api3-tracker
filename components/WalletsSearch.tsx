@@ -19,7 +19,7 @@ export const WalletsSearch = (props: IWalletsSearchProps) => {
     );
   };
   return (
-    <div className="max-w-screen-lg mx-auto">
+    <div className="ml-5 mr-5 max-w-screen-lg lg:mx-auto">
       <input
         className="w-full text-left bg-color-body p-3 text-color-grey rounded border border-1 border-color-text leading-6"
         type="text"

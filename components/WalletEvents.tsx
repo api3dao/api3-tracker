@@ -728,7 +728,7 @@ export const WalletEventsListRow = (props: IWalletEventsRowProps) => {
     ? "flex-1 text-left text-xs ps-2 darken"
     : "flex-1 text-left text-xs px-2 font-bold";
   return (
-    <li className="border-b pt-2 pb-2">
+    <li className="border-b border-color-grey pt-2 pb-2">
       <div className="flex">
         <div className="text-xs text-left w-8">{(index || 0) + 1}.</div>
         <div className="text-xs text-left w-32 darken">
@@ -786,8 +786,9 @@ const filteredEvents = (props: IWalletEventsListProps): Array<IWalletEvent> => {
 export const WalletEventsList = (props: IWalletEventsListProps) => {
   return (
     <div className="mx-auto mb-20">
-      <div className="lg:hidden ml-5 mr-5">
-        <ol className="border-t">
+      <div className="lg:hidden mt-5 ml-5 mr-5">
+        <div className="mb-4 uppercase text-center text-sm">Member Events</div>
+        <ol className="border-t border-color-grey">
           {filteredEvents(props).map((row: any, index: number) => (
             <WalletEventsListRow
               key={row.id}
