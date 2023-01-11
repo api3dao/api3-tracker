@@ -6,8 +6,8 @@ import { useRouter } from "next/router";
 import InfiniteScroll from "react-infinite-scroller";
 import { Footer, Header, Meta } from "../components/";
 import { fetchWebconfig } from "../services/webconfig";
-import { Supply, Wallets, Blocks } from "../services/api";
-import { ISupply, IWallet, IBlockNumber } from "../services/types";
+import { CacheTotals, Wallets, Blocks } from "../services/api";
+import { IWallet, IBlockNumber } from "../services/types";
 import { WalletsSearch } from "../components/WalletsSearch";
 import { WalletsList } from "../components/WalletsList";
 import { serializable } from "../services/format";
@@ -25,7 +25,7 @@ export async function getServerSideProps(context: any) {
   const results = await Promise.all([
     Wallets.fetchList(q, cursor),
     Blocks.fetchLast(),
-    Wallets.totalShares(),
+    CacheTotals.fetch(),
   ]);
   const list: Array<IWallet> = results[0].list;
   const total = results[0].page.total;
@@ -107,7 +107,7 @@ const WalletsPage: NextPage = (props: any) => {
       fetcher("/api/json/wallets?q=" + value + "&take=" + state.take)
         .then(setData(value))
         .then(() => setLoading(false))
-        .catch((e: any) => setLoading(false));
+        .catch((_: any) => setLoading(false));
     }, 300);
   };
 
@@ -125,7 +125,7 @@ const WalletsPage: NextPage = (props: any) => {
     )
       .then(appendData)
       .then(() => setLoadingMore(false))
-      .catch((e: any) => setLoadingMore(false));
+      .catch((_: any) => setLoadingMore(false));
   };
 
   return (
