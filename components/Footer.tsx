@@ -9,11 +9,8 @@ export interface IFooterProps {
 }
 
 export const Footer = (props: IFooterProps) => {
-  const { blockNumber, github, showGas } = props;
-  const onToggleGas = () => {
-    localStorage.setItem("GAS", showGas ? "HIDDEN" : "VISIBLE");
-    props.changeGas(!showGas);
-  };
+  const { blockNumber, github } = props;
+  // const onToggleGas = () => { localStorage.setItem("GAS", showGas ? "HIDDEN" : "VISIBLE"); props.changeGas(!showGas); };
   return (
     <footer>
       <div className="bg-color-body text-color-text md:fixed md:bottom-0 md:left-0 md:z-20 w-full">
@@ -32,12 +29,12 @@ export const Footer = (props: IFooterProps) => {
               </a>
             </span>
           ) : null}
-          <span className="hidden md:inline">&nbsp; | &nbsp;</span>
+          {/*<span className="hidden md:inline">&nbsp; | &nbsp;</span>
           <span className="darken">
             &nbsp;
             <input type="checkbox" checked={showGas} onClick={onToggleGas} />
             {" "}Gas{" "}
-          </span>
+          </span>*/}
           {blockNumber ? (
             <span className="hidden md:inline">&nbsp; | &nbsp;</span>
           ) : null}

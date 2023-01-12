@@ -10,8 +10,9 @@ export const VoteGas = {
   VOTES: new Map<number, Map<string, GasUsage>>(),
 
   appearance: (): boolean => {
-    const v = (typeof global.localStorage != "undefined" ) ? global.localStorage.getItem("GAS") : "";
-    return v != "HIDDEN";
+    // const v = (typeof global.localStorage != "undefined" ) ? global.localStorage.getItem("GAS") : "";
+    // return v != "HIDDEN";
+    return true;
   },
 
   reset: () => {
