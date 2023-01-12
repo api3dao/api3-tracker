@@ -78,10 +78,9 @@ const EventGasTotals = (props: IEventGasTotals) => {
   );
 };
 
-export const VotingEventsListTr = (row: IVotingEvent) => {
+const votePower = (row: IVotingEvent) => {
   let supports = "";
   let votes = "";
-  let power = <div></div>;
   if (row.eventName == "CastVote") {
     const supported = JSON.stringify(row.data[2]) == "true";
     supports = supported ? "Supports" : "Against";
@@ -98,10 +97,14 @@ export const VotingEventsListTr = (row: IVotingEvent) => {
         )
       );
       const pct = ((abs * 100) / total).toFixed(2) + "%";
-      // power = (<div>{abs}<br />{pct}<br />{total}</div>);
-      power = <span>{pct}</span>;
+      return [supports, votes, pct];
     }
   }
+  return [supports, votes, ""];
+};
+
+export const VotingEventsListTr = (row: IVotingEvent) => {
+  const [supports, votes, power] = votePower(row);
   return (
     <tr>
       <td className="text-center">{(row.index || 0) + 1}.</td>
@@ -117,7 +120,8 @@ export const VotingEventsListTr = (row: IVotingEvent) => {
         <Link
           href={`/wallets/${toHex(row.address)}`}
           className="text-bold"
-          legacyBehavior>
+          legacyBehavior
+        >
           <div>
             {row.ensName
               ? [
@@ -130,13 +134,15 @@ export const VotingEventsListTr = (row: IVotingEvent) => {
             <div className="accent">{toHex(row.address)}</div>
           </div>
         </Link>
-        <MemberBadges badges={row.badges || ''} />
+        <MemberBadges badges={row.badges || ""} />
         <EventDetails data={row.data} eventName={row.eventName} />
-        {row.showGas ? <EventGasTotals
-          gasUsed={row.gasUsed}
-          gasPrice={row.gasPrice}
-          feeUsd={parseFloat(row.feeUsd + "")}
-        />: null}
+        {row.showGas ? (
+          <EventGasTotals
+            gasUsed={row.gasUsed}
+            gasPrice={row.gasPrice}
+            feeUsd={parseFloat(row.feeUsd + "")}
+          />
+        ) : null}{" "}
       </td>
       <td className="text-right text-sm darken">{supports}</td>
       <td className="text-right text-sm">{votes}</td>
@@ -145,17 +151,73 @@ export const VotingEventsListTr = (row: IVotingEvent) => {
   );
 };
 
+export const VotingEventsListRow = (row: IVotingEvent) => {
+  const [supports, votes, power] = votePower(row);
+  return (
+    <li className="border-b border-color-grey pt-2 pb-2">
+      <div className="r1 flex">
+        <div className="text-xs text-left w-8">{(row.index || 0) + 1}.</div>
+        <div className="text-xs text-left w-32 darken">
+          {" "}
+          {niceDateTime(row.createdAt)}{" "}
+        </div>
+        <div className="text-xs">
+          <BlockNumber txId={toHex(row.txHash)} blockNumber={row.blockNumber} />
+        </div>
+        <div className="flex-1 text-right text-xs font-bold">
+          {row.eventName}{" "}
+        </div>
+      </div>
+      <div className="r3 leading-6 text-xs">
+        <Link
+          href={`/wallets/${toHex(row.address)}`}
+          className="text-bold"
+          legacyBehavior
+        >
+          <div>
+            {row.ensName
+              ? [
+                  <span key={0} className="text-sm font-bold">
+                    {row.ensName}
+                  </span>,
+                  <br key={1} />,
+                ]
+              : null}
+            <div className="accent">{toHex(row.address)}</div>
+          </div>
+        </Link>
+      </div>
+      <div className="r4">
+        <MemberBadges badges={row.badges || ""} />
+      </div>
+      <div className="text-right">
+        <EventDetails data={row.data} eventName={row.eventName} />
+      </div>
+      {row.showGas ? (
+        <div className="text-right">
+          <EventGasTotals
+            gasUsed={row.gasUsed}
+            gasPrice={row.gasPrice}
+            feeUsd={parseFloat(row.feeUsd + "")}
+          />
+        </div>
+      ) : null}
+    </li>
+  );
+};
+
 export const VotingEventsList = (props: IVotingEventsListProps) => {
   if (!props.list.length) return null;
   return (
-    <div>
-      <table className="table invisible lg:visible">
-        <VotingEventsListThead />
-        <tbody>
+    <div className="mx-auto">
+      <div className="lg:hidden mt-5 ml-5 mr-5">
+        <ol className="border-t border-color-grey">
           {props.list.map((row, index) => {
-            const member = props.members.filter((x: any) => (toHex(row.address) == toHex(x.address)));
+            const member = props.members.filter(
+              (x: any) => toHex(row.address) == toHex(x.address)
+            );
             return (
-              <VotingEventsListTr
+              <VotingEventsListRow
                 key={row.id}
                 {...member[0]}
                 {...row}
@@ -165,9 +227,31 @@ export const VotingEventsList = (props: IVotingEventsListProps) => {
               />
             );
           })}
-        </tbody>
-      </table>
-      <div className="pt-6 font-xl">&nbsp;</div>
+        </ol>
+      </div>
+      <div className="max-w-screen-lg mx-auto hidden lg:block">
+        <table className="table">
+          <VotingEventsListThead />
+          <tbody>
+            {props.list.map((row, index) => {
+              const member = props.members.filter(
+                (x: any) => toHex(row.address) == toHex(x.address)
+              );
+              return (
+                <VotingEventsListTr
+                  key={row.id}
+                  {...member[0]}
+                  {...row}
+                  index={index}
+                  showGas={props.showGas}
+                  totalStake={props.totalStake}
+                />
+              );
+            })}
+          </tbody>
+        </table>
+        <div className="pt-6 font-xl">&nbsp;</div>
+      </div>
     </div>
   );
 };

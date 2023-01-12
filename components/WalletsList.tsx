@@ -118,7 +118,7 @@ export const WalletsListRow = (props: IWalletsListRow) => {
       {skipped ? null : (
         <div className="text-xs text-right">
           <span className="darken"> Voting Power: </span>
-        {noDecimals(toCurrency(row.userVotingPower))}
+          {noDecimals(toCurrency(row.userVotingPower))}
         </div>
       )}
       {row.userShare > new Prisma.Decimal(0.0) ? (

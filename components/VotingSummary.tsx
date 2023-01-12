@@ -54,7 +54,7 @@ export const VotingSummary = (props: IVoting) => {
                   votes supported this proposal
                 </div>
                 <div className="font-bold text-sm">
-                  {props.totalFor.div(props.totalStaked).toFixed(4)}%
+                  {props.totalFor.mul(100).div(props.totalStaked).toFixed(4)}%
                 </div>
               </div>
             ) : (
@@ -75,7 +75,7 @@ export const VotingSummary = (props: IVoting) => {
                   votes against this proposal
                 </div>
                 <div className="font-bold text-sm">
-                  {props.totalAgainst.div(props.totalStaked).toFixed(4)}%
+                  {props.totalAgainst.mul(100).div(props.totalStaked).toFixed(4)}%
                 </div>
               </div>
             ) : (
