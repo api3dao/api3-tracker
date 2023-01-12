@@ -106,7 +106,7 @@ export const WalletsListRow = (props: IWalletsListRow) => {
     (row.userVotingPower > new Prisma.Decimal(0.0) ? "" : "darken");
   const skipped = row.userVotingPower < new Prisma.Decimal(0.0001);
   return (
-    <li className="border-b pt-2 pb-2">
+    <li className="border-b border-color-grey pt-2 pb-2">
       <div className="r1 flex">
         <div className="text-xs text-left w-8">{(props.index || 0) + 1}.</div>
         <div className="text-xs text-left w-32 darken">
@@ -166,7 +166,7 @@ export const WalletsList = (props: IWalletsListProps) => {
   return (
     <div className="mx-auto">
       <div className="lg:hidden mt-5 ml-5 mr-5">
-        <ol className="border-t">
+        <ol className="border-t border-color-grey">
           {props.list.map((row, index) => {
             return (
               <WalletsListRow
