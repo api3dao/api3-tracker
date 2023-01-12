@@ -52,42 +52,44 @@ export const RewardsListSmScreen = (epoch: IEpoch) => (
           href={`https://etherscan.io/tx/${epoch.txHash}#eventlog`}
           rel="nofollow noopener noreferrer"
           target="_blank"
-        ></a>
+        >
+          {toCurrency(epoch.blockNumber)}
+        </a>
       </div>
-      <div className="text-center darken">{niceDate(epoch.createdAt)}</div>
-      <div className="text-center darken">
+      <div className="mb-3 text-center text-xs darken">{niceDate(epoch.createdAt)}</div>
+      <div className="mb-2 text-center darken">
         APR:{" "}
         <span className="text-bold text-2xl text-color-panel-title">
           {toPct(epoch.apr)}
         </span>
       </div>
-      <div className="text-center darken">
+      <div className="text-sm text-center darken">
         Rewards:{" "}
         <span className="text-bold text-color-panel-title">
           {toPct(epoch.rewardsPct)}
         </span>
       </div>
-      <div className="text-center darken">
+      <div className="text-sm text-center darken">
         Members:{" "}
         <span className="text-bold text-color-panel-title">
           {toCurrency(epoch.members)}
         </span>
       </div>
-      <div className="text-center darken">
+      <div className="text-sm text-center darken">
         Total Staked:{" "}
         <span className="text-bold text-color-panel-title">
           {toCurrency(epoch.totalStake)}
         </span>
       </div>
-      <div className="text-center darken">
+      <div className="text-sm text-center darken">
         Minted:{" "}
         <span className="text-bold text-color-panel-title">
           {toCurrency(epoch.mintedShares)}
         </span>
       </div>
-      <div className="text-center darken mb-5">
+      <div className="text-center text-xs darken my-5">
         Release Date:{" "}
-        <span className="text-bold text-color-panel-title">
+        <span className="text-bold darken">
           {niceDate(epoch.releaseDate)}
         </span>
       </div>
@@ -136,9 +138,11 @@ export const RewardsListTr = (epoch: IEpoch) => (
       {noDecimals(toCurrency(epoch.mintedShares))}
     </td>
     <td className="text-center">
-      {(!epoch.isReleased)
-        ? niceDate(epoch.releaseDate)
-        : <span className="text-sm darken">released</span>}
+      {!epoch.isReleased ? (
+        niceDate(epoch.releaseDate)
+      ) : (
+        <span className="text-sm darken">released</span>
+      )}
     </td>
   </tr>
 );
