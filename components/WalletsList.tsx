@@ -57,11 +57,10 @@ export const WalletsListTr = (props: IWalletsListRow) => {
         <Link
           href={`/wallets/${toHex(row.address)}`}
           className="text-bold"
-          legacyBehavior
         >
           {row.ensName ? (
             <div className="">
-              <div className="leading-1 font-bold">{row.ensName}</div>
+              <div className="text-color-panel-title leading-1 font-bold">{row.ensName}</div>
               <div
                 className="leading-1 accent"
                 style={{ fontFamily: "monospace", cursor: "pointer" }}
