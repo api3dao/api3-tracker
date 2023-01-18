@@ -276,7 +276,10 @@ export const Wallets = {
   },
   // fetch a list of wallets for the certain search query
   fetchList: async (q: string, cursor: ICursor): Promise<WalletsList> => {
-    const where = (q.length > 0 && q != ".") ? { tags: { search: q } } : {};
+    const where = (q.length > 0 && q != ".") ? { OR: [
+       { tags: { search: q } },
+       { ensName: { contains: q }},
+    ] }: {};
     const [list, total] = await prisma.$transaction([
       prisma.member.findMany({
         where,

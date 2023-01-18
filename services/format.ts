@@ -13,7 +13,7 @@ export const shorten = (x: string, num: number): string => {
 export const toCurrency = (x: any): string => {
   if (typeof x === "undefined") return "";
   if (x === null) return "";
-  if (x.toString().indexOf("e-") > -1)  return "0";
+  if (x.toString().indexOf("e-") > -1) return "0";
   const val = x.toString().replace(/([a-zA-Z]|,)/g, "");
   if (!isNaN(parseInt(val, 10))) {
     return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -37,26 +37,26 @@ export const noDecimals = (x: string): string => {
 
 export const zerosLeft = (x: string, len: number): string => {
   let out = x;
-  while (out.length < len) out = '0' + out;
+  while (out.length < len) out = "0" + out;
   return out;
 };
 
 export const zerosRight = (x: string, len: number): string => {
   let out = x;
-  while (out.length < len) out += '0';
+  while (out.length < len) out += "0";
   return out;
 };
 
 export const justDecimals = (x: string, l: number): string => {
   const w = x.replace(/^.+\./g, "");
-  return (w.length > l) ? w.substring(0, l) : zerosRight(w, l);
+  return w.length > l ? w.substring(0, l) : zerosRight(w, l);
 };
 
-export const toPct4= (x: any): string => {
+export const toPct4 = (x: any): string => {
   if (typeof x === "undefined" || toCurrency(x) === "") return "";
   if (typeof x === "object" || typeof x === "string") {
-       if (x.toString().indexOf("e-") !== -1) return "0.0000%";
-       return noDecimals(x.toString()) + "." + justDecimals(x.toString(), 4) + "%";
+    if (x.toString().indexOf("e-") !== -1) return "0.0000%";
+    return noDecimals(x.toString()) + "." + justDecimals(x.toString(), 4) + "%";
   }
   if (typeof x === "number" && x < 1) return x.toString() + "%";
   if (x == 0.0) return x.toString() + "?";
@@ -120,7 +120,8 @@ export const niceDate = (strIso: string): string => {
     const _month = months[parseInt(parts[1])];
     const _day = parts[2];
     let out = "";
-    if ((new Date().getTime() - new Date(strIso).getTime()) > 1000*3600*24*365 ) {
+    let diff = new Date().getTime() - new Date(strIso).getTime();
+    if (diff < 0 || diff > 1000 * 3600 * 24 * 365) {
       out = parts[0] + ", ";
     }
     return out + _month + " " + _day;
@@ -130,7 +131,8 @@ export const niceDate = (strIso: string): string => {
   const _day = date.getUTCDate();
   const _month = months[date.getUTCMonth()];
   let out = "";
-  if ((new Date().getTime() - date.getTime()) > 1000*3600*24*365 ) {
+  let diff = new Date().getTime() - new Date(strIso).getTime();
+  if (diff < 0 || diff > 1000 * 3600 * 24 * 365) {
     out += date.getUTCFullYear() + ", ";
   }
   return out + _month + " " + pad2(_day);
@@ -176,11 +178,11 @@ export const withDecimals = (input: string, decimals: number): string => {
 
 // Parses single HEX string into array of big integers
 export const toBigIntArray = (hex: string): Array<BigInt> => {
-   const out = new Array<BigInt>();
-   // split hex string into chunks of 32 bytes
-   const chunks = hex.match(/.{1,64}/g) || [];
-   chunks.forEach((chunk: string) => {
-      out.push(BigInt("0x" + chunk));
-   });
-   return out;
-}
+  const out = new Array<BigInt>();
+  // split hex string into chunks of 32 bytes
+  const chunks = hex.match(/.{1,64}/g) || [];
+  chunks.forEach((chunk: string) => {
+    out.push(BigInt("0x" + chunk));
+  });
+  return out;
+};
