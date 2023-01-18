@@ -117,12 +117,12 @@ export const niceDate = (strIso: string): string => {
   }
   if (typeof strIso === "string") {
     const parts: Array<string> = strIso.replace(/T.+$/, "").split("-");
-    let out = "";
-    if (parts[0] != "" + new Date().getUTCFullYear()) {
-      out = parts[0] + ", ";
-    }
     const _month = months[parseInt(parts[1])];
     const _day = parts[2];
+    let out = "";
+    if ((new Date().getTime() - new Date(strIso).getTime()) > 1000*3600*24*365 ) {
+      out = parts[0] + ", ";
+    }
     return out + _month + " " + _day;
   }
 
@@ -130,7 +130,7 @@ export const niceDate = (strIso: string): string => {
   const _day = date.getUTCDate();
   const _month = months[date.getUTCMonth()];
   let out = "";
-  if (new Date().getUTCFullYear() != date.getUTCFullYear()) {
+  if ((new Date().getTime() - date.getTime()) > 1000*3600*24*365 ) {
     out += date.getUTCFullYear() + ", ";
   }
   return out + _month + " " + pad2(_day);
