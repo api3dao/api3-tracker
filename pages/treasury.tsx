@@ -72,6 +72,7 @@ const TreasuryPage: NextPage = (props: any) => {
             </div>
           ))}
         </div>
+        <div className="pb-20">&nbsp;</div>
       </main>
 
       <Footer

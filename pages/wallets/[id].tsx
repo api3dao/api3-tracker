@@ -82,6 +82,7 @@ const WalletDetailsPage: NextPage = (props: any) => {
             votings={votings}
             list={WalletEvents.fromList(events)}
           />
+          <div className="pb-20">&nbsp;</div>
         </main>
       ) : (
         <div>

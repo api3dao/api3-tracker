@@ -52,6 +52,7 @@ const RewardsPage: NextPage = (props: any) => {
           supply={supply}
         />}
         {(!isEmpty) ? <RewardsList list={latest} />: null}
+        <div className="pb-20">&nbsp;</div>
       </main>
 
       <Footer

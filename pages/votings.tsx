@@ -81,6 +81,7 @@ const VotingsPage: NextPage = (props: any) => {
             ) : null}
           </div>
         )}
+        <div className="pb-20">&nbsp;</div>
       </main>
       <Footer
         showGas={gas}

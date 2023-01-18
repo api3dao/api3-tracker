@@ -62,6 +62,7 @@ const VotingDetailsPage: NextPage = (props: any) => {
               totalStake={voting.totalStaked}
             />
           </div>
+          <div className="pb-20">&nbsp;</div>
         </main>
       ) : (
         <div>
