@@ -26,10 +26,10 @@ export const StakingTrend = (props: IStakingTrendProps) => {
       "DAO staking target is not reached, and APR is at its maximum of 75%";
   else if (goingUp && !isMax)
     note =
-      "DAO staking target is not reached, so APR will be increased by 1% for the next epoch until it reaches 75%";
+      "DAO staking target is not reached, so APR will increase by 1% for the next epochs until the target is met or APR reaches 75%";
   else
     note =
-      "DAO staking target is reached, so APR will be decreased by 1% for the next epoch until it reaches 2.5%";
+      "DAO staking target is reached, so APR will decrease by 1% for the next epochs until APR reaches 2.5%";
 
   const debugMsg = `apr=${props.apr} staked=${props.totalStaked} target=${props.stakingTarget}`;
   return (
