@@ -167,6 +167,13 @@ table.table {
   width: 100%;
   margin: 20px 0px;
   border-collapse: collapse;
+  position: relative;
+}
+
+table.table thead th {
+  background: black;
+  position: sticky;
+  top: 105px; /* required for the stickiness */
 }
 
 table.table tbody td {
