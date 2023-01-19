@@ -119,22 +119,22 @@ export const niceDate = (strIso: string): string => {
     const parts: Array<string> = strIso.replace(/T.+$/, "").split("-");
     const _month = months[parseInt(parts[1])];
     const _day = parts[2];
-    let out = "";
-    let diff = new Date().getTime() - new Date(strIso).getTime();
-    if (diff < 0 || diff > 1000 * 3600 * 24 * 365) {
-      out = parts[0] + ", ";
-    }
+    // let out = "";
+    // let diff = new Date().getTime() - new Date(strIso).getTime();
+    // if (diff < 0 || diff > 1000 * 3600 * 24 * 365) {
+    let out = parts[0] + ", ";
+    // }
     return out + _month + " " + _day;
   }
 
   const date = new Date(strIso); // from unix number
   const _day = date.getUTCDate();
   const _month = months[date.getUTCMonth()];
-  let out = "";
-  let diff = new Date().getTime() - new Date(strIso).getTime();
-  if (diff < 0 || diff > 1000 * 3600 * 24 * 365) {
-    out += date.getUTCFullYear() + ", ";
-  }
+  // let out = "";
+  // let diff = new Date().getTime() - new Date(strIso).getTime();
+  // if (diff < 0 || diff > 1000 * 3600 * 24 * 365) {
+  let out = date.getUTCFullYear() + ", ";
+  // }
   return out + _month + " " + pad2(_day);
 };
 
