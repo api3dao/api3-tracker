@@ -746,7 +746,7 @@ export const Events = {
         script = (cached[0].data as any)[4];
         votingPower = ethers.BigNumber.from((cached[0].data as any)[3][0]);
       }
-      scriptData = VotingReader.parseScript(script[0]);
+      scriptData = VotingReader.parseScript(script[0]); // there might be something tricky here
 
       totalStaked = new Prisma.Decimal(
         withDecimals(votingPower.toString(), 18)

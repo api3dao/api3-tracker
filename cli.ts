@@ -69,7 +69,7 @@ yargs(hideBin(process.argv))
     builder: (yargs) => {
       return yargs
         .option(`sub`, {
-          choises: ["reset", "download"],
+          choises: ["reset", "download", "votings"],
           type: "string",
           describe: `shares subcommand - reset or download new`,
         })
@@ -89,10 +89,13 @@ yargs(hideBin(process.argv))
           description: "hex address of the member to check its shares",
         });
     },
-    handler: async ({ endpoint, sub, block, member, tag, rpsLimit }) => {
+    handler: async ({ endpoint, sub, member, tag, rpsLimit }) => {
       if (sub == "reset") {
         await Shares.resetAll();
         console.log("shares cache records were deleted");
+      } else if (sub == "votings") {
+          const total = await Shares.downloadVotings(endpoint);
+          console.log(`updated ${total} new records`);
       } else if (sub == "download") {
         if (!tag) {
           const total = await Shares.download(endpoint, member, rpsLimit);

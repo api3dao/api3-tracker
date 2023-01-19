@@ -32,6 +32,7 @@
     "logs:download": "API3TRACKER_ENDPOINT=${API3TRACKER_ENDPOINT:-`chainstate --endpoints -t alchemy,mainnet`} TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts logs download",
     "shares:reset": "TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts shares reset",
     "shares:download": "API3TRACKER_ENDPOINT=${API3TRACKER_ENDPOINT:-`chainstate --endpoints -t alchemy,mainnet`} TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts shares download",
+    "shares:votings": "TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts shares votings",
     "supply:reset": "TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts supply reset",
     "supply:download": "API3TRACKER_ENDPOINT=${API3TRACKER_ENDPOINT:-`chainstate --endpoints -t alchemy,mainnet`} TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts supply download",
     "treasuries:reset": "TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts treasuries reset",

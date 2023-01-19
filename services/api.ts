@@ -115,6 +115,20 @@ export const VotingEvents = {
       })
     ).map((x: any) => ({ ...x }));
   },
+  // fetch event data of the voting start
+  fetchStart: async (votingId: string): Promise<any> => {
+    const list: Array<any> = (await prisma.votingEvent.findMany({
+       where: { votingId, eventName: 'StartVote' },
+    })).map((x: any) => ({ ...x }));
+    return list.length > 0 ? list[0] : null;
+  },
+  // fetch event data of each voting
+  fetchCastData: async (votingId: string): Promise<Array<any>> => {
+    const list: Array<any> = (await prisma.votingEvent.findMany({
+       where: { votingId, eventName: 'CastVote' },
+    })).map((x: any) => ({ ...x.data }));
+    return list;
+  },
   // object mapper
   from: (input: any): IVotingEvent => {
     const feeUsd = new Decimal(input.feeUsd || 0);

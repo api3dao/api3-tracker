@@ -19,13 +19,12 @@ export interface IVotingListProps {
 export const VotingsListThead = () => (
   <thead>
     <tr>
-      <th className="c">#</th>
-      <th className="c">Start Date</th>
-      <th className="c">Type</th>
+      <th className="c w-6">#</th>
+      <th className="c w-24">Start Date</th>
+      <th className="c w-24">Type</th>
       <th className="l">Title</th>
-      <th className="r">For</th>
-      <th className="r">Against</th>
-      <th className="r">Executed</th>
+      <th className="r pr-2 w-10">Votes</th>
+      <th className="c w-10">Status</th>
     </tr>
   </thead>
 );
@@ -41,7 +40,12 @@ export const TransferDetails = (props: ITransferProps) => {
   return (
     <div className="text-sm leading-6">
       <span className="darken">Transfer</span>{" "}
-      <span className="text-color-grey font-bold">{props.transferToken}</span>{" "}
+      {props.transferValue.toString() != "0" ? (
+        <span className="text-color-grey font-bold">
+          {toCurrency(props.transferValue.toString())}
+        </span>
+      ) : null}{" "}
+      <span className="darken">{props.transferToken}</span>{" "}
       <span className="darken">to</span>{" "}
       <Address
         inline={true}
@@ -103,18 +107,16 @@ export const VotingsListTr = (props: IVotingItem) => {
         {item.transferValue ? <TransferDetails {...item} /> : null}
         {props.showGas ? <VotingGasTotals {...item} /> : null}
       </td>
-      <td className="text-right accent">
+      <td className="text-right text-xs pr-2">
         {item.totalFor.toNumber() > 0 ? (
-          <span>
+          <div className="accent">
             {toPct(item.totalFor.mul(100).div(item.totalStaked).toFixed(2))}
-          </span>
+          </div>
         ) : null}
-      </td>
-      <td className="text-right danger">
         {item.totalAgainst.toNumber() > 0 ? (
-          <span>
+          <div className="text-color-error">
             {toPct(item.totalAgainst.mul(100).div(item.totalStaked).toFixed(2))}
-          </span>
+          </div>
         ) : null}
       </td>
       <td className="text-right">
