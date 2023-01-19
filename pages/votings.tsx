@@ -57,20 +57,24 @@ const VotingsPage: NextPage = (props: any) => {
       <Header active="/votings" />
 
       <main>
-        <h1 className="uppercase">API3 DAO Votings</h1>
+        <h1 className="uppercase">API3 DAO Proposals</h1>
         {isEmpty ? (
-          <div className="text-color-grey text-center">No votings yet</div>
+          <div className="text-color-grey text-center">No proposals yet</div>
         ) : (
           <div className="pb-10">
             {pending.length > 0 ? (
               <section className="max-w-screen-lg mx-auto">
+                <div className="text-center text-xl">
+                  {pending.length} Pending Proposal{(pending.length != 1) ? 's' : ''}
+                </div>
                 <VotingsList showGas={gas} list={Votings.fromList(pending)} />
               </section>
             ) : null}
             {executed.length > 0 ? (
               <section className="max-w-screen-lg mx-auto">
                 <div className="text-center text-xl">
-                  {executed.length} Executed Proposals
+                  {executed.length} Executed Proposal{(executed.length != 1) ? 's' : ''}
+
                 </div>
                 <VotingsList showGas={gas} list={Votings.fromList(executed)} />
               </section>
@@ -78,7 +82,8 @@ const VotingsPage: NextPage = (props: any) => {
             {invalid.length > 0 ? (
               <section className="max-w-screen-lg mx-auto">
                 <div className="text-center text-xl">
-                  {invalid.length} Invalid Proposals
+                  {invalid.length} Invalid Proposal{(invalid.length != 1) ? 's' : ''}
+
                 </div>
                 <VotingsList showGas={gas} list={Votings.fromList(invalid)} />
               </section>
@@ -86,7 +91,8 @@ const VotingsPage: NextPage = (props: any) => {
             {rejected.length > 0 ? (
               <section className="max-w-screen-lg mx-auto">
                 <div className="text-center text-xl">
-                  {rejected.length} Rejected Proposals
+                  {rejected.length} Rejected Proposal{(rejected.length != 1) ? 's' : ''}
+
                 </div>
                 <VotingsList showGas={gas} list={Votings.fromList(rejected)} />
               </section>

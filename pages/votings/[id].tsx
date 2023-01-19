@@ -55,7 +55,7 @@ const VotingDetailsPage: NextPage = (props: any) => {
 
       {voting ? (
         <main>
-          <h1 className="text-center uppercase">API3 DAO Voting</h1>
+          <h1 className="text-center uppercase">API3 DAO Proposal</h1>
           <VotingSummary {...Votings.from(voting)} />
           <div className="max-w-screen-lg mx-auto">
             <VotingEventsList
@@ -69,10 +69,10 @@ const VotingDetailsPage: NextPage = (props: any) => {
         </main>
       ) : (
         <div>
-          <h1>404 - Voting Not Found</h1>
+          <h1>404 - Proposal Not Found</h1>
           <meta httpEquiv="refresh" content="2; url=/votings" />
           <div className="text-center text-sm darken">
-            Redirecting to the list of votings...
+            Redirecting to the list of proposals...
           </div>
         </div>
       )}

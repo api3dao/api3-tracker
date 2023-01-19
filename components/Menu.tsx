@@ -25,7 +25,7 @@ const menuItems: Array<IMenuItem> = [
   },
   {
     href: "/votings",
-    title: "Voting",
+    title: "Proposals",
   },
   {
     href: "/treasury",

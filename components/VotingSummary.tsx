@@ -4,8 +4,12 @@ import { noDecimals, toCurrency } from "../services/format";
 import { IVoting } from "../services/types";
 import { Address } from "./Ethscan";
 
+const ucFirst = (s: string): string => {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 export const VotingSummary = (props: IVoting) => {
-  const title = `API3 DAO ${props.status} Proposal Voting`;
+  const title = `API3 DAO ${ucFirst(props.status)} Proposal`;
   let statusClass =
     "text-4xl py-6 my-10 text-align uppercase border border-solid border-color-border";
   let statusText = "";
@@ -87,7 +91,7 @@ export const VotingSummary = (props: IVoting) => {
         </div>
       </div>
       <div className="my-4 text-sm text-color-grey">
-        At the time of the voting DAO had{" "}
+        At the time of the proposal DAO had{" "}
         <span className="font-bold text-color-panel-title">
           {noDecimals(toCurrency(props.totalStaked))}
         </span>{" "}
