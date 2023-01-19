@@ -27,9 +27,11 @@ export async function getServerSideProps() {
   const totalExecutedVotings: number = results[3];
   const lastBlock: IBlockNumber = results[4];
   const current: IEpoch = latest[0];
+  const values = new Map<string,string>(); // values
   return {
     props: {
       webconfig: fetchWebconfig(),
+      values: serializable(values),
       totalCurrentWallets,
       totalExecutedVotings,
       latest: serializable(latest),
@@ -49,13 +51,14 @@ const HomePage: NextPage = (props: any) => {
     totalCurrentWallets,
     totalExecutedVotings,
     webconfig,
+    values,
   } = props;
   const isEmpty: boolean = !current;
   const noSupply: boolean = !supply;
   const [gas, setGas] = useState<boolean>(VoteGas.appearance);
   return (
     <div>
-      <Meta webconfig={webconfig} />
+      <Meta webconfig={webconfig} values={values} />
       <Header active="/" />
       <main>
         <div className="max-w-screen-lg text-centered mx-auto">

@@ -21,7 +21,17 @@ export async function getServerSideProps() {
   const executed: Array<IVoting> = results[1];
   const invalid: Array<IVoting> = results[2];
   const rejected: Array<IVoting> = results[3];
+  const total =
+    pending.length + executed.length + invalid.length + rejected.length;
   const lastBlock: IBlockNumber = results[4];
+
+  const values = new Map<string, string>();
+  values.set("EXECUTED_PROPOSALS", "" + executed.length);
+  values.set("PENDING_PROPOSALS", "" + pending.length);
+  values.set("INVALID_PROPOSALS", "" + invalid.length);
+  values.set("REJECTED_PROPOSALS", "" + rejected.length);
+  values.set("PROPOSALS", "" + total);
+
   return {
     props: {
       webconfig: fetchWebconfig(),
@@ -30,18 +40,20 @@ export async function getServerSideProps() {
       invalid: serializable(invalid),
       rejected: serializable(rejected),
       lastBlock: serializable(lastBlock),
+      values: serializable(values),
     }, // will be passed to the page component as props
   };
 }
 
 const VotingsPage: NextPage = (props: any) => {
-  const { pending, executed, invalid, rejected, lastBlock, webconfig } = props;
+  const { pending, executed, invalid, rejected, lastBlock, webconfig, values } =
+    props;
   const isEmpty =
     pending.length + executed.length + rejected.length + invalid.length === 0;
   const [gas, setGas] = useState<boolean>(VoteGas.appearance);
   return (
     <div>
-      <Meta webconfig={webconfig} page="votings" />
+      <Meta webconfig={webconfig} values={values} page="votings" />
       <Header active="/votings" />
 
       <main>
@@ -90,7 +102,6 @@ const VotingsPage: NextPage = (props: any) => {
         terms={webconfig.terms}
         blockNumber={lastBlock.blockNumber}
       />
-
     </div>
   );
 };

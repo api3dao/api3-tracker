@@ -13,28 +13,28 @@ opengraph:
 
 pages:
   rewards:
-    title: API3 DAO Staking Rewards History
-    description: Explore API3 DAO staking rewards - [TOKENS_MINTED] API3 tokens minted as rewards for DAO members. No wallet connection needed.
+    title: API3 DAO | Staking Rewards
+    description: Explore API3 DAO staking rewards. No wallet connection needed.
 
   treasury:
-    title: API3 DAO Treasury - balances under DAO control
+    title: API3 DAO | Treasury
     description: Explore API3 DAO Treasury balances. No wallet connection is needed
 
   wallets:
-    title: API3 DAO Explore all [MEMBERS] members wallets
+    title: API3 DAO | Explore [MEMBERS] members
     description: "Explore API3 DAO: voting power, shares and full staking rewards history of [MEMBERS] members. No wallet connection is needed"
 
   wallet:
-    title: API3 DAO Member - [MEMBER_NAME] has voting power of [MEMBER_POWER]
-    description:  Explore API3 DAO voting power, shares and full staking history of [MEMBER_NAME]. No wallet connection is needed
+    title: API3 DAO | Member - [MEMBER_NAME]
+    description: "Explore API3 DAO voting power, shares and full staking history of [MEMBER_NAME]. No wallet connection is needed"
 
   votings:
-    title: API3 DAO Tracker - Full Votings History
-    description: Explore [VOTINGS] votings history of API3 DAO. No wallet connection is needed
+    title: API3 DAO | Proposals
+    description: Explore [PROPOSALS] proposals of API3 DAO. No wallet connection is needed
 
   voting:
-    title: API3 DAO Proposal Voting History
-    description: Explore API3 DAO proposal full voting history. No wallet connection is needed
+    title: API3 DAO | Proposal Details
+    description: Explore API3 DAO full proposal history. No wallet connection is needed
 
 
 contracts:

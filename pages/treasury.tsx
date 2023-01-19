@@ -35,9 +35,11 @@ export async function getServerSideProps() {
       };
     })
   );
+  const values = new Map<string,string>();
   return {
     props: {
       webconfig,
+      values: serializable(values),
       list: serializable(list),
       lastBlock: serializable(lastBlock),
     }, // will be passed to the page component as props
@@ -45,12 +47,12 @@ export async function getServerSideProps() {
 }
 
 const TreasuryPage: NextPage = (props: any) => {
-  const { list, lastBlock, webconfig } = props;
+  const { list, lastBlock, webconfig, values } = props;
   const [gas, setGas] = useState<boolean>(VoteGas.appearance);
 
   return (
     <div>
-      <Meta webconfig={webconfig} page="treasury" />
+      <Meta webconfig={webconfig} values={values} page="treasury" />
       <Header active="/treasury" />
 
       <main>

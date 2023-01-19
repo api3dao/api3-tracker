@@ -29,9 +29,12 @@ export async function getServerSideProps(context: any) {
   const lastBlock: IBlockNumber = results[2];
   const addresses = uniqueArray(events.map((x: any) => x.address));
   const members = await Wallets.fetchByAddresses(addresses);
+  const values = new Map<string, string>();
+
   return {
     props: {
       webconfig: fetchWebconfig(),
+      values: serializable(values),
       id,
       voting: serializable(voting),
       events: serializable(events),
@@ -42,12 +45,12 @@ export async function getServerSideProps(context: any) {
 }
 
 const VotingDetailsPage: NextPage = (props: any) => {
-  const { voting, events, lastBlock, webconfig, members } = props;
+  const { voting, events, lastBlock, webconfig, values, members } = props;
   const [gas, setGas] = useState<boolean>(VoteGas.appearance);
 
   return (
     <div>
-      <Meta webconfig={webconfig} page="voting" />
+      <Meta webconfig={webconfig} values={values} page="voting" />
       <Header active="./votings" />
 
       {voting ? (

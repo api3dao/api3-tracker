@@ -31,12 +31,14 @@ export async function getServerSideProps(context: any) {
   const total = results[0].page.total;
   const lastBlock: IBlockNumber = results[1];
   const totalShares: any = results[2];
-
+  const values = new Map<string, string>();
+  values.set('MEMBERS', '' + total);
   return {
     props: {
       q,
       cursor,
       webconfig: fetchWebconfig(),
+      values: serializable(values),
       list: serializable(list),
       total,
       lastBlock: serializable(lastBlock),
@@ -61,7 +63,7 @@ const stringQuery = (input: any, defaultValue: string): string => {
 };
 
 const WalletsPage: NextPage = (props: any) => {
-  const { lastBlock, totalShares, webconfig } = props;
+  const { lastBlock, totalShares, webconfig, values } = props;
   const router = useRouter();
   const q = stringQuery(router.query.q, "");
 
@@ -130,7 +132,7 @@ const WalletsPage: NextPage = (props: any) => {
 
   return (
     <div>
-      <Meta webconfig={webconfig} page="wallets" />
+      <Meta webconfig={webconfig} values={values} page="wallets" />
       <Header active="/wallets" />
       <main>
         <h1>API3 DAO MEMBERS</h1>

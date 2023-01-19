@@ -8,20 +8,38 @@ export interface IMetaProps {
   values?: Map<string, string>;
 }
 
+const withValues = (txt: string, values: Map<string, string>|undefined) => {
+  if (!values) return txt;
+  let out = txt;
+  for (const [_, [k, v]] of values.entries()) {
+    out = out.replaceAll('['+ k + ']', v);
+  }
+  return out;
+};
+
 export const Meta = (props: IMetaProps) => {
   const { opengraph } = props.webconfig;
   const pages = props.webconfig.pages as any;
   const pg = pages[props.page || ""] || ({} as any);
-  const title = pg.title || opengraph.title;
-  const description = pg.description || opengraph.description;
-  const ogTitle = pg.ogTitle || opengraph.ogTitle || title;
-  const ogDescription =
-    pg.ogDescription || opengraph.ogDescription || description;
+
+  const title = withValues(pg.title || opengraph.title, props.values);
+  const description = withValues(
+    pg.description || opengraph.description,
+    props.values
+  );
+  const ogTitle = withValues(
+    pg.ogTitle || opengraph.ogTitle || title,
+    props.values
+  );
+  const ogDescription = withValues(
+    pg.ogDescription || opengraph.ogDescription || description,
+    props.values
+  );
+
   const siteName = pg.siteName || opengraph.siteName;
   const ogImage = pg.image || opengraph.image;
   const ogImageWidth = pg.imageWidth || opengraph.imageWidth;
   const ogImageHeight = pg.imageHeight || opengraph.imageHeight;
-  // TODO: map props.values to have templates
   return (
     <Head>
       <title>{title}</title>

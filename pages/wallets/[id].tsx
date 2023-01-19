@@ -42,9 +42,20 @@ export async function getServerSideProps(context: any) {
   const totalShares: any = results[4];
   const delegationsFrom: Array<IDelegation> = results[5];
   const delegationsTo: Array<IDelegation> = results[6];
+  const values = new Map<string, string>();
+  let memberName = '';
+  let memberPower = '';
+  if (wallet) {
+    memberName = '0x' + wallet.address.toString();
+    if (wallet.ensName) memberName = wallet.ensName + ' (' + memberName + ')';
+    memberPower = wallet.userVotingPower.toString() + ' shares';
+  }
+  values.set('MEMBER_NAME', memberName);
+  values.set('MEMBER_POWER', memberPower);
   return {
     props: {
       webconfig: fetchWebconfig(),
+      values: serializable(values),
       id,
       wallet: serializable(wallet),
       events: serializable(events),
@@ -58,13 +69,13 @@ export async function getServerSideProps(context: any) {
 }
 
 const WalletDetailsPage: NextPage = (props: any) => {
-  const { lastBlock, wallet, events, totalShares, votings, webconfig } = props;
+  const { lastBlock, wallet, events, totalShares, votings, webconfig, values } = props;
   const { delegationsFrom, delegationsTo } = props;
   const total = totalShares;
   const [gas, setGas] = useState<boolean>(VoteGas.appearance);
   return (
     <div>
-      <Meta webconfig={webconfig} page="wallet" />
+      <Meta webconfig={webconfig} values={values} page="wallet" />
       <Header active="./wallets" />
       {wallet ? (
         <main>
