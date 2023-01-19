@@ -53,13 +53,13 @@ export const WalletSummary = (props: IWalletSummaryProps) => {
         <div>
           <div className="lg:mt-6 lg:flex border-t border-b border-solid border-color-panel-border">
             <div className="flex-1">
-              <div className={classTitle}>Deposited</div>
+              <div className={classTitle}>Total Deposited</div>
               <div className={classValue}>
                 {noDecimals(toCurrency(wallet.userDeposited))}
               </div>
             </div>
             <div className="flex-1">
-              <div className={classTitle}>Withdrawn</div>
+              <div className={classTitle}>Total Withdrawn</div>
               <div className={classValue}>{noDecimals(toCurrency(wallet.userWithdrew))}</div>
             </div>
           </div>

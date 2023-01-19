@@ -14,7 +14,7 @@ const badges = [
   {
     name: "delegates",
     className: "bg-color-panel-title text-color-body",
-    title: "This member is delegating his shares to another member",
+    title: "This member is delegating to another member",
   },
   {
     name: "ens",
@@ -24,7 +24,7 @@ const badges = [
   {
     name: "voter",
     className: "bg-color-panel-title text-color-body",
-    title: "This member participated in votings",
+    title: "This member voted for proposals",
   },
   {
     name: "withdrawn",
@@ -39,7 +39,7 @@ const badges = [
   {
     name: "unstaking",
     className: "bg-color-panel-title text-color-body",
-    title: "Member in the process of unstaking his shares",
+    title: "Member is unstaking his shares",
   },
   /* {
     name: "deposited",
