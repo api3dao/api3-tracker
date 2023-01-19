@@ -166,7 +166,8 @@ label.cell-title {
 table.table {
   width: 100%;
   margin: 20px 0px;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0px;
   position: relative;
 }
 
@@ -289,3 +290,4 @@ a.icon {
 .link-icon {
   fill: var(--color-link);
 }
+

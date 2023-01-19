@@ -15,7 +15,7 @@ export const Footer = (props: IFooterProps) => {
   // const onToggleGas = () => { localStorage.setItem("GAS", showGas ? "HIDDEN" : "VISIBLE"); props.changeGas(!showGas); };
   return (
     <footer>
-      <div className="bg-color-body text-color-text md:fixed md:bottom-0 md:left-0 md:z-20 w-full">
+      <div className="bg-color-body border-t border-2px border-solid border-color-cell-border text-color-text md:fixed md:bottom-0 md:left-0 md:z-20 w-full">
         <div className="text-center my-2 text-sm">
           <span className="text-center block leading-6 md:inline md:text-left">
             {" "}

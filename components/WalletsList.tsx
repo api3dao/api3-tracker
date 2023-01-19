@@ -21,11 +21,11 @@ export const WalletsListThead = () => (
   <thead>
     <tr>
       <th className="text-center">#</th>
-      <th className="text-center">Joined</th>
-      <th className="text-center">Updated</th>
-      <th className="text-left">Wallet</th>
-      <th className="text-right">Owns</th>
-      <th className="text-right">%</th>
+      <th className="text-center" title="Date of the first on-chain event related to this member">Joined</th>
+      <th className="text-center" title="Date of the latest on-chain event related to this member">Updated</th>
+      <th className="text-left" title="Member address, ENS name and classification">Wallet</th>
+      <th className="text-right" title="Shares that are owned by this member">Owns</th>
+      <th className="text-right" title="% of the voting power">%</th>
       <th className="text-right">Voting Power</th>
     </tr>
   </thead>
