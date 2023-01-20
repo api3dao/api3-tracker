@@ -35,7 +35,7 @@ export async function getServerSideProps() {
       };
     })
   );
-  const values = new Map<string,string>();
+  const values = new Map<string, string>();
   return {
     props: {
       webconfig,
@@ -56,7 +56,7 @@ const TreasuryPage: NextPage = (props: any) => {
       <Header active="/treasury" />
 
       <main>
-        <div className="inner">
+        <div className="lg:min-h-screen">
           <h1>API3 DAO TREASURIES</h1>
           <p className="centered darken">
             API3 DAO currently operates {list.length || 0} treasuries.
@@ -66,15 +66,15 @@ const TreasuryPage: NextPage = (props: any) => {
               Balances below are updated each hour.
             </p>
           ) : null}
+          <div className="max-w-screen-lg lg:flex justify-center my-0 mx-auto">
+            {list.map((x: any) => (
+              <div key={x.title} className="flex-1 mx-auto">
+                <Treasury {...x} />
+              </div>
+            ))}
+          </div>
+          <div className="pb-20">&nbsp;</div>
         </div>
-        <div className="max-w-screen-lg lg:flex justify-center my-0 mx-auto">
-          {list.map((x: any) => (
-            <div key={x.title} className="flex-1 mx-auto">
-              <Treasury {...x} />
-            </div>
-          ))}
-        </div>
-        <div className="pb-20">&nbsp;</div>
       </main>
 
       <Footer
