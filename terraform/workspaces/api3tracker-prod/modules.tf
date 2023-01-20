@@ -15,6 +15,7 @@ module "api3tracker" {
   source = "../../app/api3tracker"
   trusted_ips = []
   enable_metrics = true
+  enable_server_monitoring = true
   webconfig = file("./webconfig.yaml")
 
   https = 1
