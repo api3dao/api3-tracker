@@ -9,10 +9,12 @@ export type Badge =
   | "grant"
   | "supporter"
   | "withdrawn"
-  | "delegates"
+  | "delegate"
+  | "delegator"
   | "deposited"
   | "unstaking"
   | "voter"
+  | "proposer"
   | "vested";
 
 const Wordlist = {
@@ -454,7 +456,7 @@ export const Batch = {
         delegation ? delegation.userShares : 0
       );
       if (delegation) { // delegates badge should be received
-        const badge = "delegates";
+        const badge = "delegator";
         member.badges = Wordlist.add(member.badges, badge);
         if (member.tags) {
           member.tags = Wordlist.add(member.tags, badge);

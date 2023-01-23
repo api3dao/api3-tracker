@@ -1013,7 +1013,7 @@ export const Events = {
           }
 
           if (decoded.signature == "StartVote(uint256,address,string)") {
-            await Batch.ensureExists(from, blockDt, "voter", matchFrom);
+            await Batch.ensureExists(from, blockDt, "proposer", matchFrom);
             if (
               await Events.processVote(
                 blockInfo,

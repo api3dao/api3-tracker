@@ -7,14 +7,19 @@ interface IBadgerProps {
 const classBadge = "rounded text-xs mr-2 px-2 py-0.5 ";
 const badges = [
   {
-    name: "delegates",
+    name: "delegate", /// previously: delegates
+    className: "bg-color-warning text-color-body",
+    title: "This member is delegated to vote by another member",
+  },
+  {
+    name: "delegator", /// previously: delegates
     className: "bg-color-panel-title text-color-body",
     title: "This member is delegating to another member",
   },
   {
-    name: "ens",
-    className: "bg-color-panel-title text-color-body",
-    title: "This member has ENS name",
+    name: "proposer",
+    className: "bg-color-success text-color-body",
+    title: "This member created proposals",
   },
   {
     name: "voter",
