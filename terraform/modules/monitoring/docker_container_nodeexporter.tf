@@ -1,7 +1,7 @@
 resource "docker_container" nodeexporter {
     count = var.enable ? 1 : 0
 
-    image = docker_image.nodeexporter.latest
+    image = docker_image.nodeexporter.image_id
     name  = "${local.nodeexporter_shortname}-${var.network_params.postfix}"
 
     restart = "always"

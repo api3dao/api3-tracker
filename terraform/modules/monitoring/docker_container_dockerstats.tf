@@ -1,7 +1,7 @@
 resource "docker_container" dockerstats {
     count = var.enable ? 1 : 0
 
-    image = docker_image.dockerstats.latest
+    image = docker_image.dockerstats.image_id
     name  = "${local.dockerstats_shortname}-${var.network_params.postfix}"
     restart = "always"
 

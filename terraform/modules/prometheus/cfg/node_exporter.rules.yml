@@ -1,0 +1,52 @@
+groups:
+  - name: node_exporter
+    rules:
+    - alert: Unreachable
+      expr: up == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Unreachable"
+        description: "{{$labels.instance}} of job {{$labels.job}} has been down for more than 1 minute or external network is not available"
+    - alert: ServerLoad
+      expr: node_load5 / count by (instance, job) (node_cpu_seconds_total{mode="idle"}) >= 0.95
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Instance {{$labels.instance}} is overloaded"
+        description: "{{$labels.instance}} of job {{$labels.job}} has been overloaded for more than 1 minute"
+    - alert: HostOutOfMemory
+      expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host out of memory (instance {{ $labels.instance }})
+        description: "Node memory is filling up (< 10% left)\n  VALUE = {{ $value }}"
+    - alert: HostMemoryUnderMemoryPressure
+      expr: rate(node_vmstat_pgmajfault[1m]) > 1000
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host memory under memory pressure ({{ $labels.job }})
+        description: "The node is under heavy memory pressure. High rate of major page faults\n{{ $value }}"
+    - alert: HostOutOfDiskSpace
+      expr: (node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 5 and ON (instance, device, mountpoint) node_filesystem_readonly == 0
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host out of disk space ({{ $labels.job }})
+        description: "Disk is almost full (< 5% left)\n{{ $value }}"
+    - alert: HostDiskWillFillIn24Hours
+      expr: (node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 10 and ON (instance, device, mountpoint) predict_linear(node_filesystem_avail_bytes{fstype!~"tmpfs"}[1h], 24 * 3600) < 0 and ON (instance, device, mountpoint) node_filesystem_readonly == 0
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host disk will fill in 24 hours ({{ $labels.job }})
+        description: "Filesystem is predicted to run out of space within the next 24 hours at current write rate\n{{ $value }}"
+
