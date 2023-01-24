@@ -7,11 +7,6 @@ interface IBadgerProps {
 const classBadge = "rounded text-xs mr-2 px-2 py-0.5 ";
 const badges = [
   {
-    name: "vested",
-    className: "bg-color-panel-title text-color-body",
-    title: "Some shares of this member were vested",
-  },
-  {
     name: "delegates",
     className: "bg-color-panel-title text-color-body",
     title: "This member is delegating to another member",
@@ -26,6 +21,11 @@ const badges = [
     className: "bg-color-panel-title text-color-body",
     title: "This member voted for proposals",
   },
+  /*{
+    name: "vested",
+    className: "bg-color-panel-title text-color-body",
+    title: "Some shares of this member were vested",
+  },
   {
     name: "withdrawn",
     className: "bg-color-error text-color-panel-title",
@@ -35,7 +35,7 @@ const badges = [
     name: "supporter",
     className: "bg-color-success text-color-body",
     title: "API3 tokens are not vested, member can withdraw, but never did",
-  },
+  }, */
   {
     name: "unstaking",
     className: "bg-color-panel-title text-color-body",
