@@ -34,7 +34,6 @@ const menuItems: Array<IMenuItem> = [
 ];
 
 export const Menu = (props: IMenuProps) => {
-  // TODO: base URL
   return (
     <div className="lg:flex lg:items-end">
       {menuItems.map((item) => {

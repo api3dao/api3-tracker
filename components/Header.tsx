@@ -1,5 +1,6 @@
 import React from "react";
 import { Menu } from "./Menu";
+import Link from "next/link";
 
 interface IHeader {
   active: string;
@@ -47,6 +48,9 @@ export const Header = (props: IHeader) => {
   const [state, setState] = React.useState<IHeaderState>({
     mobileOpen: false,
   });
+  const hide = () => {
+    setState({ ...state, mobileOpen: false });
+  };
   const toggle = () => {
     setState({ ...state, mobileOpen: !state.mobileOpen });
   };
@@ -55,9 +59,9 @@ export const Header = (props: IHeader) => {
       <header className="fixed bg-color-body w-full z-10 top-0 left-0 lg:pb-1 border-b border-1px border-solid">
         <div className="hidden lg:flex items-center mx-auto max-w-screen-lg">
           <div className="flex flex-col py-2">
-            <span className="text-color-menu-active text-5xl py-2 text-center font-bold">
+            <Link href='/' className="text-color-menu-active text-5xl py-2 text-center font-bold">
               API3 DAO Tracker
-            </span>
+            </Link>
             <span className="text-color-accent text-sm text-left">
               on-chain analytics: members, staking rewards, API3 token supply
             </span>
@@ -66,7 +70,11 @@ export const Header = (props: IHeader) => {
           <Menu active={props.active} />
         </div>
         <div className="lg:hidden flex p-3">
-          <div className="flex-1">&nbsp;</div>
+          <div className="flex-1">
+            <Link href="/" onClick={hide}>
+              <img src="/API3x32-white-iso.png" alt="API3 DAO Tracker" />
+            </Link>
+          </div>
           <button onClick={toggle}>
             {state.mobileOpen ? iconClose : iconMenu}
           </button>
