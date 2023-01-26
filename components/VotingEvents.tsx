@@ -28,7 +28,7 @@ export const VotingEventsListThead = () => (
       <th className="text-center">Event</th>
       <th className="text-left">User</th>
       <th className="text-right">Cast</th>
-      <th className="text-right">Shares</th>
+      <th className="text-right">Voting Power</th>
       <th className="text-right">%</th>
     </tr>
   </thead>

@@ -135,7 +135,7 @@ const SharesOfUser = (props: ISharesOfUserProps) => {
       ) : null}
       {unstakeShares != "0" ? (
         <span>
-          Unstake Shares:{" "}
+          Unstaked:{" "}
           <span className="text-color-panel-title">
             {toCurrency(unstakeShares)}
           </span>{" "}
@@ -180,7 +180,7 @@ const EventDetails = (props: IEventDetails) => {
             <span className="text-color-panel-title">
               {noDecimals(toCurrency(totalShares))}
             </span>
-            {" shares). "}
+            {"). "}
           </div>
           <div key={1} className="text-xs darken">
             Rewarded with{" "}
@@ -191,7 +191,7 @@ const EventDetails = (props: IEventDetails) => {
             <span className="text-color-panel-title">
               {noDecimals(toCurrency(mintedShares))}
             </span>{" "}
-            minted shares{" "}
+            minted{" "}
           </div>
           {userReleasedShares > 0 ? (
             <div key={2} className="text-xs darken">
@@ -199,7 +199,6 @@ const EventDetails = (props: IEventDetails) => {
               <span className="text-color-panel-title">
                 {noDecimals(toCurrency(userReleasedShares))}
               </span>
-              {" shares "}
             </div>
           ) : null}
         </div>
@@ -255,12 +254,10 @@ const EventDetails = (props: IEventDetails) => {
               from.replace("0x", "").toLowerCase() == thisWallet ? to : from
             }
           />{" "}
-          <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
-          shares.
+          <span className="text-color-panel-title">{toCurrency(shares)}</span>{". "}
           <span className={props.wide ? "ml-1" : "block"}>
             Total:{" "}
-            <span className="text-color-panel-title">{toCurrency(total)}</span>{" "}
-            shares.{" "}
+            <span className="text-color-panel-title">{toCurrency(total)}</span>{". "}
           </span>
         </div>
       );
@@ -288,8 +285,7 @@ const EventDetails = (props: IEventDetails) => {
               from.replace("0x", "").toLowerCase() == thisWallet ? to : from
             }
           />{" "}
-          <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
-          shares.
+          <span className="text-color-panel-title">{toCurrency(shares)}</span>.
           <span className={props.wide ? "ml-1" : "block"}>
             Delta:{" "}
             <span className="text-color-panel-title">
@@ -297,7 +293,6 @@ const EventDetails = (props: IEventDetails) => {
             </span>{" "}
             Total:{" "}
             <span className="text-color-panel-title">{toCurrency(total)}</span>{" "}
-            shares.{" "}
           </span>
         </div>
       );
@@ -320,10 +315,9 @@ const EventDetails = (props: IEventDetails) => {
             inline={true}
             address={from == thisWallet ? to : from}
           />{" "}
-          <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
-          shares. Total:{" "}
+          <span className="text-color-panel-title">{toCurrency(shares)}</span>
+          . Total:{" "}
           <span className="text-color-panel-title">{toCurrency(total)}</span>{" "}
-          shares.{" "}
         </div>
       );
     }
@@ -354,8 +348,8 @@ const EventDetails = (props: IEventDetails) => {
           tokens. Minted{" "}
           <span className="text-color-panel-title">
             {toCurrency(mintedShares)}
-          </span>{" "}
-          shares. Unstaked{" "}
+          </span>{". "}
+          Unstaked{" "}
           <span className="text-color-panel-title">
             {toCurrency(userUnstaked)}
           </span>{" "}
@@ -364,16 +358,15 @@ const EventDetails = (props: IEventDetails) => {
             User has{" "}
             <span className="text-color-panel-title">
               {toCurrency(userShares)}
-            </span>{" "}
-            shares. Total:{" "}
+            </span>{". "}
+            Total:{" "}
             <span className="text-color-panel-title">
               {toCurrency(totalStake)}
             </span>{" "}
             stake,{" "}
             <span className="text-color-panel-title">
               {toCurrency(totalShares)}
-            </span>{" "}
-            shares.{" "}
+            </span>{". "}
           </span>
         </div>
       );
@@ -406,8 +399,7 @@ const EventDetails = (props: IEventDetails) => {
           stake,{" "}
           <span className="text-color-panel-title">
             {toCurrency(totalShares)}
-          </span>{" "}
-          shares.{" "}
+          </span>{". "}
         </div>
       );
     }
@@ -428,8 +420,8 @@ const EventDetails = (props: IEventDetails) => {
         <div className="text-xs darken leading-4">
           <span className="text-color-panel-title">{toCurrency(amount)}</span>{" "}
           tokens,{" "}
-          <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
-          shares. Scheduled for{" "}
+          <span className="text-color-panel-title">{toCurrency(shares)}</span>{". "}
+          Scheduled for{" "}
           <span className="text-color-panel-title">
             {niceDateTime(dt.toISOString())}
           </span>{" "}
@@ -438,7 +430,6 @@ const EventDetails = (props: IEventDetails) => {
             <span className="text-color-panel-title">
               {toCurrency(userShares)}
             </span>{" "}
-            shares.{" "}
           </span>
         </div>
       );
@@ -567,6 +558,8 @@ const EventDetails = (props: IEventDetails) => {
     }
     case "WithdrawnToPool":
       return null;
+
+    case "Status":
     case "Shares": {
       // fake event for debugging
       const stake = noDecimals(props.data.stake);
@@ -583,7 +576,7 @@ const EventDetails = (props: IEventDetails) => {
           <div className="text-xs darken">
             Owns{" "}
             <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
-            shares out of{" "}
+            out of{" "}
             <span className="text-color-panel-title">
               {toCurrency(totalShares)}
             </span>
@@ -679,7 +672,7 @@ export const WalletEventsListThead = () => (
 );
 
 const isSpecial = (name: string): boolean => {
-  return name == "Rewards" || name == "Shares";
+  return name == "Rewards" || name == "Status" || name == "Shares";
 };
 
 export const WalletEventsListTr = (props: IWalletEventsRowProps) => {
@@ -767,7 +760,7 @@ export const WalletEventsListRow = (props: IWalletEventsRowProps) => {
 const filteredEvents = (props: IWalletEventsListProps): Array<IWalletEvent> => {
   const blocksWithShares = new Map<number, number>();
   props.list.forEach((item: IWalletEvent) => {
-    if (item.eventName === "Shares") {
+    if (item.eventName === "Status" || item.eventName === "Shares") {
       blocksWithShares.set(item.blockNumber, 1);
     }
   });

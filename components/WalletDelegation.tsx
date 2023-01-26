@@ -17,7 +17,7 @@ export const WalletDelegationThead = () => (
         Date
       </th>
       <th className="text-center">From</th>
-      <th className="text-center">Shares</th>
+      <th className="text-center">Delegates</th>
     </tr>
   </thead>
 );
@@ -68,8 +68,7 @@ export const WalletDelegation = (props: IWalletDelegationProps) => {
     <div className="text-center mx-auto">
       {from.length > 0 ? (
         <div className="text-sm sm:mb-5 lg:text-xl text-center text-color-panel-title">
-          This member delegates his {noDecimals(toCurrency(from[0].userShares))}{" "}
-          shares to{" "}
+          This member delegates to{" "}
           <InternalAddress
             className="text-xs"
             inline={true}
@@ -81,8 +80,7 @@ export const WalletDelegation = (props: IWalletDelegationProps) => {
         <div className="text-color-panel-title">
           <h2 className="text-sm lg:text-xl font-bold text-center">
             This member is delegated{" "}
-            {noDecimals(toCurrency(props.userIsDelegated))}
-            {" shares by "}
+            {" by "}
             {toNZ.length} members
           </h2>
           <div className="block sm:hidden">

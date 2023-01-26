@@ -19,21 +19,21 @@ groups:
         summary: Processing is delayed
         description: "Processing blocks is far behind head block {{ $value }}"
 
-    - alert: SharesBlocksNotDownloaded
-      expr: blocks_without_shares > 20
+    - alert: StatusBlocksNotDownloaded
+      expr: blocks_without_status > 20
       for: 0m
       labels:
         severity: warning
       annotations:
-        summary: Blocks without shares update
-        description: "Too many blocks without shares update: {{ $value }}"
+        summary: Blocks without status update
+        description: "Too many blocks without status update: {{ $value }}"
 
-    - alert: SharesMembersNotDownloaded
-      expr: address_without_shares > 20
+    - alert: StatusMembersNotDownloaded
+      expr: address_without_status > 20
       for: 0m
       labels:
         severity: warning
       annotations:
-        summary: Addresses without shares update
-        description: "Too many addresses without shares update: {{ $value }}"
+        summary: Addresses without status update
+        description: "Too many addresses without status update: {{ $value }}"
 

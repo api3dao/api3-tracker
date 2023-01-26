@@ -28,7 +28,7 @@ const uniqueEvents = async (
   });
   // loop 1 - define what blocks are definitely disabled
   for (const event of events) {
-    if (event.eventName === "Shares") {
+    if (event.eventName === "Status" || event.eventName === "Shares") {
       disabledBlocks.set(event.blockNumber, 1);
       lastEvent = event;
     }
@@ -38,7 +38,7 @@ const uniqueEvents = async (
   for (const event of events) {
     if (disabledBlocks.has(event.blockNumber)) continue;
     if (blocks.has(event.blockNumber)) continue;
-    event.eventName = "Shares";
+    event.eventName = "Status";
     event.txIndex = 255;
     event.logIndex = 255;
     event.gasPrice = BigInt(0);

@@ -24,7 +24,7 @@ export const WalletsListThead = () => (
       <th className="text-center" title="Date of the first on-chain event related to this member">Joined</th>
       <th className="text-center" title="Date of the latest on-chain event related to this member">Updated</th>
       <th className="text-left" title="Member address, ENS name and classification">Wallet</th>
-      <th className="text-right" title="Shares that are owned by this member">Owns</th>
+      <th className="text-right" title="Owned by this member">Owns</th>
       <th className="text-right" title="% of the voting power">%</th>
       <th className="text-right" title="Voting power is owned shares plus delegated">Voting Power</th>
     </tr>

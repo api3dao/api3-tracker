@@ -134,49 +134,49 @@ export default async function handler(
     out.push('votings{status="' + v.status + '"} ' + v.total);
   }
 
-  // 6. Shares estimates - of downloaded user state history
+  // 6. Status estimates - of downloaded user state history
   out.push("");
-  const blocksWithShares = (await prisma.memberEvent.groupBy({
-      where: { eventName: "Shares" },
+  const blocksWithStatus = (await prisma.memberEvent.groupBy({
+      where: { eventName: "Status" },
       by: [ "blockNumber" ],
   })).reduce((map: any, obj: any) => {
       map[obj.blockNumber] = 1;
       return map;
   }, {});
 
-  const blocksWithoutSharesTotal = (await prisma.memberEvent.groupBy({
-      where: { eventName: { not: "Shares" }},
+  const blocksWithoutStatusTotal= (await prisma.memberEvent.groupBy({
+      where: { eventName: { not: "Status" }},
       by: [ "blockNumber" ],
   })).map((x: any) => (
-      1 - ( blocksWithShares[x.blockNumber] || 0)
+      1 - ( blocksWithStatus[x.blockNumber] || 0)
   )).reduce((partialSum, a) => (partialSum + a), 0);
 
   out.push("# HELP blocks_without_shares returns the estimate amount of history to be downloaded");
   out.push("# TYPE blocks_without_shares gauge");
-  out.push("blocks_without_shares " + blocksWithoutSharesTotal);
-  out.push("# HELP blocks_with_shares returns the estimate amount of history blocks that were already downloaded");
-  out.push("# TYPE blocks_with_shares gauge");
-  out.push("blocks_with_shares " + Object.keys(blocksWithShares).length);
+  out.push("blocks_without_status " + blocksWithoutStatusTotal);
+  out.push("# HELP blocks_with_status returns the estimate amount of history blocks that were already downloaded");
+  out.push("# TYPE blocks_with_status gauge");
+  out.push("blocks_with_status "+ Object.keys(blocksWithStatus).length);
 
-  const addressWithShares = (await prisma.memberEvent.groupBy({
-      where: { eventName: "Shares" },
+  const addressWithStatus = (await prisma.memberEvent.groupBy({
+      where: { eventName: "Status" },
       by: [ "address" ],
   })).reduce((map: any, obj: any) => {
       map[obj.address] = 1;
       return map;
   }, {});
   const addressWithRewardsTotal = (await prisma.memberEvent.groupBy({
-      where: { eventName: { not: "Shares" }},
+      where: { eventName: { not: "Status" }},
       by: [ "address" ],
   })).map((x: any) => (
-      1 - (addressWithShares[x.address] || 0)
+      1 - (addressWithStatus[x.address] || 0)
   )).reduce((partialSum, a) => (partialSum + a), 0);
-  out.push("# HELP address_without_shares returns the amount of members that have no any shares history checked");
-  out.push("# TYPE address_without_shares gauge");
-  out.push("address_without_shares " + addressWithRewardsTotal);
-  out.push("# HELP address_with_shares returns the estimate amount of addresses that were already downloaded");
-  out.push("# TYPE address_with_shares gauge");
-  out.push("address_with_shares " + Object.keys(addressWithShares).length);
+  out.push("# HELP address_without_status returns the amount of members that have no any shares history checked");
+  out.push("# TYPE address_without_status gauge");
+  out.push("address_without_status " + addressWithRewardsTotal);
+  out.push("# HELP address_with_status returns the estimate amount of addresses that were already downloaded");
+  out.push("# TYPE address_with_status gauge");
+  out.push("address_with_status " + Object.keys(addressWithStatus).length);
 
   res.status(200).send(out.join("\n"));
 }
