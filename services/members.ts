@@ -455,7 +455,8 @@ export const Batch = {
       member.userDelegates = new Prisma.Decimal(
         delegation ? delegation.userShares : 0
       );
-      if (delegation) { // delegates badge should be received
+      if (delegation) {
+        // delegates badge should be received
         const badge = "delegator";
         member.badges = Wordlist.add(member.badges, badge);
         if (member.tags) {
@@ -466,6 +467,15 @@ export const Batch = {
       }
       // find what are the delegations TO the member
       member.userIsDelegated = delegated;
+      if (delegated) {
+        const badge = "delegate";
+        member.badges = Wordlist.add(member.badges, badge);
+        if (member.tags) {
+          member.tags = Wordlist.add(member.tags, badge);
+        } else {
+          member.tags = badge;
+        }
+      }
       member.userVotingPower = new Prisma.Decimal(member.userShare).add(
         member.userIsDelegated
       );
@@ -587,10 +597,7 @@ export const Batch = {
         m1.userStake = m1.userStake.sub(amount);
 
         Batch.ensureUpdated(m1);
-        await Batch.updateTotals(
-          Address.asBuffer(m1.address),
-          verboseTotals
-        );
+        await Batch.updateTotals(Address.asBuffer(m1.address), verboseTotals);
         return m1;
       }
       case "Delegated(address,address,uint256,uint256)":
@@ -667,10 +674,9 @@ export const Batch = {
         const m1 = Batch.removeBadge(member, "supporter", blockDt, verbose);
         const m2 = Batch.removeBadge(m1, "unstaking", blockDt, verbose);
         const m3 = Batch.addBadge(m2, "withdrawn", blockDt, verbose);
-        const tokens = new Prisma.Decimal(withDecimals(
-          ethers.BigNumber.from(args[1]).toString(),
-          18
-        ));
+        const tokens = new Prisma.Decimal(
+          withDecimals(ethers.BigNumber.from(args[1]).toString(), 18)
+        );
         m3.userWithdrew = m3.userWithdrew.add(tokens);
         Batch.ensureUpdated(m3);
 
