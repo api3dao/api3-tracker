@@ -21,7 +21,7 @@ pages:
     description: Explore API3 DAO Treasury balances. No wallet connection is needed
 
   wallets:
-    title: API3 DAO | Explore [MEMBERS] members
+    title: API3 DAO | Explore [MEMBERS] active members
     description: "Explore API3 DAO: voting power, shares and full staking rewards history of [MEMBERS] members. No wallet connection is needed"
 
   wallet:

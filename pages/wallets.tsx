@@ -26,13 +26,14 @@ export async function getServerSideProps(context: any) {
     Wallets.fetchList(q, cursor),
     Blocks.fetchLast(),
     CacheTotals.fetch(),
+    Wallets.totalActive(),
   ]);
   const list: Array<IWallet> = results[0].list;
-  const total = results[0].page.total;
+  const total = results[3];
   const lastBlock: IBlockNumber = results[1];
   const totalShares: any = results[2];
   const values = new Map<string, string>();
-  values.set('MEMBERS', '' + total);
+  values.set("MEMBERS", "" + total);
   return {
     props: {
       q,
@@ -48,7 +49,7 @@ export async function getServerSideProps(context: any) {
 }
 
 interface WalletsPageState {
-  q: String,
+  q: String;
   list: Array<IWallet>;
   total: number;
   hasMore: boolean;
@@ -56,9 +57,9 @@ interface WalletsPageState {
 }
 
 const stringQuery = (input: any, defaultValue: string): string => {
-  if (typeof input === 'undefined') return defaultValue;
-  if (typeof input === 'number') return defaultValue + "";
-  if (typeof input === 'string') return input;
+  if (typeof input === "undefined") return defaultValue;
+  if (typeof input === "number") return defaultValue + "";
+  if (typeof input === "string") return input;
   return input[0];
 };
 
@@ -77,7 +78,7 @@ const WalletsPage: NextPage = (props: any) => {
     total: props.total || 0,
     hasMore: props.total > props.list.length,
   });
-  const setData = (q: string) => ((response: any) => {
+  const setData = (q: string) => (response: any) => {
     setState({
       q,
       list: response.list,
@@ -85,7 +86,7 @@ const WalletsPage: NextPage = (props: any) => {
       total: response.page.total,
       hasMore: response.page.total > response.list.length,
     });
-  });
+  };
   const appendData = (response: any) => {
     const list = state.list.slice();
     for (const item of response.list) {
@@ -103,14 +104,18 @@ const WalletsPage: NextPage = (props: any) => {
   const wallets = state.list;
   const onChange = (value: string) => {
     setLoading(true);
-    Debounced.start("q", () => {
-      router.push("?q=" + value, undefined, { shallow: true });
-      setState({ ...state, q: value || "" });
-      fetcher("/api/json/wallets?q=" + value + "&take=" + state.take)
-        .then(setData(value))
-        .then(() => setLoading(false))
-        .catch((_: any) => setLoading(false));
-    }, 300);
+    Debounced.start(
+      "q",
+      () => {
+        router.push("?q=" + value, undefined, { shallow: true });
+        setState({ ...state, q: value || "" });
+        fetcher("/api/json/wallets?q=" + value + "&take=" + state.take)
+          .then(setData(value))
+          .then(() => setLoading(false))
+          .catch((_: any) => setLoading(false));
+      },
+      300
+    );
   };
 
   const onLoadMore = () => {
@@ -161,7 +166,6 @@ const WalletsPage: NextPage = (props: any) => {
         terms={webconfig.terms}
         blockNumber={lastBlock.blockNumber}
       />
-
     </div>
   );
 };
