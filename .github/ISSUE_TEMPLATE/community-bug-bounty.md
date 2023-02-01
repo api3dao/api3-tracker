@@ -1,8 +1,8 @@
 ---
 name: Community bug bounty
 about: Submissions for the community bug bounty
-title: "[CBB] "
-labels: bug
+title: ''
+labels: cbb
 assignees: ''
 
 ---
