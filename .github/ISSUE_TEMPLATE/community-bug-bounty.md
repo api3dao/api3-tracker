@@ -2,8 +2,8 @@
 name: Community bug bounty
 about: Submissions for the community bug bounty
 title: "[CBB] "
-labels: ''
-assignees: bbenligiray
+labels: bug
+assignees: ''
 
 ---
 
