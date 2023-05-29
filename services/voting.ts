@@ -87,7 +87,7 @@ export const VotingReader = {
 
     let offsetAmt = offset + 20 + 16;
     const bufAmt = buf.slice( offsetAmt, offsetAmt + 16);
-    const amt = BigInt("0x" + bufAmt.toString("hex")).toString(10);
+    const amt = BigInt("0x0" + bufAmt.toString("hex")).toString(10);
 
     return {
       scriptType,
