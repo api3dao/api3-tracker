@@ -5,6 +5,7 @@ module "api3tracker" {
   registry = var.registry
   zone = module.traefik.zone["default"]
   endpoints = var.endpoints
+  coingecko = var.coingecko
   webconfig = var.webconfig
   connection = module.postgres.connection
 }
