@@ -1,5 +1,6 @@
 import yargs from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
+import { EthereumPrice } from "./services/price";
 import { Events } from "./services/sync";
 import { Treasuries } from "./services/treasuries";
 import { Supply } from "./services/supply";
@@ -44,18 +45,30 @@ yargs(hideBin(process.argv))
     command: "logs [sub]",
     describe: "Operations with API3 DAO contract logs",
     builder: (yargs) => {
-      return yargs.option(`sub`, {
-        choises: ["reset", "download"],
-        type: "string",
-        describe: `logs subcommand - reset or download new`,
-      });
+      return yargs
+        .option(`sub`, {
+          choises: ["reset", "download"],
+          type: "string",
+          describe: `logs subcommand - reset or download new`,
+        })
+        .option("coingecko_host", {
+          default: process.env.API3TRACKER_COINGECKO_HOST || "api.coingecko.com",
+          type: "string",
+          description: "Host to use for CoinGecko API",
+        })
+        .option("coingecko_api_key", {
+          default: process.env.API3TRACKER_COINGECKO_API_KEY || "",
+          type: "string",
+          description: "API KEY to be used for CoinGecko-compatible API",
+        });
     },
-    handler: async ({ endpoint, sub }) => {
+    handler: async ({ endpoint, sub, coingecko_host, coingecko_api_key }) => {
       if (sub == "reset") {
         await Events.resetAll();
         console.log("events were deleted");
       } else if (sub == "download") {
-        const total = await Events.download(endpoint);
+        const priceReader = EthereumPrice(coingecko_host, coingecko_api_key);
+        const total = await Events.download(endpoint, priceReader);
         console.log(`downloaded ${total} new events`);
       } else {
         console.error("ERROR: Unknown sub-command");
@@ -94,8 +107,8 @@ yargs(hideBin(process.argv))
         await Shares.resetAll();
         console.log("shares cache records were deleted");
       } else if (sub == "votings") {
-          const total = await Shares.downloadVotings(endpoint);
-          console.log(`updated ${total} new records`);
+        const total = await Shares.downloadVotings(endpoint);
+        console.log(`updated ${total} new records`);
       } else if (sub == "download") {
         if (!tag) {
           const total = await Shares.download(endpoint, member, rpsLimit);
