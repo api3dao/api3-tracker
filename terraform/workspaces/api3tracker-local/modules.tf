@@ -6,6 +6,16 @@ variable api3tracker_archive_endpoint {
   type = string
 }
 
+variable coingecko_host {
+  type = string
+  default = "api.coingecko.com"
+}
+
+variable coingecko_api_key {
+  type = string
+  default = ""
+}
+
 module "api3tracker" {
   source = "../../app/api3tracker"
   trusted_ips = []
@@ -35,10 +45,15 @@ module "api3tracker" {
     archive = var.api3tracker_archive_endpoint
   }
 
+  coingecko = {
+    host = var.coingecko_host
+    api_key = var.coingecko_api_key
+  }
+
   // backups s3 configuration
   aws_backup = {
-    profile = "tracker"
-    bucket = "dao-tracker-backups"
+    profile = "s3_backup"
+    bucket = "api3-dao-tracker-backups"
     path = "tracker"
     exchange_dir = "${path.cwd}/exchange"
   }

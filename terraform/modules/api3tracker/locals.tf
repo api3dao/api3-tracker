@@ -65,6 +65,8 @@ locals {
 
     env = [
         "API3TRACKER_ENDPOINT=${var.endpoints.default}",
+        "API3TRACKER_COINGECKO_HOST=${var.coingecko.host}",
+        "API3TRACKER_COINGECKO_API_KEY=${var.coingecko.api_key}",
         "DATABASE_URL=${var.connection}",
     ]
 

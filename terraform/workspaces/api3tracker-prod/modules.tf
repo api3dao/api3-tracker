@@ -11,6 +11,16 @@ variable api3tracker_endpoint {
   type = string
 }
 
+variable coingecko_host {
+  type = string
+  default = "api.coingecko.com"
+}
+
+variable coingecko_api_key {
+  type = string
+  default = ""
+}
+
 module "api3tracker" {
   source = "../../app/api3tracker"
   trusted_ips = []
@@ -43,16 +53,23 @@ module "api3tracker" {
     }
   ]
 
-  // Hint: use TF_VAR_api3tracker_endpoint to set this up, pointing to Infura or Alchemy JSON+RPC provider
+  // Hint: use terraform.tfvars to set this up securely,
+  // pointing to Infura or Alchemy JSON+RPC provider
   endpoints = {
     default = var.api3tracker_endpoint
     archive = var.api3tracker_archive_endpoint
   }
+  // Hint: use terraform.tfvars to set this up securely
+  coingecko = {
+    host = var.coingecko_host
+    api_key = var.coingecko_api_key
+  }
+
 
   // backups s3 configuration
   aws_backup = {
-    profile = "default"
-    bucket = "dao-tracker-backups"
+    profile = "s3_backup"
+    bucket = "api3-dao-tracker-backups"
     path = "tracker"
     exchange_dir = "${path.cwd}/exchange"
   }

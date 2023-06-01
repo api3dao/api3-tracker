@@ -6,9 +6,9 @@ import { Wallets } from "./../services/api";
 import { noDecimals, withDecimals } from "./../services/format";
 import { BigNumber, ethers } from "ethers";
 import { fetchWebconfig } from "./webconfig";
-import { IWallet, IContract } from "./types";
+import type { IWallet, IContract } from "./types";
 import { Filter, Block, Log, Provider } from "@ethersproject/abstract-provider";
-import { EthereumPrice } from "./../services/price";
+import type { IPriceReader } from "./../services/price";
 import { Shares } from "./../services/shares";
 import { VotingReader } from "./../services/voting";
 import { VoteGas } from "./../services/gas";
@@ -141,7 +141,8 @@ export const BlockLoader = {
   fromLogs: async (
     jsonRpc: Provider,
     blockHash: string,
-    logsList: Array<Log>
+    logsList: Array<Log>,
+    priceReader: IPriceReader
   ): Promise<BlockFullInfo> => {
     const start = new Date().getTime();
 
@@ -155,7 +156,7 @@ export const BlockLoader = {
     const price =
       foundBlock.length > 0
         ? parseFloat(foundBlock[0].price.toString())
-        : await EthereumPrice.at(new Date(block.timestamp * 1000));
+        : await priceReader(new Date(block.timestamp * 1000));
 
     // load receipts for each transaction
     const txs = new Map<string, any>();
@@ -516,7 +517,7 @@ export const Events = {
     blockInfo: BlockFullInfo,
     event: Log,
     tx: any,
-    useArchive: boolean,
+    useArchive: boolean
   ): Promise<boolean> => {
     const start = new Date().getTime();
     const { transactionIndex, transactionHash, logIndex } = event;
@@ -621,14 +622,19 @@ export const Events = {
       totalLocked = totalLocked.add(m.userLockedReward);
 
       if (useArchive) {
-         const data = await Shares.downloadUserAt(endpoint, pool, member.address, blockNumber);
-         const unstaked = withDecimals(data.user[2], 18);
-         member.userLockedReward = new Prisma.Decimal(data.locked);
-         member.userStake = new Prisma.Decimal(data.stake);
-         member.userShare = new Prisma.Decimal(data.shares);
-         member.userVotingPower = new Prisma.Decimal(data.votingPower);
-         member.userUnstake = new Prisma.Decimal(unstaked);
-         Batch.ensureUpdated(member);
+        const data = await Shares.downloadUserAt(
+          endpoint,
+          pool,
+          member.address,
+          blockNumber
+        );
+        const unstaked = withDecimals(data.user[2], 18);
+        member.userLockedReward = new Prisma.Decimal(data.locked);
+        member.userStake = new Prisma.Decimal(data.stake);
+        member.userShare = new Prisma.Decimal(data.shares);
+        member.userVotingPower = new Prisma.Decimal(data.votingPower);
+        member.userUnstake = new Prisma.Decimal(unstaked);
+        Batch.ensureUpdated(member);
       }
     }
 
@@ -897,7 +903,7 @@ export const Events = {
     endpoint: string,
     verbose: SyncVerbosity,
     termination: SyncTermination,
-    useArchive: boolean,
+    useArchive: boolean
   ): Promise<SyncBlockResult> => {
     const start = new Date().getTime();
     VoteGas.reset(); // gas accumulator for the block
@@ -1102,7 +1108,14 @@ export const Events = {
             decoded.signature == "MintedReward(uint256,uint256,uint256,uint256)"
           ) {
             if (
-              await Events.processEpoch(endpoint, pool, blockInfo, event, tx, useArchive)
+              await Events.processEpoch(
+                endpoint,
+                pool,
+                blockInfo,
+                event,
+                tx,
+                useArchive
+              )
             ) {
               if (termination.epoch) {
                 shouldTerminate = true;
@@ -1238,7 +1251,7 @@ export const Events = {
     endpoint: string,
     verbose: SyncVerbosity,
     terminate: SyncTermination,
-    useArchive: boolean,
+    useArchive: boolean
   ) => {
     let total = 0;
     const webconfig = fetchWebconfig();
@@ -1251,7 +1264,7 @@ export const Events = {
           endpoint,
           verbose,
           terminate,
-          useArchive,
+          useArchive
         );
         if (result.shouldTerminate) {
           return result.included ? ++total : total;
@@ -1264,7 +1277,7 @@ export const Events = {
     return total;
   },
 
-  download: async (endpoint: string) => {
+  download: async (endpoint: string, priceReader: IPriceReader) => {
     const webconfig = fetchWebconfig();
     const poolContract = webconfig.contracts?.find(
       ({ name }) => name.toLowerCase() === "api3pool"
@@ -1335,7 +1348,8 @@ export const Events = {
           const fullInfo: BlockFullInfo = await BlockLoader.fromLogs(
             jsonRpc,
             logs[0].blockHash,
-            logs
+            logs,
+            priceReader,
           );
           Sync.saveBlock(fullInfo);
         }
