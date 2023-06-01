@@ -51,7 +51,7 @@ const setCache = async (ts: Date, currencies: ICurrencies) => {
   date.setMilliseconds(0);
   await prisma.priceEthereum.create({
     data: {
-      ts: ts,
+      ts: date,
       eur: currencies.eur,
       usd: currencies.usd,
       rub: currencies.rub,
