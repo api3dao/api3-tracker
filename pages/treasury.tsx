@@ -27,11 +27,16 @@ export async function getServerSideProps() {
         tokens
           .filter((x: any) => x.token === "USDC")
           .map((x: any) => x.value)[0] || 0;
+      const valueETH =
+        tokens
+          .filter((x: any) => x.token === "ETH")
+          .map((x: any) => x.value)[0] || 0;
       return {
         title: ttype.charAt(0).toUpperCase() + ttype.slice(1).toLowerCase(),
         address: toHex(tokens[0].address),
         valueAPI3,
         valueUSDC,
+        valueETH,
       };
     })
   );

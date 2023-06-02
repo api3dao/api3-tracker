@@ -93,6 +93,7 @@ export interface ITreasury {
   address: string;
   valueAPI3?: Prisma.Decimal;
   valueUSDC?: Prisma.Decimal;
+  valueETH?: Prisma.Decimal;
 }
 
 export interface IVoting {

@@ -40,6 +40,7 @@ export const Treasuries = {
     const mapTokens = new Map<string, ITokenContract>();
     mapTokens.set("USDC", { address: usdc, decimals: 6 });
     mapTokens.set("API3", { address: api3, decimals: 18 });
+    mapTokens.set("ETH", { address: "0x0", decimals: 18 });
 
     // known contracts to check
     const v1 = webconfig.contracts?.find(
@@ -60,13 +61,15 @@ export const Treasuries = {
     let updated = 0;
     for (const [tokenSymbol, token] of mapTokens.entries()) {
       // console.log("Reading token", token);
-      const tokenContract = new ethers.Contract(
+      const tokenContract = (token.address == "0x0") ? null : new ethers.Contract(
         token.address,
         abiERC20,
         jsonRpc
       );
       for (const [contractAddress, contractType] of mapAddresses.entries()) {
-        const tokenBalance = await tokenContract.balanceOf(contractAddress);
+        const tokenBalance = (tokenContract) ? await tokenContract.balanceOf(contractAddress) :
+            await jsonRpc.getBalance(contractAddress);
+
         const value = withDecimals(tokenBalance.toString(), token.decimals);
         console.log(contractType, tokenSymbol, value);
         await prisma.$transaction([

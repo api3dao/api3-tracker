@@ -25,6 +25,12 @@ export const Treasury = (props: ITreasury) => {
             {noDecimals(toCurrency(props.valueUSDC))}
           </div>
         </div>
+        <div className="text-center my-5">
+          <h3 className="text-sm text-color-cell-title">ETH</h3>
+          <div className="text-center text-bold text-3xl">
+            {noDecimals(toCurrency(props.valueETH))}
+          </div>
+        </div>
       </div>
     </BorderedPanel>
   );
