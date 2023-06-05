@@ -66,12 +66,19 @@ export default async function handler(
       tokens
         .filter((x: any) => x.token === "USDC")
         .map((x: any) => x.value)[0] || 0;
+    const valueETH =
+      tokens
+        .filter((x: any) => x.token === "ETH")
+        .map((x: any) => x.value)[0] || 0;
     out.push("# HELP treasury_api3: API3 tokens in the treasury");
     out.push("# TYPE treasury_api3: gauge");
     out.push('treasury_api3{name="' + ttype + '"} ' + valueAPI3);
     out.push("# HELP treasury_usdc: USDC tokens in the treasury");
     out.push("# TYPE treasury_usdc: gauge");
     out.push('treasury_usdc{name="' + ttype + '"} ' + valueUSDC);
+    out.push("# HELP treasury_usdc: ETH balance in the treasury");
+    out.push("# TYPE treasury_usdc: gauge");
+    out.push('treasury_eth{name="' + ttype + '"} ' + valueETH);
   }
 
   // 3. supply
