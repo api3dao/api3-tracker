@@ -76,8 +76,8 @@ export default async function handler(
     out.push("# HELP treasury_usdc: USDC tokens in the treasury");
     out.push("# TYPE treasury_usdc: gauge");
     out.push('treasury_usdc{name="' + ttype + '"} ' + valueUSDC);
-    out.push("# HELP treasury_usdc: ETH balance in the treasury");
-    out.push("# TYPE treasury_usdc: gauge");
+    out.push("# HELP treasury_eth: ETH balance in the treasury");
+    out.push("# TYPE treasury_eth: gauge");
     out.push('treasury_eth{name="' + ttype + '"} ' + valueETH);
   }
 
