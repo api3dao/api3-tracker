@@ -576,7 +576,7 @@ const EventDetails = (props: IEventDetails) => {
           <div className="text-xs darken">
             Owns{" "}
             <span className="text-color-panel-title">{toCurrency(shares)}</span>{" "}
-            out of{" "}
+            shares out of{" "}
             <span className="text-color-panel-title">
               {toCurrency(totalShares)}
             </span>
