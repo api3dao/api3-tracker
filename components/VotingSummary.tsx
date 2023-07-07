@@ -1,12 +1,12 @@
 import React from "react";
 import { BorderedPanel } from "./BorderedPanel";
-import { noDecimals, toCurrency } from "../services/format";
+import { withDecimals, noDecimals, toCurrency } from "../services/format";
 import { IVoting } from "../services/types";
 import { Address } from "./Ethscan";
 
 const ucFirst = (s: string): string => {
   return s.charAt(0).toUpperCase() + s.slice(1);
-}
+};
 
 export const VotingSummary = (props: IVoting) => {
   const title = `API3 DAO ${ucFirst(props.status)} Proposal`;
@@ -39,9 +39,12 @@ export const VotingSummary = (props: IVoting) => {
           <span className="font-bold text-color-grey">
             {noDecimals(toCurrency(props.transferValue))}
           </span>{" "}
-          {props.transferToken}{" "}
-           to{" "}
-          <Address inline={true} className="font-bold text-color-grey" address={props.transferAddress} />
+          {props.transferToken} to{" "}
+          <Address
+            inline={true}
+            className="font-bold text-color-grey"
+            address={props.transferAddress}
+          />
         </div>
       ) : null}
       {statusText ? <div className={statusClass}>{statusText}</div> : null}
@@ -62,9 +65,7 @@ export const VotingSummary = (props: IVoting) => {
                 </div>
               </div>
             ) : (
-              <div className="my-20 mt-12 text-sm darken">
-                Nobody voted for
-              </div>
+              <div className="my-20 mt-12 text-sm darken">Nobody voted for</div>
             )}
           </BorderedPanel>
         </div>
@@ -79,7 +80,11 @@ export const VotingSummary = (props: IVoting) => {
                   votes against this proposal
                 </div>
                 <div className="font-bold text-sm">
-                  {props.totalAgainst.mul(100).div(props.totalStaked).toFixed(4)}%
+                  {props.totalAgainst
+                    .mul(100)
+                    .div(props.totalStaked)
+                    .toFixed(4)}
+                  %
                 </div>
               </div>
             ) : (
@@ -105,7 +110,7 @@ export const VotingSummary = (props: IVoting) => {
       <div className="my-4 text-sm text-color-grey">
         Spent{" "}
         <span className="font-bold text-color-panel-title">
-          {toCurrency(props.totalGasUsed)}
+          {withDecimals(props.totalGasUsed + "", 7)}
         </span>{" "}
         ETH in fees, Est{" "}
         <span className="font-bold text-color-panel-title">
