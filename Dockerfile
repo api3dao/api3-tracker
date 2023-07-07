@@ -1,7 +1,6 @@
 FROM node:16.16-alpine3.15 as dependencies
 WORKDIR /app
 COPY package.json yarn.lock ./
-RUN yarn rm-dev
 RUN yarn install --frozen-lockfile
 
 FROM node:16.16-alpine3.15 as builder
