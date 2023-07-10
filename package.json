@@ -75,6 +75,7 @@
     "husky": "8.0.2",
     "postcss": "8.4.19",
     "postcss-cli": "10.0.0",
+    "postcss-import": "^15.1.0",
     "postcss-loader": "7.0.1",
     "prettier": "2.8.0",
     "prettier-plugin-prisma": "3.14.0",
