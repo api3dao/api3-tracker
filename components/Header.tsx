@@ -1,6 +1,7 @@
 import React from "react";
 import { Menu } from "./Menu";
 import Link from "next/link";
+import Image from 'next/image';
 
 interface IHeader {
   active: string;
@@ -71,8 +72,8 @@ export const Header = (props: IHeader) => {
         </div>
         <div className="lg:hidden flex p-3">
           <div className="flex-1">
-            <Link href="/" onClick={hide}>
-              <img src="/API3x32-white-iso.png" alt="API3 DAO Tracker" />
+            <Link href="/" onClick={hide} className="block w-8 h-8">
+              <Image src="/API3x32-white-iso.png" width={32} height={32} alt="API3 DAO Tracker" />
             </Link>
           </div>
           <button onClick={toggle}>
