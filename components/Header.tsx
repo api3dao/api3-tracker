@@ -76,7 +76,7 @@ export const Header = (props: IHeader) => {
               <Image src="/API3x32-white-iso.png" width={32} height={32} alt="API3 DAO Tracker" />
             </Link>
           </div>
-          <button onClick={toggle}>
+          <button name="toggle-mobile-menu" onClick={toggle}>
             {state.mobileOpen ? iconClose : iconMenu}
           </button>
         </div>
