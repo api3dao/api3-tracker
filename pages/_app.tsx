@@ -7,7 +7,7 @@ import Router from "next/router";
 import type { AppProps } from "next/app";
 import Head from "next/head";
 
-function Layout({ Component, pageProps }: AppProps) {
+function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
     NProgress.configure({
       trickleSpeed: 300,
@@ -32,14 +32,14 @@ function Layout({ Component, pageProps }: AppProps) {
   }, []);
 
   return (
-    <div>
+    <>
       <Head>
+        <meta property="og:locale" content="en_US" />
+        <meta property="og:type" content="website" />
         <meta
           name="viewport"
           content="viewport-fit=cover, width=device-width, initial-scale=1.0"
         />
-        <meta property="og:locale" content="en_US" />
-        <meta property="og:type" content="website" />
         <link rel="icon" href="/favicon.ico" />
         <link rel="icon" href="/API3x16-white-iso.png" />
         <link rel="icon" href="/API3x32-white-iso.png" />
@@ -48,8 +48,8 @@ function Layout({ Component, pageProps }: AppProps) {
         <link rel="icon" href="/API3x256-white-iso.png" />
       </Head>
       <Component {...pageProps} />
-    </div>
+    </>
   );
 }
 
-export default Layout;
+export default MyApp;
