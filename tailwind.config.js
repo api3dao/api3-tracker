@@ -8,6 +8,7 @@ module.exports = {
   darkmode: false,
   theme: {
     screens: {
+      xs: "280px",
       sm: "640px",
       md: "768px",
       lg: "960px",
