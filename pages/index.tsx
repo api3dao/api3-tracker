@@ -69,7 +69,7 @@ const HomePage: NextPage = (props: any) => {
             </div>
           ) : (
             <div>
-              <p className="mb-8 text-center">
+              <p className="mx-4 mb-8 text-center">
                 API3 DAO has {" "}
                 <a href="./wallets">{totalCurrentWallets} current members</a> and {" "}
                 <a href="./votings">
@@ -80,8 +80,8 @@ const HomePage: NextPage = (props: any) => {
                 API3 Staking Rewards
               </h2>
               <div className="lg:flex mx-auto">
-                {latest.map((epoch: IEpoch) => (
-                  <div key={epoch.epoch} className="px-4 flex-1">
+                {latest.map((epoch: IEpoch, index: number) => (
+                  <div key={index} className="px-4 flex-1">
                     <Epoch {...epoch} />
                   </div>
                 ))}
