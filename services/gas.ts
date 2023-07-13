@@ -47,6 +47,7 @@ export const VoteGas = {
         gasUsed: existing.gasUsed.add(gasUsed),
         feeUsd: existing.feeUsd + feeUsd,
       };
+      VoteGas.VOTES.get(voteId)?.set(txHash, updated);
     }
   },
 
@@ -55,7 +56,7 @@ export const VoteGas = {
     for (const [voteId, transactions] of VoteGas.VOTES.entries()) {
       let gasUsed = BigNumber.from(0);
       let feeUsd = 0.0;
-      for (const [txHash, usage] of transactions) {
+      for (const [_txHash, usage] of transactions) {
         gasUsed = gasUsed.add(usage.gasUsed);
         feeUsd += usage.feeUsd;
       }
