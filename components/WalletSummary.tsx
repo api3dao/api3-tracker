@@ -25,12 +25,12 @@ export const WalletSummary = (props: IWalletSummaryProps) => {
   return (
     <div className="max-w-screen-lg text-center mx-auto my-10">
       {wallet.ensName ? (
-        <div className="text-4xl text-color-panel-title uppercase">
+        <div className="mx-2 text-4xl text-color-panel-title uppercase">
           API3 DAO member{" "}
           <span className="text-color-accent">{wallet.ensName}</span>
         </div>
       ) : null}
-      <div className="text-md leading-10 text-center">
+      <div className="mx-2 text-md leading-10 text-center">
         {toHex(wallet.address)} <TxIcon txId={toHex(wallet.address)} />
       </div>
       <div className="lg:grid lg:grid-cols-2">
