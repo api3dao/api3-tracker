@@ -835,8 +835,8 @@ export const Events = {
       where: { id: voteInternalId + "" },
     });
     if (foundVote.length > 0) {
-      if (supported) totalFor = totalFor.add(foundVote[0].totalFor);
-      else totalAgainst = totalAgainst.add(foundVote[0].totalAgainst);
+      totalFor = totalFor.add(foundVote[0].totalFor);
+      totalAgainst = totalAgainst.add(foundVote[0].totalAgainst);
     }
     if (verboseVote) {
       const blockDt = new Date(blockInfo.block.timestamp * 1000);
