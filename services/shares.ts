@@ -1,6 +1,6 @@
 import prisma from "./db";
 import { Prisma } from "@prisma/client";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { fetchWebconfig } from "./webconfig";
 import { zerosLeft, toBigIntArray, withDecimals } from "./format";
 import { VotingReader } from "./voting";
@@ -209,6 +209,43 @@ export const Shares = {
       return { shares, stake, locked, votingPower, user, downloaded: true };
     }
     return { ...found[0], downloaded: false };
+  },
+
+  recalculateTotals: async () => {
+    const votings = await Votings.fetchAll();
+    for (const v of votings) {
+      const voteInternalId = v.id;
+      console.log("VOTING", voteInternalId, v.name);
+      let bnFor = BigNumber.from(0);
+      let bnAgainst = BigNumber.from(0);
+      const events = await VotingEvents.fetchCastData(voteInternalId);
+      for (const data of events) {
+        try {
+          const supports = data['2'] as boolean;
+          const shares = BigNumber.from(data['3']).toString();
+          if (supports) {
+            bnFor = bnFor.add(shares);
+          } else {
+            bnAgainst = bnAgainst.add(shares);
+          }
+          console.log(supports,
+            withDecimals(bnFor.toString(), 18),
+            withDecimals(bnAgainst.toString(), 18));
+        } catch (e){
+          console.error(e)
+        }
+      }
+
+      const totalFor = new Prisma.Decimal(withDecimals(bnFor.toString(), 18));
+      const totalAgainst = new Prisma.Decimal(withDecimals(bnAgainst.toString(), 18));
+      if (v.totalFor != totalFor || v.totalAgainst != totalAgainst) {
+        console.log("== UPDATED");
+        await prisma.voting.updateMany({
+          where: { id: voteInternalId + "" },
+          data: { totalFor, totalAgainst },
+        });
+      }
+    }
   },
 
   downloadVotings: async (endpoint: string) => {
