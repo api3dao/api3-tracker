@@ -45,7 +45,7 @@
     "@prisma/client": "^4.7.1",
     "@types/js-yaml": "4.0.5",
     "assert": "2.0.0",
-    "axios": "0.27.2",
+    "axios": "1.6.0",
     "buffer": "6.0.3",
     "csv-stringify": "6.2.2",
     "ethers": "5.7.2",
