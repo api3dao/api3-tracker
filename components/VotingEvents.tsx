@@ -55,7 +55,7 @@ const EventDetails = (props: IEventDetails) => {
       <div className="text-xs darken mt-1 leading-4">
         {supports ? "Supported" : "Voted against"} with{" "}
         <span className="text-color-panel-title">{toCurrency(votes)}</span>{" "}
-        tokens
+        shares
       </div>
     );
   } else {
