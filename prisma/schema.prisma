@@ -75,6 +75,7 @@ model MemberEvent {
   gasUsed     BigInt? // gas used for this transaction
   feeUsd      Decimal? @db.Decimal(10, 2) // USD equivalent of the fee
 
+  @@index([address])
   @@map("member_events")
 }
 
@@ -86,6 +87,8 @@ model MemberDelegation {
   updatedAt  DateTime @default(now()) // time of the last delegation update
   userShares Decimal  @db.Decimal(60, 18) // number of delegated shares
 
+  @@index([from])
+  @@index([to])
   @@map("member_delegations")
 }
 
@@ -117,6 +120,7 @@ model Member {
   // delegatesTo MemberDelegation?  @relation("delegatesTo") // relation to delegations OF this member
   // delegates   MemberDelegation[] @relation("delegated") // relation to delegations TO this member
 
+  @@index(userShare)
   @@map("members")
 }
 
@@ -175,6 +179,7 @@ model Voting {
 
   events VotingEvent[] @relation("votingEvents") // relations to events
 
+  @@index([status])
   @@map("voting")
 }
 
