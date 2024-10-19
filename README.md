@@ -3,8 +3,8 @@
 API3 DAO Tracker provides a web interface to see
 on-chain details of the API3 DAO, including:
 
-- Members, their stakes, shares, voting power and votings history
-- Details of the votings
+- Members, their stakes, shares, voting power, and voting history
+- Proposal details
 - All events from the smart contracts of the API3 DAO
 - DAO Treasuries status
 
@@ -21,13 +21,13 @@ Some scripts also rely on [cURL](https://curl.se/) and [JQ](https://jqlang.githu
 
 1. Prepare docker image of API3 Tracker with `make build install`
 2. Please go to `terraform/workspaces/api3tracker-local` and apply
-terraform plan `terraform init && terraform apply`. You should see
-all resources that will be installed on your system.
-You can also check running components with `docker ps`.
-Default local environment starts website at [http://localhost:7040](http://localhost:7040).
+   terraform plan `terraform init && terraform apply`. You should see
+   all resources that will be installed on your system.
+   You can also check running components with `docker ps`.
+   Default local environment starts website at [http://localhost:7040](http://localhost:7040).
 3. Run `./bin/postgres-download.sh` to download the latest database backup
-from AWS S3. As the database syncing is extremely slow and can take weeks,
-you should take database that is ready for development
+   from AWS S3. As the database syncing is extremely slow and can take weeks,
+   you should take database that is ready for development
 
 ## Local Development
 
