@@ -255,7 +255,7 @@ export const Batch = {
       } else {
         const existing: IWallet = Wallets.from(members[0]);
         // only badge can be new in our case
-        // nothing else is changing currenly
+        // nothing else is changing currently
         if (badge) {
           if (!Wordlist.has(existing.badges, badge)) {
             existing.badges = Wordlist.add(existing.badges, badge);
@@ -456,7 +456,6 @@ export const Batch = {
         delegation ? delegation.userShares : 0
       );
       if (delegation) {
-        // delegates badge should be received
         const badge = "delegator";
         member.badges = Wordlist.add(member.badges, badge);
         if (member.tags) {
@@ -467,7 +466,7 @@ export const Batch = {
       }
       // find what are the delegations TO the member
       member.userIsDelegated = delegated;
-      if (delegated) {
+      if (delegated > new Prisma.Decimal(0.0)) {
         const badge = "delegate";
         member.badges = Wordlist.add(member.badges, badge);
         if (member.tags) {
