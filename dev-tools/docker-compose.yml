@@ -1,0 +1,29 @@
+version: '3.5'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - postgres
+#    volumes:
+#      - /custom/mount:/var/lib/postgresql/data
+
+  api3tracker:
+    image: api3dao/api3-tracker:latest
+    environment:
+      API3TRACKER_ENDPOINT: "https://ethereum-rpc.publicnode.com"
+      API3TRACKER_COINGECKO_HOST: api.coingecko.com
+      API3TRACKER_COINGECKO_API_KEY: ""
+      DATABASE_URL: "postgres://postgres:postgres@tasks.postgres:5432/postgres?sslmode=disable"
+    ports:
+      - "3000:3000"
+    networks:
+      - postgres
+
+networks:
+  postgres:
