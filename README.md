@@ -64,6 +64,8 @@ Run the stack:
 docker stack deploy -c dev-tools/docker-compose.yml tracker-stack
 ```
 
+If all goes well the application will be served at http://localhost:3000
+
 Some commands for visualising the services:
 ```bash
 docker ps # all docker containers
@@ -88,7 +90,7 @@ DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disab
 
 Keep in mind that the Postgres DB in the docker-compose file is not configured with a volume by default, so changes will be lost on service restart.
 
-## Local Installation
+## Local Installation and Deployment (Terraform only)
 
 The only requirements for installation are [Docker](https://docs.docker.com/get-docker/)
 and [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli).
