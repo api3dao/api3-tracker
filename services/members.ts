@@ -17,7 +17,7 @@ export type Badge =
   | "proposer"
   | "vested";
 
-const Wordlist = {
+export const Wordlist = {
   has: (wordlist: string, word: string): boolean => {
     if (!wordlist) return false;
     const parts = wordlist.split(",");
@@ -466,14 +466,13 @@ export const Batch = {
       }
       // find what are the delegations TO the member
       member.userIsDelegated = delegated;
+      const badge = "delegate";
       if (delegated > new Prisma.Decimal(0.0)) {
-        const badge = "delegate";
         member.badges = Wordlist.add(member.badges, badge);
-        if (member.tags) {
-          member.tags = Wordlist.add(member.tags, badge);
-        } else {
-          member.tags = badge;
-        }
+        member.tags = Wordlist.add(member.tags || "", badge);
+      } else {
+        member.badges = Wordlist.remove(member.badges, badge);
+        member.tags = Wordlist.remove(member.tags || "", badge);
       }
       member.userVotingPower = new Prisma.Decimal(member.userShare).add(
         member.userIsDelegated
