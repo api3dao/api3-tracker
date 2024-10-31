@@ -17,7 +17,7 @@ export type Badge =
   | "proposer"
   | "vested";
 
-const Wordlist = {
+export const Wordlist = {
   has: (wordlist: string, word: string): boolean => {
     if (!wordlist) return false;
     const parts = wordlist.split(",");
@@ -255,7 +255,7 @@ export const Batch = {
       } else {
         const existing: IWallet = Wallets.from(members[0]);
         // only badge can be new in our case
-        // nothing else is changing currenly
+        // nothing else is changing currently
         if (badge) {
           if (!Wordlist.has(existing.badges, badge)) {
             existing.badges = Wordlist.add(existing.badges, badge);
@@ -456,7 +456,6 @@ export const Batch = {
         delegation ? delegation.userShares : 0
       );
       if (delegation) {
-        // delegates badge should be received
         const badge = "delegator";
         member.badges = Wordlist.add(member.badges, badge);
         if (member.tags) {
@@ -467,14 +466,13 @@ export const Batch = {
       }
       // find what are the delegations TO the member
       member.userIsDelegated = delegated;
-      if (delegated) {
-        const badge = "delegate";
+      const badge = "delegate";
+      if (delegated > new Prisma.Decimal(0.0)) {
         member.badges = Wordlist.add(member.badges, badge);
-        if (member.tags) {
-          member.tags = Wordlist.add(member.tags, badge);
-        } else {
-          member.tags = badge;
-        }
+        member.tags = Wordlist.add(member.tags || "", badge);
+      } else {
+        member.badges = Wordlist.remove(member.badges, badge);
+        member.tags = Wordlist.remove(member.tags || "", badge);
       }
       member.userVotingPower = new Prisma.Decimal(member.userShare).add(
         member.userIsDelegated

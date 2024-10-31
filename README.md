@@ -8,7 +8,89 @@ on-chain details of the API3 DAO, including:
 - All events from the smart contracts of the API3 DAO
 - DAO Treasuries status
 
-## Local Installation
+## Architecture
+
+The app relies on Terraform to configure a generic Linux EC2 instance.
+The EC2 instance in-turn hosts Docker, and app-services are orchestrated by Docker directly (eg. `restart=always`).
+
+The services are:
+
+```
+(end user) -> Cloudflare -> EC2 IP -> traefik (load balancer) -> api3-tracker (container)
+```
+
+Containers:
+- api3tracker: The FE and BE-service
+- postgres: The database the FE and BE rely on
+- traefik: A load balancer that encrypts HTTP responses (using the CF origin server key pair)
+- postgres-exporter: a service that exports the database as a backup on an interval
+
+Host services:
+The host OS also runs some cron services, these are:
+```bash
+*/10 * * * * root cd /home/ubuntu/src/github.com/api3dao/api3-tracker/terraform/workspaces/api3tracker-prod && ./bin/job_logs_download.sh >> /var/log/api3-logs-download.log 2>&1
+15,45 * * * * root cd /home/ubuntu/src/github.com/api3dao/api3-tracker/terraform/workspaces/api3tracker-prod && ./bin/job_supply_download.sh >> /var/log/api3-supply-download.log 2>&1
+0 * * * * root cd /home/ubuntu/src/github.com/api3dao/api3-tracker/terraform/workspaces/api3tracker-prod && ./bin/job_treasuries_download.sh >> /var/log/api3-treasuries-download.log 2>&1
+2,12,22,32,42,52 * * * * root cd /home/ubuntu/src/github.com/api3dao/api3-tracker/terraform/workspaces/api3tracker-prod && ./bin/job_state_update.sh >> /var/log/api3-state-update.log 2>&1
+10 0 * * * root cd /home/ubuntu/src/github.com/api3dao/api3-tracker/terraform/workspaces/api3tracker-prod && ./bin/job_shares_download.sh --tag . > /var/log/api3-shares-download.log 2>&1
+24 4 * * */3 root cd /home/ubuntu/src/github.com/api3dao/api3-tracker/terraform/workspaces/api3tracker-prod && bash ./bin/postgres-backup.sh >> /var/log/postgres-backups.log 2>&1
+```
+
+## Local developement using Docker
+Developers can run some or all services locally using Docker Swarm, or even bare-bones, without containerisation.
+
+One combination is running just postgres locally using Docker, eg:
+```bash
+docker run --rm -ti -p 5432:5432 postgres:15
+```
+and then running the FE and BE services directly (refer to Cron jobs below and `yarn next dev` in `package.json`).
+
+Alternatively, one can run services using Docker Swarm, but this lacks hot-reloading.
+
+### Local development using Docker Swarm
+If you haven't already enabled Swarm mode on your Docker instance, do so now (only has to be done once):
+```bash
+docker swarm init
+```
+The result of the above command can be ignored.
+
+Build the FE/BE image:
+```bash
+docker build -t api3dao/api3-tracker:latest .
+```
+
+Run the stack:
+```bash
+docker stack deploy -c dev-tools/docker-compose.yml tracker-stack
+```
+
+If all goes well the application will be served at http://localhost:3000
+
+Some commands for visualising the services:
+```bash
+docker ps # all docker containers
+docker service ls # all swarm services
+docker service ps tracker-stack_postgres --no-trunc # show status of postgres
+docker stack rm tracker-stack # tear down the stack
+```
+
+Initialise the DB:
+```bash
+DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" yarn prisma migrate deploy
+```
+
+Cron jobs (unwrapped versions of cronjobs):
+```bash
+DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts logs download
+DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts supply download
+DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts treasuries download
+DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts shares download
+DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" API3TRACKER_ENDPOINT="ARCHIVE RPC URL" TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts state update --rps-limit
+```
+
+Keep in mind that the Postgres DB in the docker-compose file is not configured with a volume by default, so changes will be lost on service restart.
+
+## Local Installation and Deployment (Terraform only)
 
 The only requirements for installation are [Docker](https://docs.docker.com/get-docker/)
 and [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli).
