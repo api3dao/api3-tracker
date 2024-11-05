@@ -1,10 +1,11 @@
-import prisma from "./db";
 import { Prisma } from "@prisma/client";
 import { BigNumber, ethers } from "ethers";
-import { fetchWebconfig } from "./webconfig";
+
+import { Wallets, Votings, VotingEvents } from "./api";
+import prisma from "./db";
 import { zerosLeft, toBigIntArray, withDecimals } from "./format";
 import { VotingReader } from "./voting";
-import { Wallets, Votings, VotingEvents } from "./api";
+import { fetchWebconfig } from "./webconfig";
 
 export const Address = {
   asBuffer: (addr: string): Buffer => {
@@ -12,14 +13,14 @@ export const Address = {
   },
 };
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const uniqueEvents = async (
-  member: string
+  member: string,
 ): Promise<[Array<any>, any, number]> => {
   const blocks = new Map<number, number>();
   const disabledBlocks = new Map<number, number>();
-  const out = new Array();
+  const out = [];
   let lastEvent: any = null;
   let lastBlockNumber: number = 0;
   const events = await prisma.memberEvent.findMany({
@@ -44,7 +45,7 @@ const uniqueEvents = async (
     event.gasPrice = BigInt(0);
     event.gasUsed = BigInt(0);
     event.fee = BigInt(0);
-    event.feeUsd = new Prisma.Decimal(0.0);
+    event.feeUsd = new Prisma.Decimal(0);
     out.push(event);
     blocks.set(event.blockNumber, 1);
   }
@@ -58,26 +59,26 @@ export const Shares = {
   downloadTotalsAt: async (
     endpoint: string,
     pool: string,
-    blockNumber: number
+    blockNumber: number,
   ) => {
     const found = await prisma.cacheTotalShares.findMany({
       where: { height: blockNumber },
     });
-    if (found.length == 0) {
+    if (found.length === 0) {
       console.log("Requesting totals at", blockNumber);
       const blockHex = "0x" + blockNumber.toString(16);
 
       const jsonRpc = new ethers.providers.JsonRpcProvider({
         url: endpoint,
         throttleLimit: 5,
-        timeout: 300000,
+        timeout: 300_000,
       });
       const result = await ethers.utils.fetchJson(
         jsonRpc.connection,
         `[
            {"id":"totalShares","method":"eth_call","params":[{"from":null,"to":"${pool}","data":"0x3a98ef39d75a0463a589a77e7570097b7e407deab0b5678402f964703022acc1"}, "${blockHex}"],"jsonrpc":"2.0"},
            {"id":"totalStake","method":"eth_call","params":[{"from":null,"to":"${pool}","data":"0x8b0e9f3f74ca417eae2239691de899dcf9e89dd25acfd44380d195cbb069ebd1"}, "${blockHex}"],"jsonrpc":"2.0"}
-         ]`
+         ]`,
       );
       result.forEach((item: any) => {
         if (item.error) {
@@ -89,14 +90,14 @@ export const Shares = {
           .filter((item: any) => item.id === "totalShares")
           .map((item: any) => BigInt(item.result))[0]
           .toString(),
-        18
+        18,
       );
       const totalStake = withDecimals(
         result
           .filter((item: any) => item.id === "totalStake")
           .map((item: any) => BigInt(item.result))[0]
           .toString(),
-        18
+        18,
       );
 
       await prisma.cacheTotalShares.create({
@@ -113,21 +114,21 @@ export const Shares = {
 
   downloadUserAt: async (
     endpoint: string,
-    pool: String,
+    pool: string,
     member: string,
-    blockNumber: number
+    blockNumber: number,
   ) => {
     const userAddress = member;
     const found = await prisma.cacheUserShares.findMany({
       where: { addr: Address.asBuffer(userAddress), height: blockNumber },
     });
-    if (found.length == 0) {
+    if (found.length === 0) {
       console.log("Requesting user state at", blockNumber, "for", member);
 
       const jsonRpc = new ethers.providers.JsonRpcProvider({
         url: endpoint,
         throttleLimit: 5,
-        timeout: 300000,
+        timeout: 300_000,
       });
       const blockHex = "0x" + blockNumber.toString(16);
       const memberHex = zerosLeft(member.replace("0x", ""), 64);
@@ -147,7 +148,7 @@ export const Shares = {
            {"id":"userStake","method":"eth_call","params":[{"from":null,"to":"${pool}","data":"0x${methodUserStake}${memberHex}"}, "${blockHex}"],"jsonrpc":"2.0"},
            {"id":"userLocked","method":"eth_call","params":[{"from":null,"to":"${pool}","data":"0x${methodUserLocked}${memberHex}"}, "${blockHex}"],"jsonrpc":"2.0"},
            {"id":"users","method":"eth_call","params":[{"from":null,"to":"${pool}","data":"0x${methodUsers}${memberHex}"}, "${blockHex}"],"jsonrpc":"2.0"}
-         ]`
+         ]`,
       );
       result.forEach((item: any) => {
         if (item.error) {
@@ -160,7 +161,7 @@ export const Shares = {
           .filter((item: any) => item.id === "userShares")
           .map((item: any) => BigInt(item.result))[0]
           .toString(),
-        18
+        18,
       );
 
       const votingPower = withDecimals(
@@ -168,7 +169,7 @@ export const Shares = {
           .filter((item: any) => item.id === "userVotingPower")
           .map((item: any) => BigInt(item.result))[0]
           .toString(),
-        18
+        18,
       );
 
       const stake = withDecimals(
@@ -176,7 +177,7 @@ export const Shares = {
           .filter((item: any) => item.id === "userStake")
           .map((item: any) => BigInt(item.result))[0]
           .toString(),
-        18
+        18,
       );
 
       const locked = withDecimals(
@@ -184,15 +185,15 @@ export const Shares = {
           .filter((item: any) => item.id === "userLocked")
           .map((item: any) => BigInt(item.result))[0]
           .toString(),
-        18
+        18,
       );
 
       const user = result
         .filter((item: any) => item.id === "users")
         .map((item: any) =>
-          toBigIntArray(item.result.replace("0x", "")).map((bn: BigInt) =>
-            bn.toString()
-          )
+          toBigIntArray(item.result.replace("0x", "")).map((bn: bigint) =>
+            bn.toString(),
+          ),
         )[0];
 
       await prisma.cacheUserShares.create({
@@ -220,24 +221,29 @@ export const Shares = {
       let bnAgainst = BigNumber.from(0);
       const events = await VotingEvents.fetchCastData(voteInternalId);
       for (const data of events) {
+        // eslint-disable-next-line functional/no-try-statements
         try {
-          const supports = data['2'] as boolean;
-          const shares = BigNumber.from(data['3']).toString();
+          const supports = data["2"] as boolean;
+          const shares = BigNumber.from(data["3"]).toString();
           if (supports) {
             bnFor = bnFor.add(shares);
           } else {
             bnAgainst = bnAgainst.add(shares);
           }
-          console.log(supports,
+          console.log(
+            supports,
             withDecimals(bnFor.toString(), 18),
-            withDecimals(bnAgainst.toString(), 18));
-        } catch (e){
-          console.error(e)
+            withDecimals(bnAgainst.toString(), 18),
+          );
+        } catch (error) {
+          console.error(error);
         }
       }
 
       const totalFor = new Prisma.Decimal(withDecimals(bnFor.toString(), 18));
-      const totalAgainst = new Prisma.Decimal(withDecimals(bnAgainst.toString(), 18));
+      const totalAgainst = new Prisma.Decimal(
+        withDecimals(bnAgainst.toString(), 18),
+      );
       if (v.totalFor != totalFor || v.totalAgainst != totalAgainst) {
         console.log("== UPDATED");
         await prisma.voting.updateMany({
@@ -248,7 +254,7 @@ export const Shares = {
     }
   },
 
-  downloadVotings: async (endpoint: string) => {
+  downloadVotings: async () => {
     let count = 0;
     const votings = await Votings.fetchAll();
     for (const v of votings) {
@@ -261,7 +267,7 @@ export const Shares = {
           hash: Buffer.from(transactionHash.replace("0x", ""), "hex"),
         },
       });
-      if (cached.length == 0) continue;
+      if (cached.length === 0) continue;
 
       const script = (cached[0].data as any)[4];
       const scriptData = VotingReader.parseScript(script[0]);
@@ -269,7 +275,7 @@ export const Shares = {
       const cachedData = cached[0].data as any;
       const totalStaked = withDecimals(
         ethers.BigNumber.from(cachedData[3][0]).toString(),
-        18
+        18,
       );
       const data: any = { totalStaked };
       if (scriptData.token) data.transferToken = scriptData.token;
@@ -285,9 +291,9 @@ export const Shares = {
     return count;
   },
   downloadMembers: async (endpoint: string, tag: string, rpsLimit: boolean) => {
-    const cursor = { take: 1000000, skip: 0 };
+    const cursor = { take: 1_000_000, skip: 0 };
     const wallets = await Wallets.fetchList(tag, cursor);
-    console.log("Found ", wallets.list.length, "members");
+    console.log("Found", wallets.list.length, "members");
     let count = 0;
     for (const w of wallets.list) {
       await Shares.download(endpoint, w.address.toString(), rpsLimit);
@@ -300,19 +306,19 @@ export const Shares = {
     const webconfig = fetchWebconfig();
     const pool: string = (
       webconfig.contracts?.find(
-        ({ name }) => name.toLowerCase() === "api3pool"
+        ({ name }) => name.toLowerCase() === "api3pool",
       ) || { address: "" }
     ).address;
 
     let count = 0;
     const [events, lastEvent, lastBlockNumber] = await uniqueEvents(member);
     console.log(
-      "Found ",
+      "Found",
       events.length,
       "events till",
       lastBlockNumber,
       "for",
-      member.toString()
+      member.toString(),
     );
     for (const e of events) {
       const started = new Date();
@@ -320,53 +326,51 @@ export const Shares = {
         endpoint,
         pool,
         member,
-        e.blockNumber
+        e.blockNumber,
       );
       const totals = await Shares.downloadTotalsAt(
         endpoint,
         pool,
-        e.blockNumber
+        e.blockNumber,
       );
-      const took: number = new Date().getTime() - started.getTime();
+      const took: number = Date.now() - started.getTime();
       console.log(
         "Block",
         e.blockNumber,
         "took",
         took + "ms",
         JSON.stringify(argsUser),
-        JSON.stringify(totals)
+        JSON.stringify(totals),
       );
-      if (argsUser.downloaded) {
-        if (rpsLimit && took < 1000) {
-          console.log("RPS Limit: wait for", 1000 - took, "ms");
-          await sleep(1000 - took);
-        }
+      if (argsUser.downloaded && rpsLimit && took < 1000) {
+        console.log("RPS Limit: wait for", 1000 - took, "ms");
+        await sleep(1000 - took);
       }
       delete (argsUser as any).downloaded;
       const args = { ...argsUser, ...totals };
       await prisma.memberEvent.create({
         data: {
-          id: e.id + "-s",
-          createdAt: e.createdAt,
           address: e.address,
-          chainId: e.chainId,
-          txHash: e.txHash,
           blockNumber: e.blockNumber,
-          txIndex: e.txIndex,
-          logIndex: e.logIndex,
-          eventName: e.eventName,
+          chainId: e.chainId,
+          createdAt: e.createdAt,
           data: args as any,
-          gasPrice: e.gasPrice,
-          gasUsed: e.gasUsed,
+          eventName: e.eventName,
           fee: e.fee,
           feeUsd: e.feeUsd,
+          gasPrice: e.gasPrice,
+          gasUsed: e.gasUsed,
+          id: e.id + "-s",
+          logIndex: e.logIndex,
+          txHash: e.txHash,
+          txIndex: e.txIndex,
         },
       });
       count++;
     }
     if (lastEvent != null) {
       console.log("UPDATING", JSON.stringify(lastEvent.data));
-      const data: any = lastEvent.data;
+      const { data } = lastEvent;
       const unstaked = withDecimals(data.user[2], 18);
       // const vesting = (withDecimals(data.user[1], 18));
       await prisma.member.update({

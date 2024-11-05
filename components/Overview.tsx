@@ -1,17 +1,18 @@
 import React from "react";
-import { BorderedPanel } from "./BorderedPanel";
-import { IEpoch } from "./../services/types";
+
 import {
   noDecimals,
   niceDateTime,
-  niceDate,
   toCurrency,
   toPct,
 } from "../services/format";
 
+import { type IEpoch } from "./../services/types";
+import { BorderedPanel } from "./BorderedPanel";
+
 export const Epoch = (props: IEpoch) => {
   const title = props.isCurrent ? "Current Epoch" : "Previous Epoch";
-  let nextDt = new Date(props.createdAt);
+  const nextDt = new Date(props.createdAt);
   nextDt.setDate(nextDt.getDate() + 7);
   const epochDt = props.isCurrent ? nextDt : new Date(props.createdAt);
   const darkenTitle = "text-xs text-color-grey font-bold uppercase";

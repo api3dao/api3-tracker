@@ -1,39 +1,32 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import prisma from "./../../services/db";
 import { ethers } from "ethers";
-import {
-  Votings,
-  Wallets,
-  Supply,
-  ITreasuryType,
-  Treasuries,
-} from "../../services/api";
-import { toHex, serializable } from "../../services/format";
-import { ITreasury, IBlockNumber } from "../../services/types";
-import superjson from "superjson";
+import type { NextApiRequest, NextApiResponse } from "next";
+
+import { Votings, Wallets, Supply, Treasuries } from "../../services/api";
+
+import prisma from "./../../services/db";
 
 // This function is used for comparison of the chain state sync with cloudflare
-const getHeadBlock = async (): Promise<BigInt> => {
+const getHeadBlock = async (): Promise<bigint> => {
   const jsonRpc = new ethers.providers.JsonRpcProvider(
-    process.env.API3TRACKER_EXTERNAL_ENDPOINT || "https://cloudflare-eth.com/"
+    process.env.API3TRACKER_EXTERNAL_ENDPOINT || "https://cloudflare-eth.com/",
   );
   const result = await ethers.utils.fetchJson(
     jsonRpc.connection,
-    ` {"id":"head","method":"eth_blockNumber","params":[],"jsonrpc":"2.0"} `
+    ` {"id":"head","method":"eth_blockNumber","params":[],"jsonrpc":"2.0"} `,
   );
   return BigInt(result.result);
 };
 
 export default async function handler(
   _req: NextApiRequest,
-  res: NextApiResponse<string>
+  res: NextApiResponse<string>,
 ) {
   const out = ["# HELP up Server is running", "# TYPE up gauge", "up 1", ""];
 
   // 1. Block numbers: external, max downloaded block, max porcessed block
   const headBlock = await getHeadBlock();
   out.push(
-    "# HELP head_block_number: latest block number at cloudflare or other external JSON+RPC provider"
+    "# HELP head_block_number: latest block number at cloudflare or other external JSON+RPC provider",
   );
   out.push("# TYPE head_block_number gauge");
   out.push("head_block_number " + headBlock);
@@ -43,7 +36,7 @@ export default async function handler(
   });
   if (status.length > 0) {
     out.push(
-      "# HELP downloaded_block_number: latest downloaded into caches block number "
+      "# HELP downloaded_block_number: latest downloaded into caches block number ",
     );
     out.push("# TYPE downloaded_block_number gauge");
     out.push("downloaded_block_number " + status[0].downloaded);
@@ -100,14 +93,14 @@ export default async function handler(
     out.push("# TYPE staking_target_pct gauge");
     out.push(
       "staking_target_pct " +
-        supply.totalStaked.mul(100).div(supply.stakingTarget).toString()
+        supply.totalStaked.mul(100).div(supply.stakingTarget).toString(),
     );
 
     // out.push("total_locked " + supply.totalLocked.toString());
     out.push("# HELP locked number of locked tokens");
     out.push("# TYPE locked gauge");
     out.push(
-      'locked{where="governance"} ' + supply.lockedByGovernance.toString()
+      'locked{where="governance"} ' + supply.lockedByGovernance.toString(),
     );
     out.push('locked{where="vestings"} ' + supply.lockedVestings.toString());
     out.push('locked{where="rewards"} ' + supply.lockedRewards.toString());
@@ -143,45 +136,61 @@ export default async function handler(
 
   // 6. Status estimates - of downloaded user state history
   out.push("");
-  const blocksWithStatus = (await prisma.memberEvent.groupBy({
+  const blocksWithStatus = (
+    await prisma.memberEvent.groupBy({
       where: { eventName: "Status" },
-      by: [ "blockNumber" ],
-  })).reduce((map: any, obj: any) => {
-      map[obj.blockNumber] = 1;
-      return map;
+      by: ["blockNumber"],
+    })
+  ).reduce((map: any, obj: any) => {
+    map[obj.blockNumber] = 1;
+    return map;
   }, {});
 
-  const blocksWithoutStatusTotal= (await prisma.memberEvent.groupBy({
-      where: { eventName: { not: "Status" }},
-      by: [ "blockNumber" ],
-  })).map((x: any) => (
-      1 - ( blocksWithStatus[x.blockNumber] || 0)
-  )).reduce((partialSum, a) => (partialSum + a), 0);
+  const blocksWithoutStatusTotal = (
+    await prisma.memberEvent.groupBy({
+      where: { eventName: { not: "Status" } },
+      by: ["blockNumber"],
+    })
+  )
+    .map((x: any) => 1 - (blocksWithStatus[x.blockNumber] || 0))
+    .reduce((partialSum, a) => partialSum + a, 0);
 
-  out.push("# HELP blocks_without_shares returns the estimate amount of history to be downloaded");
+  out.push(
+    "# HELP blocks_without_shares returns the estimate amount of history to be downloaded",
+  );
   out.push("# TYPE blocks_without_shares gauge");
   out.push("blocks_without_status " + blocksWithoutStatusTotal);
-  out.push("# HELP blocks_with_status returns the estimate amount of history blocks that were already downloaded");
+  out.push(
+    "# HELP blocks_with_status returns the estimate amount of history blocks that were already downloaded",
+  );
   out.push("# TYPE blocks_with_status gauge");
-  out.push("blocks_with_status "+ Object.keys(blocksWithStatus).length);
+  out.push("blocks_with_status " + Object.keys(blocksWithStatus).length);
 
-  const addressWithStatus = (await prisma.memberEvent.groupBy({
+  const addressWithStatus = (
+    await prisma.memberEvent.groupBy({
       where: { eventName: "Status" },
-      by: [ "address" ],
-  })).reduce((map: any, obj: any) => {
-      map[obj.address] = 1;
-      return map;
+      by: ["address"],
+    })
+  ).reduce((map: any, obj: any) => {
+    map[obj.address] = 1;
+    return map;
   }, {});
-  const addressWithRewardsTotal = (await prisma.memberEvent.groupBy({
-      where: { eventName: { not: "Status" }},
-      by: [ "address" ],
-  })).map((x: any) => (
-      1 - (addressWithStatus[x.address] || 0)
-  )).reduce((partialSum, a) => (partialSum + a), 0);
-  out.push("# HELP address_without_status returns the amount of members that have no any shares history checked");
+  const addressWithRewardsTotal = (
+    await prisma.memberEvent.groupBy({
+      where: { eventName: { not: "Status" } },
+      by: ["address"],
+    })
+  )
+    .map((x: any) => 1 - (addressWithStatus[x.address] || 0))
+    .reduce((partialSum, a) => partialSum + a, 0);
+  out.push(
+    "# HELP address_without_status returns the amount of members that have no any shares history checked",
+  );
   out.push("# TYPE address_without_status gauge");
   out.push("address_without_status " + addressWithRewardsTotal);
-  out.push("# HELP address_with_status returns the estimate amount of addresses that were already downloaded");
+  out.push(
+    "# HELP address_with_status returns the estimate amount of addresses that were already downloaded",
+  );
   out.push("# TYPE address_with_status gauge");
   out.push("address_with_status " + Object.keys(addressWithStatus).length);
 

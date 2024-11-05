@@ -1,5 +1,6 @@
-import prisma from "./db";
 import axios from "axios";
+
+import prisma from "./db";
 import { pad2 } from "./format";
 
 interface ICurrencies {
@@ -12,11 +13,16 @@ interface ICurrencies {
   gbp: number;
 }
 
-const fetch = async (dt: Date, host: string, api_key: string) => {
-  const revDt = pad2(dt.getDate()) + "-" + pad2(1 + dt.getMonth())+ "-" + dt.getUTCFullYear();
+const fetch = async (dt: Date, host: string, apiKey: string) => {
+  const revDt =
+    pad2(dt.getDate()) +
+    "-" +
+    pad2(1 + dt.getMonth()) +
+    "-" +
+    dt.getUTCFullYear();
   const market = "ethereum";
   let url = `https://${host}/api/v3/coins/${market}/history?date=${revDt}`;
-  if (api_key) url += `&apikey=${api_key}`;
+  if (apiKey) url += `&apikey=${apiKey}`;
 
   const response = await axios.get(url);
   if (response.status !== 200) {
@@ -27,19 +33,19 @@ const fetch = async (dt: Date, host: string, api_key: string) => {
   }
   const currencies = response.data.market_data.current_price;
   return currencies;
-}
+};
 
 const getCache = async (isoDt: string): Promise<ICurrencies | null> => {
-  const date = new Date(isoDt.substring(0, 10));
+  const date = new Date(isoDt.slice(0, 10));
   date.setHours(0);
   date.setMinutes(0);
   date.setSeconds(0);
   date.setMilliseconds(0);
-  const found = await prisma.priceEthereum.findUnique({
+  const found = (await prisma.priceEthereum.findUnique({
     where: {
       ts: date,
     },
-  }) as ICurrencies | null;
+  })) as ICurrencies | null;
   return found;
 };
 
@@ -65,14 +71,14 @@ const setCache = async (ts: Date, currencies: ICurrencies) => {
 
 export type IPriceReader = (dt: Date) => Promise<number>;
 
-export const EthereumPrice = (host: string, api_key: string): IPriceReader => {
+export const EthereumPrice = (host: string, apiKey: string): IPriceReader => {
   return async (dt: Date): Promise<number> => {
-    const isoDt = dt.toISOString().substring(0, 10);
+    const isoDt = dt.toISOString().slice(0, 10);
     const fromCache = await getCache(isoDt);
     if (fromCache !== null) {
       return fromCache.usd;
     }
-    const currencies = await fetch(dt, host, api_key); // throws if failed
+    const currencies = await fetch(dt, host, apiKey); // throws if failed
     await setCache(dt, currencies);
     return currencies.usd;
   };

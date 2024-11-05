@@ -1,7 +1,9 @@
 import React from "react";
-import { BorderedPanel } from "./BorderedPanel";
+
 import { withDecimals, noDecimals, toCurrency } from "../services/format";
-import { IVoting } from "../services/types";
+import { type IVoting } from "../services/types";
+
+import { BorderedPanel } from "./BorderedPanel";
 import { Address } from "./Ethscan";
 
 const ucFirst = (s: string): string => {
@@ -13,11 +15,11 @@ export const VotingSummary = (props: IVoting) => {
   let statusClass =
     "text-4xl py-6 my-10 text-align uppercase border border-solid border-color-border";
   let statusText = "";
-  if (props.status == "Executed") {
+  if (props.status === "Executed") {
     statusClass += " text-color-accent";
     statusText = "Accepted and Executed";
   }
-  if (props.status == "Accepted") {
+  if (props.status === "Accepted") {
     statusClass += " text-color-accent";
     statusText = "Passing, not executed";
   }

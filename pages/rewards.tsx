@@ -1,17 +1,18 @@
+import { Prisma } from "@prisma/client";
 import type { NextPage } from "next";
 import { useState } from "react";
-import { VoteGas } from "../services/gas";
+
 import { Footer, Header, Meta } from "../components/";
-import { Prisma } from "@prisma/client";
-import { fetchWebconfig } from "../services/webconfig";
 import { RewardsList, RewardsSummary } from "../components/Rewards";
-import { IBlockNumber, IEpoch, ISupply } from "../services/types";
 import { Epochs, Supply, Blocks } from "../services/api";
 import { serializable } from "../services/format";
+import { VoteGas } from "../services/gas";
+import { type IBlockNumber, type IEpoch, type ISupply } from "../services/types";
+import { fetchWebconfig } from "../services/webconfig";
 
 export async function getServerSideProps() {
   const results = await Promise.all([
-    Epochs.fetchLatest(10000, false),
+    Epochs.fetchLatest(10_000, false),
     Supply.fetch(),
     Blocks.fetchLast(),
   ]);
@@ -51,7 +52,7 @@ const RewardsPage: NextPage = (props: any) => {
           latest={latest[0]}
           supply={supply}
         />}
-        {(!isEmpty) ? <RewardsList list={latest} />: null}
+        {(isEmpty) ? null: <RewardsList list={latest} />}
         <div className="pb-20">&nbsp;</div>
       </main>
 

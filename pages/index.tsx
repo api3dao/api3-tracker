@@ -1,17 +1,18 @@
 import type { NextPage } from "next";
 import { useState } from "react";
-import { VoteGas } from "../services/gas";
+
 import { Footer, Header, Meta } from "../components/";
+import { ContractsList } from "../components/ContractsList";
 import { Epoch } from "../components/Overview";
-import { TokenSupply } from "../components/TokenSupply";
+import { StakingTrend } from "../components/StakingTrend";
 import { TokenCirculating } from "../components/TokenCirculating";
 import { TokenStaking } from "../components/TokenStaking";
-import { StakingTrend } from "../components/StakingTrend";
-import { ContractsList } from "../components/ContractsList";
-import { fetchWebconfig } from "../services/webconfig";
-import { IBlockNumber, ISupply, IEpoch } from "../services/types";
+import { TokenSupply } from "../components/TokenSupply";
 import { Epochs, Supply, Votings, Wallets, Blocks } from "../services/api";
 import { serializable } from "../services/format";
+import { VoteGas } from "../services/gas";
+import { type IBlockNumber, type ISupply, type IEpoch } from "../services/types";
+import { fetchWebconfig } from "../services/webconfig";
 
 export async function getServerSideProps() {
   const results = await Promise.all([
@@ -73,7 +74,7 @@ const HomePage: NextPage = (props: any) => {
                 API3 DAO has {" "}
                 <a href="./wallets">{totalCurrentWallets} current members</a> and {" "}
                 <a href="./votings">
-                  {totalExecutedVotings} completed proposal{totalExecutedVotings != 1 ? "s" : ""}
+                  {totalExecutedVotings} completed proposal{totalExecutedVotings === 1 ? "" : "s"}
                 </a>
               </p>
               <h2 className="mt-4 mb-0 font-bold text-center text-2xl uppercase">

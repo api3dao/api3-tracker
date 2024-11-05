@@ -1,24 +1,22 @@
+import {uniq } from "lodash";
 import type { NextPage } from "next";
 import { useState } from "react";
-import { VoteGas } from "../../services/gas";
+
 import { Footer, Header, Meta } from "../../components/";
-import { VotingSummary } from "../../components/VotingSummary";
 import { VotingEventsList } from "../../components/VotingEvents";
-import { fetchWebconfig } from "../../services/webconfig";
+import { VotingSummary } from "../../components/VotingSummary";
 import { Wallets, Votings, VotingEvents, Blocks } from "../../services/api";
-import { IBlockNumber, IVoting, IVotingEvent } from "../../services/types";
 import { serializable } from "../../services/format";
+import { VoteGas } from "../../services/gas";
+import { type IBlockNumber, type IVoting, type IVotingEvent } from "../../services/types";
+import { fetchWebconfig } from "../../services/webconfig";
 
 const uniqueArray = (arr: Array<any>): Array<any> => {
-  const a = new Array();
-  for (let i = 0, l = arr.length; i < l; i++) {
-    if (a.indexOf(arr[i]) === -1 && arr[i] !== "") a.push(arr[i]);
-  }
-  return a;
+  return uniq(arr.filter((item) => item !== ""));
 };
 
 export async function getServerSideProps(context: any) {
-  const id = context.params.id;
+  const {id} = context.params;
   const results = await Promise.all([
     Votings.fetch(id),
     VotingEvents.fetchList(id),

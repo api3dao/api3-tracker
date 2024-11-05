@@ -1,13 +1,9 @@
-import React from "react";
-import Link from "next/link";
 import { Prisma } from "@prisma/client";
 import { ethers } from "ethers";
-import {
-  IWallet,
-  IVoting,
-  IWebConfig,
-  IWalletEvent,
-} from "./../services/types";
+import Link from "next/link";
+import React from "react";
+
+import { Address, InternalAddress, BlockNumber } from "./../components/Ethscan";
 import {
   toHex,
   niceDate,
@@ -17,7 +13,12 @@ import {
   noDecimals,
   withDecimals,
 } from "./../services/format";
-import { Address, InternalAddress, BlockNumber } from "./../components/Ethscan";
+import {
+  type IWallet,
+  type IVoting,
+  type IWebConfig,
+  type IWalletEvent,
+} from "./../services/types";
 
 export interface IWalletEventsListProps {
   wallet: IWallet;
@@ -53,7 +54,7 @@ interface IEventGasTotals {
 }
 
 const EventGasTotals = (props: IEventGasTotals) => {
-  if (props.gasUsed == 0) return null;
+  if (props.gasUsed === 0) return null;
   const price = noDecimals(withDecimals("" + (props.gasPrice || 0), 9));
   return (
     <div className="text-xs text-color-grey leading-6">
@@ -61,7 +62,7 @@ const EventGasTotals = (props: IEventGasTotals) => {
       Gas Price: <span className="text-color-panel-title">{price}</span> GWei,{" "}
       Est.{" "}
       <span className="text-color-panel-title">
-        ${parseFloat(props.feeUsd + "").toFixed(2)}
+        ${Number.parseFloat(props.feeUsd + "").toFixed(2)}
       </span>{" "}
     </div>
   );
@@ -78,9 +79,9 @@ const VotingLink = (props: IVotingLinkProps) => {
   const isSecondary = true;
   const id = props.id * (isSecondary ? 2 : 1) + "";
   const href = `/votings/${id}`;
-  let title = `#${props.id}`;
+  const title = `#${props.id}`;
   for (const v of props.votings) {
-    if (v.id == id) {
+    if (v.id === id) {
       return (
         <Link href={href} legacyBehavior>
           {v.name}
@@ -96,58 +97,58 @@ interface ISharesOfUserProps {
 }
 
 const SharesOfUser = (props: ISharesOfUserProps) => {
-  if (!props.user || !props.user.length) return null;
+  if (!props.user || props.user.length === 0) return null;
   const unstaked = noDecimals(withDecimals(props.user[0], 18));
   const vesting = noDecimals(withDecimals(props.user[1], 18));
   const unstakeAmount = noDecimals(withDecimals(props.user[2], 18));
   const unstakeShares = noDecimals(withDecimals(props.user[3], 18));
   if (
     unstaked === "0" &&
-    vesting == "0" &&
-    unstakeAmount == "0" &&
-    unstakeShares == "0"
+    vesting === "0" &&
+    unstakeAmount === "0" &&
+    unstakeShares === "0"
   )
-    return null;
-  const unstakeScheduledFor = parseInt(props.user[4]);
+    {return null;}
+  const unstakeScheduledFor = Number.parseInt(props.user[4]);
   // lastDelegationUpdateTimestamp   uint256 :  0
   // lastProposalTimestamp   uint256 :  1669559759
   return (
     <div className="text-xs darken">
-      {unstaked != "0" ? (
+      {unstaked == "0" ? null : (
         <span>
           Unstaked:{" "}
           <span className="text-color-panel-title">{toCurrency(unstaked)}</span>{" "}
         </span>
-      ) : null}
-      {vesting != "0" ? (
+      )}
+      {vesting == "0" ? null : (
         <span>
           Vesting:{" "}
           <span className="text-color-panel-title">{toCurrency(vesting)}</span>.{" "}
         </span>
-      ) : null}
-      {unstakeAmount != "0" ? (
+      )}
+      {unstakeAmount == "0" ? null : (
         <span>
           Unstake Amount:{" "}
           <span className="text-color-panel-title">
             {toCurrency(unstakeAmount)}
           </span>{" "}
         </span>
-      ) : null}
-      {unstakeShares != "0" ? (
+      )}
+      {unstakeShares == "0" ? null : (
         <span>
           Unstaked:{" "}
           <span className="text-color-panel-title">
             {toCurrency(unstakeShares)}
           </span>{" "}
         </span>
-      ) : null}
+      )}
       {unstakeScheduledFor > 0 ? (
         <span>
           Unstake Scheduled For:{" "}
           <span className="text-color-panel-title">
             {new Date(1000 * unstakeScheduledFor)
               .toISOString()
-              .substring(0, 10)}
+              .slice(0, 10)}
           </span>{" "}
         </span>
       ) : null}
@@ -210,9 +211,9 @@ const EventDetails = (props: IEventDetails) => {
       const amount = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[2]).toString(), 18)
       );
-      const tmStart = parseInt(ethers.BigNumber.from(props.data[3]).toString());
+      const tmStart = Number.parseInt(ethers.BigNumber.from(props.data[3]).toString());
       const dtStart = new Date(tmStart * 1000);
-      const tmEnd = parseInt(ethers.BigNumber.from(props.data[4]).toString());
+      const tmEnd = Number.parseInt(ethers.BigNumber.from(props.data[4]).toString());
       const dtEnd = new Date(tmEnd * 1000);
       return (
         <div className="text-xs darken leading-4">
@@ -244,14 +245,14 @@ const EventDetails = (props: IEventDetails) => {
       );
       return (
         <div className="text-xs darken leading-4">
-          {from.replace("0x", "").toLowerCase() == thisWallet
+          {from.replace("0x", "").toLowerCase() === thisWallet
             ? " to "
             : " from "}
           <InternalAddress
             className="text-xs"
             inline={true}
             address={
-              from.replace("0x", "").toLowerCase() == thisWallet ? to : from
+              from.replace("0x", "").toLowerCase() === thisWallet ? to : from
             }
           />{" "}
           <span className="text-color-panel-title">{toCurrency(shares)}</span>{". "}
@@ -275,14 +276,14 @@ const EventDetails = (props: IEventDetails) => {
       );
       return (
         <div className="text-xs darken leading-4">
-          {from.replace("0x", "").toLowerCase() == thisWallet
+          {from.replace("0x", "").toLowerCase() === thisWallet
             ? " to "
             : " from "}{" "}
           <InternalAddress
             className="text-xs"
             inline={true}
             address={
-              from.replace("0x", "").toLowerCase() == thisWallet ? to : from
+              from.replace("0x", "").toLowerCase() === thisWallet ? to : from
             }
           />{" "}
           <span className="text-color-panel-title">{toCurrency(shares)}</span>.
@@ -309,11 +310,11 @@ const EventDetails = (props: IEventDetails) => {
       );
       return (
         <div className="text-xs darken leading-4">
-          {from == thisWallet ? " to " : " from "}{" "}
+          {from === thisWallet ? " to " : " from "}{" "}
           <InternalAddress
             className="text-xs"
             inline={true}
-            address={from == thisWallet ? to : from}
+            address={from === thisWallet ? to : from}
           />{" "}
           <span className="text-color-panel-title">{toCurrency(shares)}</span>
           . Total:{" "}
@@ -411,7 +412,7 @@ const EventDetails = (props: IEventDetails) => {
       const shares = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[2]).toString(), 18)
       );
-      const tm = parseInt(ethers.BigNumber.from(props.data[3]).toString());
+      const tm = Number.parseInt(ethers.BigNumber.from(props.data[3]).toString());
       const dt = new Date(tm * 1000);
       const userShares = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[4]).toString(), 18)
@@ -439,9 +440,9 @@ const EventDetails = (props: IEventDetails) => {
       const amount = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[1]).toString(), 18)
       );
-      const tmStart = parseInt(ethers.BigNumber.from(props.data[2]).toString());
+      const tmStart = Number.parseInt(ethers.BigNumber.from(props.data[2]).toString());
       const dtStart = new Date(tmStart * 1000);
-      const tmEnd = parseInt(ethers.BigNumber.from(props.data[3]).toString());
+      const tmEnd = Number.parseInt(ethers.BigNumber.from(props.data[3]).toString());
       const dtEnd = new Date(tmEnd * 1000);
       const userUnstaked = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[4]).toString(), 18)
@@ -520,7 +521,7 @@ const EventDetails = (props: IEventDetails) => {
       const amount = noDecimals(
         withDecimals(ethers.BigNumber.from(props.data[1]).toString(), 18)
       );
-      if (props.data.length == 3) {
+      if (props.data.length === 3) {
         const userUnstaked = noDecimals(
           withDecimals(ethers.BigNumber.from(props.data[2]).toString(), 18)
         );
@@ -548,7 +549,7 @@ const EventDetails = (props: IEventDetails) => {
       }
     }
     case "UpdatedLastProposalTimestamp": {
-      const tm = parseInt(ethers.BigNumber.from(props.data[1]).toString());
+      const tm = Number.parseInt(ethers.BigNumber.from(props.data[1]).toString());
       const dt = new Date(tm * 1000);
       return (
         <div className="text-xs darken leading-4">
@@ -556,8 +557,9 @@ const EventDetails = (props: IEventDetails) => {
         </div>
       );
     }
-    case "WithdrawnToPool":
+    case "WithdrawnToPool": {
       return null;
+    }
 
     case "Status":
     case "Shares": {
@@ -611,11 +613,11 @@ const EventDetails = (props: IEventDetails) => {
     }
   }
 
-  if (props.eventName == "StartVote" || props.eventName == "ExecuteVote") {
-    if (typeof props.data[0] == "undefined") {
+  if (props.eventName === "StartVote" || props.eventName === "ExecuteVote") {
+    if (props.data[0] === undefined) {
       return <div className="darken text-xs">NO DETAILS</div>;
     }
-    const voteId = parseInt(ethers.BigNumber.from(props.data[0]).toString());
+    const voteId = Number.parseInt(ethers.BigNumber.from(props.data[0]).toString());
     return (
       <div className="text-xs darken leading-4">
         <VotingLink
@@ -626,11 +628,11 @@ const EventDetails = (props: IEventDetails) => {
         />{" "}
       </div>
     );
-  } else if (props.eventName == "CastVote") {
-    if (typeof props.data[0] == "undefined") {
+  } else if (props.eventName === "CastVote") {
+    if (props.data[0] === undefined) {
       return <div className="darken text-xs">NO DETAILS</div>;
     }
-    const voteId = parseInt(ethers.BigNumber.from(props.data[0]).toString());
+    const voteId = Number.parseInt(ethers.BigNumber.from(props.data[0]).toString());
     const supports = props.data[2];
     const votes = noDecimals(
       withDecimals(ethers.BigNumber.from(props.data[3]).toString(), 18)
@@ -672,7 +674,7 @@ export const WalletEventsListThead = () => (
 );
 
 const isSpecial = (name: string): boolean => {
-  return name == "Rewards" || name == "Status" || name == "Shares";
+  return name === "Rewards" || name === "Status" || name === "Shares";
 };
 
 export const WalletEventsListTr = (props: IWalletEventsRowProps) => {
@@ -706,7 +708,7 @@ export const WalletEventsListTr = (props: IWalletEventsRowProps) => {
             <EventGasTotals
               gasUsed={row.gasUsed}
               gasPrice={row.gasPrice}
-              feeUsd={parseFloat(row.feeUsd + "")}
+              feeUsd={Number.parseFloat(row.feeUsd + "")}
             />
           ) : null}
         </div>
@@ -749,7 +751,7 @@ export const WalletEventsListRow = (props: IWalletEventsRowProps) => {
           <EventGasTotals
             gasUsed={row.gasUsed}
             gasPrice={row.gasPrice}
-            feeUsd={parseFloat(row.feeUsd + "")}
+            feeUsd={Number.parseFloat(row.feeUsd + "")}
           />
         ) : null}
       </div>

@@ -1,9 +1,9 @@
-FROM node:16.16-alpine3.15 AS dependencies
+FROM node:20.18-alpine3.19 AS dependencies
 WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
-FROM node:16.16-alpine3.15 AS builder
+FROM node:20.18-alpine3.19 AS builder
 WORKDIR /app
 COPY . .
 COPY --from=dependencies /app/node_modules ./node_modules
@@ -11,7 +11,7 @@ RUN yarn prisma generate
 RUN yarn build
 RUN yarn next telemetry disable
 
-FROM node:16.16-alpine3.15
+FROM node:20.18-alpine3.19
 WORKDIR /app
 ENV NODE_ENV=production
 
