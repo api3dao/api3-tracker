@@ -1,10 +1,9 @@
-import prisma from "../services/db";
-import { Batch } from "../services/members";
 import { Prisma } from "@prisma/client";
-import { Wordlist } from "../services/members";
+
+import prisma from "../services/db";
+import { Batch, Wordlist } from "../services/members";
 
 async function fixDelegateBadges() {
-  // Get all members with delegate badge
   const members = await prisma.member.findMany({
     where: {
       badges: {
@@ -21,7 +20,7 @@ async function fixDelegateBadges() {
     const addrHex = addr.toString("hex");
 
     // Calculate total delegated amount for this member
-    const delegated = await Batch.readMemberDelegatedTotal(addr, false);
+    const delegated = await Batch.readMemberDelegatedTotal(addr);
 
     // console.log(`\nChecking member ${addrHex}:`);
     // console.log(`Current delegated amount: ${delegated}`);
@@ -32,11 +31,10 @@ async function fixDelegateBadges() {
       fixCount++;
       // console.log(`Removing delegate badge for ${addrHex}`);
 
-      // Remove badges directly
       const updatedBadges = Wordlist.remove(member.badges, "delegate");
       const updatedTags = Wordlist.remove(member.tags || "", "delegate");
 
-      // Update database directly
+      // eslint-disable-next-line functional/no-try-statements
       try {
         await prisma.member.update({
           where: { address: addr },
@@ -68,7 +66,7 @@ async function fixDelegateBadges() {
   console.log(`Members still with delegate badge: ${remainingDelegates}`);
 }
 
-// Run the fix
 fixDelegateBadges()
   .catch(console.error)
-  .finally(() => prisma.$disconnect());
+  .finally(() => prisma.$disconnect())
+  .catch(console.error);

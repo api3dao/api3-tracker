@@ -1,11 +1,11 @@
 import "../styles/globals.css";
 import "nprogress/nprogress.css";
 import "../styles/nprogress-overrides.css";
-import NProgress from "nprogress";
-import { useEffect } from "react";
-import Router from "next/router";
 import type { AppProps } from "next/app";
 import Head from "next/head";
+import Router from "next/router";
+import NProgress from "nprogress";
+import { useEffect } from "react";
 
 function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {

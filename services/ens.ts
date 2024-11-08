@@ -1,6 +1,8 @@
-import fs from "fs";
-import prisma from "./db";
+import fs from "node:fs";
+
 import { ethers } from "ethers";
+
+import prisma from "./db";
 
 export const Address = {
   asBuffer: (addr: string): Buffer => {
@@ -16,7 +18,7 @@ export const ENS = {
     let inserted = 0;
     const files = fs.readdirSync(folder);
     for (const file of files) {
-      if (file.indexOf(".addr.reverse.txt") > -1) {
+      if (file.includes(".addr.reverse.txt")) {
         const addr = "0x" + file.split(".")[0];
         const domain = fs
           .readFileSync(folder + "/" + file)

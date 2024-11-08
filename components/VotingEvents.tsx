@@ -1,7 +1,7 @@
-import React from "react";
 import { ethers } from "ethers";
-import { IWallet, IVotingEvent } from "./../services/types";
 import Link from "next/link";
+import React from "react";
+
 import { BlockNumber } from "./../components/Ethscan";
 import { MemberBadges } from "./../components/MemberClassification";
 import {
@@ -11,6 +11,7 @@ import {
   toHex,
   toCurrency,
 } from "./../services/format";
+import { type IWallet, type IVotingEvent } from "./../services/types";
 
 export interface IVotingEventsListProps {
   list: Array<IVotingEvent>;
@@ -46,7 +47,7 @@ interface IEventDetails {
 }
 
 const EventDetails = (props: IEventDetails) => {
-  if (props.eventName == "CastVote") {
+  if (props.eventName === "CastVote") {
     const supports = props.data[2];
     const votes = noDecimals(
       withDecimals(ethers.BigNumber.from(props.data[3]).toString(), 18)
@@ -72,7 +73,7 @@ const EventGasTotals = (props: IEventGasTotals) => {
       Gas Price: <span className="text-color-panel-title">{price}</span> GWei,{" "}
       Est.{" "}
       <span className="text-color-panel-title">
-        ${parseFloat(props.feeUsd + "").toFixed(2)}
+        ${Number.parseFloat(props.feeUsd + "").toFixed(2)}
       </span>{" "}
     </div>
   );
@@ -81,7 +82,7 @@ const EventGasTotals = (props: IEventGasTotals) => {
 const votePower = (row: IVotingEvent) => {
   let supports = "";
   let votes = "";
-  if (row.eventName == "CastVote") {
+  if (row.eventName === "CastVote") {
     const supported = JSON.stringify(row.data[2]) == "true";
     supports = supported ? "Supports" : "Against";
     votes = noDecimals(
@@ -90,8 +91,8 @@ const votePower = (row: IVotingEvent) => {
       )
     );
     if (row.totalStake) {
-      const total = parseInt(noDecimals(row.totalStake.toString()));
-      const abs = parseFloat(
+      const total = Number.parseInt(noDecimals(row.totalStake.toString()));
+      const abs = Number.parseFloat(
         noDecimals(
           withDecimals(ethers.BigNumber.from(row.data[3]).toString(), 18)
         )
@@ -140,7 +141,7 @@ export const VotingEventsListTr = (row: IVotingEvent) => {
           <EventGasTotals
             gasUsed={row.gasUsed}
             gasPrice={row.gasPrice}
-            feeUsd={parseFloat(row.feeUsd + "")}
+            feeUsd={Number.parseFloat(row.feeUsd + "")}
           />
         ) : null}{" "}
       </td>
@@ -152,7 +153,6 @@ export const VotingEventsListTr = (row: IVotingEvent) => {
 };
 
 export const VotingEventsListRow = (row: IVotingEvent) => {
-  const [supports, votes, power] = votePower(row);
   return (
     <li className="border-b border-color-grey pt-2 pb-2">
       <div className="r1 flex">
@@ -198,7 +198,7 @@ export const VotingEventsListRow = (row: IVotingEvent) => {
           <EventGasTotals
             gasUsed={row.gasUsed}
             gasPrice={row.gasPrice}
-            feeUsd={parseFloat(row.feeUsd + "")}
+            feeUsd={Number.parseFloat(row.feeUsd + "")}
           />
         </div>
       ) : null}
@@ -207,19 +207,19 @@ export const VotingEventsListRow = (row: IVotingEvent) => {
 };
 
 export const VotingEventsList = (props: IVotingEventsListProps) => {
-  if (!props.list.length) return null;
+  if (props.list.length === 0) return null;
   return (
     <div className="mx-auto">
       <div className="lg:hidden mt-5 ml-5 mr-5">
         <ol className="border-t border-color-grey">
           {props.list.map((row, index) => {
-            const member = props.members.filter(
-              (x: any) => toHex(row.address) == toHex(x.address)
+            const member = props.members.find(
+              (x: any) => toHex(row.address) === toHex(x.address)
             );
             return (
               <VotingEventsListRow
                 key={row.id}
-                {...member[0]}
+                {...member}
                 {...row}
                 index={index}
                 showGas={props.showGas}
@@ -234,13 +234,13 @@ export const VotingEventsList = (props: IVotingEventsListProps) => {
           <VotingEventsListThead />
           <tbody>
             {props.list.map((row, index) => {
-              const member = props.members.filter(
-                (x: any) => toHex(row.address) == toHex(x.address)
+              const member = props.members.find(
+                (x: any) => toHex(row.address) === toHex(x.address)
               );
               return (
                 <VotingEventsListTr
                   key={row.id}
-                  {...member[0]}
+                  {...member}
                   {...row}
                   index={index}
                   showGas={props.showGas}

@@ -1,7 +1,7 @@
-import React from "react";
-import { Prisma } from "@prisma/client";
-import { IVoting } from "./../services/types";
+import { type Prisma } from "@prisma/client";
 import Link from "next/link";
+import React from "react";
+
 import {
   noDecimals,
   toCurrency,
@@ -9,6 +9,7 @@ import {
   niceDate,
   toPct,
 } from "./../services/format";
+import { type IVoting } from "./../services/types";
 import { Address } from "./Ethscan";
 
 export interface IVotingListProps {
@@ -40,11 +41,11 @@ export const TransferDetails = (props: ITransferProps) => {
   return (
     <div className="text-sm leading-6">
       <span className="darken">Transfer</span>{" "}
-      {props.transferValue.toString() != "0" ? (
+      {props.transferValue.toString() == "0" ? null : (
         <span className="text-color-grey font-bold">
           {toCurrency(props.transferValue.toString())}
         </span>
-      ) : null}{" "}
+      )}{" "}
       <span className="darken">{props.transferToken}</span>{" "}
       <span className="darken">to</span>{" "}
       <Address
@@ -77,7 +78,7 @@ const VotingGasTotals = (props: IVotingGasTotals) => {
       </span>{" "}
       ETH in fees, Est.{" "}
       <span className="text-color-panel-title">
-        ${parseFloat(props.totalUsd + "").toFixed(2)}
+        ${Number.parseFloat(props.totalUsd + "").toFixed(2)}
       </span>{" "}
     </div>
   );
@@ -92,7 +93,7 @@ export const VotingsListTr = (props: IVotingItem) => {
       <td className="text-center">
         <span
           className={
-            item.vt.toUpperCase() == "PRIMARY"
+            item.vt.toUpperCase() === "PRIMARY"
               ? "badge badge-primary"
               : "badge badge-secondary"
           }
@@ -139,7 +140,7 @@ export const VotingsListRow = (props: IVotingItem) => {
         <div className="flex-1 text-right">
           <span
             className={
-              item.vt.toUpperCase() == "PRIMARY"
+              item.vt.toUpperCase() === "PRIMARY"
                 ? "badge badge-primary"
                 : "badge badge-secondary"
             }

@@ -1,12 +1,13 @@
 import type { NextPage } from "next";
 import { useState } from "react";
-import { VoteGas } from "../services/gas";
+
 import { Footer, Header, Meta } from "../components/";
 import { VotingsList } from "../components/VotingsList";
-import { fetchWebconfig } from "../services/webconfig";
 import { Votings, Blocks } from "../services/api";
-import { IBlockNumber, IVoting } from "../services/types";
 import { serializable } from "../services/format";
+import { VoteGas } from "../services/gas";
+import { type IBlockNumber, type IVoting } from "../services/types";
+import { fetchWebconfig } from "../services/webconfig";
 
 export async function getServerSideProps() {
   const results = await Promise.all([
@@ -65,7 +66,7 @@ const VotingsPage: NextPage = (props: any) => {
             {pending.length > 0 ? (
               <section className="max-w-screen-lg mx-auto">
                 <div className="text-center text-xl">
-                  {pending.length} Pending Proposal{(pending.length != 1) ? 's' : ''}
+                  {pending.length} Pending Proposal{(pending.length === 1) ? '' : 's'}
                 </div>
                 <VotingsList showGas={gas} list={Votings.fromList(pending)} />
               </section>
@@ -73,7 +74,7 @@ const VotingsPage: NextPage = (props: any) => {
             {executed.length > 0 ? (
               <section className="max-w-screen-lg mx-auto">
                 <div className="text-center text-xl">
-                  {executed.length} Executed Proposal{(executed.length != 1) ? 's' : ''}
+                  {executed.length} Executed Proposal{(executed.length === 1) ? '' : 's'}
 
                 </div>
                 <VotingsList showGas={gas} list={Votings.fromList(executed)} />
@@ -82,7 +83,7 @@ const VotingsPage: NextPage = (props: any) => {
             {invalid.length > 0 ? (
               <section className="max-w-screen-lg mx-auto">
                 <div className="text-center text-xl">
-                  {invalid.length} Invalid Proposal{(invalid.length != 1) ? 's' : ''}
+                  {invalid.length} Invalid Proposal{(invalid.length === 1) ? '' : 's'}
 
                 </div>
                 <VotingsList showGas={gas} list={Votings.fromList(invalid)} />
@@ -91,7 +92,7 @@ const VotingsPage: NextPage = (props: any) => {
             {rejected.length > 0 ? (
               <section className="max-w-screen-lg mx-auto">
                 <div className="text-center text-xl">
-                  {rejected.length} Rejected Proposal{(rejected.length != 1) ? 's' : ''}
+                  {rejected.length} Rejected Proposal{(rejected.length === 1) ? '' : 's'}
 
                 </div>
                 <VotingsList showGas={gas} list={Votings.fromList(rejected)} />
