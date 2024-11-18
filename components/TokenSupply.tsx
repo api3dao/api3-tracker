@@ -1,7 +1,6 @@
 import React from "react";
-
+import { ISupply } from "../services/types";
 import { noDecimals, toCurrency } from "../services/format";
-import { type ISupply } from "../services/types";
 
 export const TokenSupply = (props: ISupply) => {
   const classTitle =

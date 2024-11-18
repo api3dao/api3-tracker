@@ -1,12 +1,10 @@
-import { Prisma } from "@prisma/client";
 import React from "react";
-
+import { BorderedPanel } from "./BorderedPanel";
+import { toPct4, toHex, noDecimals, toCurrency } from "../services/format";
+import { Prisma } from "@prisma/client";
+import { IWallet } from "../services/types";
 import { TxIcon } from "../components/Ethscan";
 import { MemberClassification } from "../components/MemberClassification";
-import { toPct4, toHex, noDecimals, toCurrency } from "../services/format";
-import { type IWallet } from "../services/types";
-
-import { BorderedPanel } from "./BorderedPanel";
 
 export interface IWalletSummaryProps {
   wallet: IWallet;

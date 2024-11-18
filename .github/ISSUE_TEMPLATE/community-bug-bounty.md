@@ -1,9 +1,10 @@
 ---
 name: Community bug bounty
 about: Submissions for the community bug bounty
-title: ""
+title: ''
 labels: cbb
-assignees: ""
+assignees: ''
+
 ---
 
 ## Steps to reproduce

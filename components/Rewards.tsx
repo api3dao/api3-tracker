@@ -1,12 +1,9 @@
-import { type Prisma } from "@prisma/client";
 import React from "react";
-
-import { BorderedPanel } from "../components/BorderedPanel";
-import { StakingTrend } from "../components/StakingTrend";
-
+import { Prisma } from "@prisma/client";
+import { IEpoch, ISupply } from "./../services/types";
 import { noDecimals, niceDate, toCurrency, toPct } from "./../services/format";
-import { type IEpoch, type ISupply } from "./../services/types";
-
+import { StakingTrend } from "../components/StakingTrend";
+import { BorderedPanel } from "../components/BorderedPanel";
 
 export interface IRewardsSummaryProps {
   supply: ISupply;
@@ -141,10 +138,10 @@ export const RewardsListTr = (epoch: IEpoch) => (
       {noDecimals(toCurrency(epoch.mintedShares))}
     </td>
     <td className="text-center">
-      {epoch.isReleased ? (
-        <span className="text-sm darken">released</span>
-      ) : (
+      {!epoch.isReleased ? (
         niceDate(epoch.releaseDate)
+      ) : (
+        <span className="text-sm darken">released</span>
       )}
     </td>
   </tr>

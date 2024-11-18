@@ -1,5 +1,4 @@
 import React from "react";
-
 import { toCurrency } from "../services/format";
 
 export interface IFooterProps {

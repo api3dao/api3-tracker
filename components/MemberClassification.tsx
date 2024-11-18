@@ -26,7 +26,7 @@ const badges = [
     className: "bg-color-panel-title text-color-body",
     title: "This member voted for proposals",
   },
-  /* {
+  /*{
     name: "vested",
     className: "bg-color-panel-title text-color-body",
     title: "Some shares of this member were vested",
@@ -54,13 +54,13 @@ const badges = [
 ];
 
 export const MemberClassification = (props: IBadgerProps) => {
-  if (props.badges.length === 0) return null;
+  if (props.badges.length == 0) return null;
   return (
     <div className="mt-4">
       <div className="uppercase text-center text-sm">Member classification</div>
       <ul className="mt-4 ml-4 lg:ml-0">
         {badges.map((b: any) =>
-          props.badges.includes(b.name) ? (
+          props.badges.indexOf(b.name) === -1 ? null : (
             <li
               className="text-sm text-center lg:text-left leading-6 text-color-grey"
               key={b.name}
@@ -68,7 +68,7 @@ export const MemberClassification = (props: IBadgerProps) => {
               <span className={classBadge + b.className}>{b.name}</span> -{" "}
               <span className="text-xs">{b.title}</span>
             </li>
-          ) : null
+          )
         )}
       </ul>
     </div>
@@ -76,13 +76,13 @@ export const MemberClassification = (props: IBadgerProps) => {
 };
 
 export const MemberBadges = (props: IBadgerProps) => {
-  if (props.badges.length === 0) return null;
+  if (props.badges.length == 0) return null;
   return (
     <div className="leading-2 text-xs">
       {badges.map((b: any) =>
-        props.badges.includes(b.name) ? (
+        props.badges.indexOf(b.name) === -1 ? null : (
           <span title={b.title} key={b.name} className={classBadge + b.className}>{b.name}</span>
-        ) : null
+        )
       )}
     </div>
   );
