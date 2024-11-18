@@ -1,3 +1,5 @@
-export {Footer} from "./Footer";
-export {Header} from "./Header";
-export {Meta} from "./Meta";
+import { Header } from "./Header";
+import { Footer } from "./Footer";
+import { Meta } from "./Meta";
+
+export { Meta, Header, Footer };

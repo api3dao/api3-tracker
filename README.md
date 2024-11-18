@@ -20,7 +20,6 @@ The services are:
 ```
 
 Containers:
-
 - api3tracker: The FE and BE-service
 - postgres: The database the FE and BE rely on
 - traefik: A load balancer that encrypts HTTP responses (using the CF origin server key pair)
@@ -28,7 +27,6 @@ Containers:
 
 Host services:
 The host OS also runs some cron services, these are:
-
 ```bash
 */10 * * * * root cd /home/ubuntu/src/github.com/api3dao/api3-tracker/terraform/workspaces/api3tracker-prod && ./bin/job_logs_download.sh >> /var/log/api3-logs-download.log 2>&1
 15,45 * * * * root cd /home/ubuntu/src/github.com/api3dao/api3-tracker/terraform/workspaces/api3tracker-prod && ./bin/job_supply_download.sh >> /var/log/api3-supply-download.log 2>&1
@@ -39,37 +37,29 @@ The host OS also runs some cron services, these are:
 ```
 
 ## Local developement using Docker
-
 Developers can run some or all services locally using Docker Swarm, or even bare-bones, without containerisation.
 
 One combination is running just postgres locally using Docker, eg:
-
 ```bash
 docker run --rm -ti -p 5432:5432 postgres:15
 ```
-
 and then running the FE and BE services directly (refer to Cron jobs below and `yarn next dev` in `package.json`).
 
 Alternatively, one can run services using Docker Swarm, but this lacks hot-reloading.
 
 ### Local development using Docker Swarm
-
 If you haven't already enabled Swarm mode on your Docker instance, do so now (only has to be done once):
-
 ```bash
 docker swarm init
 ```
-
 The result of the above command can be ignored.
 
 Build the FE/BE image:
-
 ```bash
 docker build -t api3dao/api3-tracker:latest .
 ```
 
 Run the stack:
-
 ```bash
 docker stack deploy -c dev-tools/docker-compose.yml tracker-stack
 ```
@@ -77,7 +67,6 @@ docker stack deploy -c dev-tools/docker-compose.yml tracker-stack
 If all goes well the application will be served at http://localhost:3000
 
 Some commands for visualising the services:
-
 ```bash
 docker ps # all docker containers
 docker service ls # all swarm services
@@ -86,13 +75,11 @@ docker stack rm tracker-stack # tear down the stack
 ```
 
 Initialise the DB:
-
 ```bash
 DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" yarn prisma migrate deploy
 ```
 
 Cron jobs (unwrapped versions of cronjobs):
-
 ```bash
 DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts logs download
 DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts supply download

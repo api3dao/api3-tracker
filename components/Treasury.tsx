@@ -1,9 +1,8 @@
 import React from "react";
-
-import { BorderedPanel } from "../components/BorderedPanel";
+import { ITreasury } from "../services/types";
 import { TxIcon } from "../components/Ethscan";
+import { BorderedPanel } from "../components/BorderedPanel";
 import { shorten, noDecimals, toCurrency } from "../services/format";
-import { type ITreasury } from "../services/types";
 
 export const Treasury = (props: ITreasury) => {
   return (

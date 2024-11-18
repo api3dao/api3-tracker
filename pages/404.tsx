@@ -1,8 +1,7 @@
 import type { NextPage } from "next";
 import { useState } from "react";
-
-import { Footer, Header } from "../components/";
 import { VoteGas } from "../services/gas";
+import { Footer, Header } from "../components/";
 
 const FourOhFour: NextPage = () => {
   const [gas, setGas] = useState<boolean>(VoteGas.appearance);

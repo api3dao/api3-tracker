@@ -1,31 +1,3 @@
 {
-  "extends": [
-    "plugin:@api3/eslint-plugin-commons/universal",
-    "next/core-web-vitals"
-  ],
-  "parserOptions": {
-    "project": ["./tsconfig.json"]
-  },
-  "rules": {
-    // Some of these can be removed with effort (not addressed by --fix)
-    "@typescript-eslint/ban-ts-comment": "off",
-    "@typescript-eslint/no-unsafe-function-type": "off",
-    "@typescript-eslint/prefer-namespace-keyword": "off",
-    "@typescript-eslint/prefer-nullish-coalescing": "off",
-    "eqeqeq": "off",
-    "functional/no-classes": "off",
-    "import/no-default-export": "off",
-    "no-console": "off",
-    "prefer-named-capture-group": "off",
-    "prefer-template": "off",
-    "radix": "off",
-    "unicorn/filename-case": "off",
-    "unicorn/no-array-callback-reference": "off",
-    "unicorn/no-array-push-push": "off",
-    "unicorn/no-await-expression-member": "off",
-    "unicorn/number-literal-case": "off",
-    "unicorn/prefer-code-point": "off",
-    "unicorn/prefer-string-slice": "off",
-    "unicorn/prefer-switch": "off"
-  }
+  "extends": "next/core-web-vitals"
 }

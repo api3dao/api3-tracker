@@ -1,10 +1,11 @@
 import type { NextPage } from "next";
 import { useState } from "react";
-
+import { VoteGas } from "../../services/gas";
 import { Footer, Header, Meta } from "../../components/";
+import { WalletSummary } from "../../components/WalletSummary";
 import { WalletDelegation } from "../../components/WalletDelegation";
 import { WalletEventsList } from "../../components/WalletEvents";
-import { WalletSummary } from "../../components/WalletSummary";
+import { fetchWebconfig } from "../../services/webconfig";
 import {
   CacheTotals,
   Delegations,
@@ -13,19 +14,17 @@ import {
   WalletEvents,
   Blocks,
 } from "../../services/api";
-import { serializable } from "../../services/format";
-import { VoteGas } from "../../services/gas";
 import {
-  type IDelegation,
-  type IWallet,
-  type IVoting,
-  type IWalletEvent,
-  type IBlockNumber,
+  IDelegation,
+  IWallet,
+  IVoting,
+  IWalletEvent,
+  IBlockNumber,
 } from "../../services/types";
-import { fetchWebconfig } from "../../services/webconfig";
+import { serializable } from "../../services/format";
 
 export async function getServerSideProps(context: any) {
-  const {id} = context.params;
+  const id = context.params.id;
   const address = Buffer.from(id.replace(/0x/, ""), "hex");
   const results = await Promise.all([
     Wallets.fetch(address),
@@ -55,16 +54,16 @@ export async function getServerSideProps(context: any) {
   values.set('MEMBER_POWER', memberPower);
   return {
     props: {
-      delegationsFrom: serializable(delegationsFrom),
-      delegationsTo: serializable(delegationsTo),
-      events: serializable(events),
+      webconfig: fetchWebconfig(),
+      values: serializable(values),
       id,
+      wallet: serializable(wallet),
+      events: serializable(events),
+      votings: serializable(votings),
       lastBlock: serializable(lastBlock),
       totalShares: serializable(totalShares),
-      values: serializable(values),
-      votings: serializable(votings),
-      wallet: serializable(wallet),
-      webconfig: fetchWebconfig(),
+      delegationsFrom: serializable(delegationsFrom),
+      delegationsTo: serializable(delegationsTo),
     }, // will be passed to the page component as props
   };
 }

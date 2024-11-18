@@ -1,13 +1,15 @@
-import {uniq} from "lodash";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { Wallets, Votings, VotingEvents, Blocks } from "../../../../services/api";
+import { IVoting, IVotingEvent } from "../../../../services/types";
 import { stringify } from "superjson";
-
-import { Wallets, Votings, VotingEvents } from "../../../../services/api";
 import { serializable } from "../../../../services/format";
-import { type IVoting, type IVotingEvent } from "../../../../services/types";
 
 const uniqueArray = (arr: Array<any>): Array<any> => {
-  return uniq(arr.filter((item) => item !== ""));
+  const a = new Array();
+  for (let i = 0, l = arr.length; i < l; i++) {
+    if (a.indexOf(arr[i]) === -1 && arr[i] !== "") a.push(arr[i]);
+  }
+  return a;
 };
 
 export default async function handler(
@@ -30,5 +32,5 @@ export default async function handler(
       members: serializable(members),
   };
   res.status(200).json(JSON.parse(stringify(out)).json);
-}
+};
 

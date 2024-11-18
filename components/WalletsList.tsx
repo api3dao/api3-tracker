@@ -1,8 +1,7 @@
-import { Prisma } from "@prisma/client";
-import Link from "next/link";
 import React from "react";
-
-import { MemberBadges } from "./../components/MemberClassification";
+import { Prisma } from "@prisma/client";
+import { IWallet } from "./../services/types";
+import Link from "next/link";
 import {
   toHex,
   niceDate,
@@ -11,7 +10,7 @@ import {
   noDecimals,
   toCurrency,
 } from "./../services/format";
-import { type IWallet } from "./../services/types";
+import { MemberBadges } from "./../components/MemberClassification";
 
 export interface IWalletsListProps {
   list: Array<IWallet>;
@@ -39,13 +38,13 @@ interface IWalletsListRow {
 }
 
 export const WalletsListTr = (props: IWalletsListRow) => {
-  const {row} = props;
+  const row = props.row;
   const userVotingPower = new Prisma.Decimal(row.userVotingPower)
     .mul(100)
     .div(props.totalVotingPower);
   const cls =
     "text-right text-xs " +
-    (row.userVotingPower > new Prisma.Decimal(0) ? "" : "darken");
+    (row.userVotingPower > new Prisma.Decimal(0.0) ? "" : "darken");
   const skipped = row.userVotingPower < new Prisma.Decimal(0.0001);
   return (
     <tr>
@@ -83,7 +82,7 @@ export const WalletsListTr = (props: IWalletsListRow) => {
         <MemberBadges badges={row.badges} />
       </td>
       <td className={cls}>
-        {row.userShare > new Prisma.Decimal(0)
+        {row.userShare > new Prisma.Decimal(0.0)
           ? noDecimals(toCurrency(row.userShare))
           : "-"}
       </td>
@@ -96,14 +95,14 @@ export const WalletsListTr = (props: IWalletsListRow) => {
 };
 
 export const WalletsListRow = (props: IWalletsListRow) => {
-  const {row} = props;
+  const row = props.row;
   const userVotingPower = new Prisma.Decimal(row.userVotingPower)
     .mul(100)
     .div(props.totalVotingPower);
 
   const cls =
     "flex-1 text-right text-xs " +
-    (row.userVotingPower > new Prisma.Decimal(0) ? "" : "darken");
+    (row.userVotingPower > new Prisma.Decimal(0.0) ? "" : "darken");
   const skipped = row.userVotingPower < new Prisma.Decimal(0.0001);
   return (
     <li className="border-b border-color-grey pt-2 pb-2">
@@ -121,7 +120,7 @@ export const WalletsListRow = (props: IWalletsListRow) => {
           {noDecimals(toCurrency(row.userVotingPower))}
         </div>
       )}
-      {row.userShare > new Prisma.Decimal(0) ? (
+      {row.userShare > new Prisma.Decimal(0.0) ? (
         <div className="text-xs text-right">
           <span className="darken"> Owns: </span>
           {noDecimals(toCurrency(row.userShare))}

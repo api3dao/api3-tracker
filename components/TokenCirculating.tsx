@@ -1,8 +1,7 @@
 import React from "react";
-
+import { ISupply } from "../services/types";
 import { BorderedPanel } from "../components/BorderedPanel";
 import { noDecimals, toCurrency } from "../services/format";
-import { type ISupply } from "../services/types";
 
 export const TokenCirculating = (props: ISupply) => {
   const classTitle =

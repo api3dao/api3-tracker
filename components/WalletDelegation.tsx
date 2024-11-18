@@ -1,10 +1,8 @@
-import { Prisma } from "@prisma/client";
 import React from "react";
-
-import { niceDateTime, noDecimals, toCurrency } from "../services/format";
-import { type IDelegation } from "../services/types";
-
 import { InternalAddress } from "./../components/Ethscan";
+import { niceDateTime, noDecimals, toCurrency } from "../services/format";
+import { Prisma } from "@prisma/client";
+import { IDelegation } from "../services/types";
 
 export interface IWalletDelegationProps {
   from: Array<IDelegation>;
@@ -26,7 +24,7 @@ export const WalletDelegationThead = () => (
 
 export const WalletDelegationTr = (props: any) => {
   const { index } = props;
-  const {row} = props;
+  const row: IDelegation = props.row;
   return (
     <tr>
       <td className="text-center">{(index || 0) + 1}.</td>
@@ -44,7 +42,7 @@ export const WalletDelegationTr = (props: any) => {
 
 export const WalletDelegationRow = (props: any) => {
   const { index } = props;
-  const {row} = props;
+  const row: IDelegation = props.row;
   return (
     <li className="border-b border-color-grey py-2">
       <div className="flex mr-5 ml-5">

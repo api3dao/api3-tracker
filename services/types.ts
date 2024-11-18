@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 
-export const { Decimal } = Prisma;
+export const Decimal = Prisma.Decimal;
 
 export interface IBlockEvent {
   createdAt: string;
@@ -67,7 +67,7 @@ export interface IEpoch {
 }
 
 export interface ISupply {
-  blockNumber: bigint;
+  blockNumber: BigInt;
   circulatingSupply: Prisma.Decimal;
 
   totalLocked: Prisma.Decimal;
