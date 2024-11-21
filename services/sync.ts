@@ -1,24 +1,36 @@
-import fs from "fs";
-import prisma from "./db";
+import fs from "node:fs";
+
+import {
+  type Filter,
+  type Block,
+  type Log,
+  type Provider,
+} from "@ethersproject/abstract-provider";
 import { Prisma } from "@prisma/client";
-import { IWebConfig, IBlockNumber } from "./../services/types";
+import { BigNumber, ethers } from "ethers";
+import { uniq } from "lodash";
+
 import { Wallets } from "./../services/api";
 import { noDecimals, withDecimals } from "./../services/format";
-import { BigNumber, ethers } from "ethers";
-import { fetchWebconfig } from "./webconfig";
-import type { IWallet, IContract } from "./types";
-import { Filter, Block, Log, Provider } from "@ethersproject/abstract-provider";
-import type { IPriceReader } from "./../services/price";
-import { Shares } from "./../services/shares";
-import { VotingReader } from "./../services/voting";
 import { VoteGas } from "./../services/gas";
 import { Batch } from "./../services/members";
+import type { IPriceReader } from "./../services/price";
+import { Shares } from "./../services/shares";
+import {
+  type IWebConfig,
+  type IBlockNumber,
+  type IWallet,
+  type IContract,
+} from "./../services/types";
+import { VotingReader } from "./../services/voting";
+import prisma from "./db";
+import { fetchWebconfig } from "./webconfig";
 
 const rewardsPct = (newApr: number): number => {
-  const epochLength = 604800.0;
-  const week = epochLength / 3600.0 / 24.0;
-  const aprCoeff = (52.0 * week) / 365.0;
-  return (newApr * 100 * aprCoeff) / 52.0;
+  const epochLength = 604_800;
+  const week = epochLength / 3600 / 24;
+  const aprCoeff = (52 * week) / 365;
+  return (newApr * 100 * aprCoeff) / 52;
 };
 
 interface SyncTermination {
@@ -52,22 +64,18 @@ interface BlockFullInfo {
 }
 
 const elapsed = (since: number): string => {
-  const duration = new Date().getTime() - since;
+  const duration = Date.now() - since;
   return `${duration / 1000}s`;
 };
 
 const uniqueArray = (arr: Array<any>): Array<any> => {
-  const a = new Array();
-  for (let i = 0, l = arr.length; i < l; i++) {
-    if (a.indexOf(arr[i]) === -1 && arr[i] !== "") a.push(arr[i]);
-  }
-  return a;
+  return uniq(arr.filter((item) => item !== ""));
 };
 
 const adjustedLogIndex = (a: any): number => {
   if (
     a.topics.length > 0 &&
-    a.topics[0] ==
+    a.topics[0] ===
       "0xf310def5b4718cefe3603eb46259d8061fd58003695cf952de94c53e14dbb309"
   ) {
     return 255;
@@ -78,16 +86,16 @@ const adjustedLogIndex = (a: any): number => {
 export const BlockLoader = {
   fromDatabase: async (
     blockRecord: any,
-    verboseBlock: boolean
+    verboseBlock: boolean,
   ): Promise<BlockFullInfo> => {
-    const start = new Date().getTime();
-    const price = parseFloat(blockRecord.price.toString());
+    const start = Date.now();
+    const price = Number.parseFloat(blockRecord.price.toString());
     const block: Block = blockRecord.data as any;
 
     const foundLogs = await prisma.cacheLogs.findMany({
       where: { hash: blockRecord.hash },
     });
-    if (foundLogs.length == 0) throw "no logs saved for the block";
+    if (foundLogs.length === 0) throw "no logs saved for the block";
     const logsList = new Array<Log>();
     for (const found of foundLogs) {
       const logs = found.logs as any;
@@ -132,7 +140,7 @@ export const BlockLoader = {
         logsList.length + "L",
         receipts.size + "R",
         price.toFixed(2) + "USD",
-        "read in " + elapsed(start)
+        "read in " + elapsed(start),
       );
     }
     return { block, price, txs, receipts, logs };
@@ -142,9 +150,9 @@ export const BlockLoader = {
     jsonRpc: Provider,
     blockHash: string,
     logsList: Array<Log>,
-    priceReader: IPriceReader
+    priceReader: IPriceReader,
   ): Promise<BlockFullInfo> => {
-    const start = new Date().getTime();
+    const start = Date.now();
 
     const foundBlock = await prisma.cacheBlock.findMany({
       where: { hash: Hash.asBuffer(blockHash) },
@@ -155,7 +163,7 @@ export const BlockLoader = {
         : await jsonRpc.getBlock(blockHash);
     const price =
       foundBlock.length > 0
-        ? parseFloat(foundBlock[0].price.toString())
+        ? Number.parseFloat(foundBlock[0].price.toString())
         : await priceReader(new Date(block.timestamp * 1000));
 
     // load receipts for each transaction
@@ -196,7 +204,7 @@ export const BlockLoader = {
       logsList.length + "L",
       receipts.size + "R",
       price.toFixed(2) + "USD",
-      "took " + elapsed(start)
+      "took " + elapsed(start),
     );
     return {
       block,
@@ -217,7 +225,7 @@ export const Sync = {
   },
   saveBlock: async (b: BlockFullInfo) => {
     const blockHash = Hash.asBuffer(b.block.hash);
-    const tx = new Array();
+    const tx = [];
     // 1. save block
     tx.push(
       prisma.cacheBlock.createMany({
@@ -231,7 +239,7 @@ export const Sync = {
           },
         ],
         skipDuplicates: true,
-      })
+      }),
     );
     // 2. save transaction details
     for (const [txHash, t] of b.txs.entries()) {
@@ -244,7 +252,7 @@ export const Sync = {
             },
           ],
           skipDuplicates: true,
-        })
+        }),
       );
     }
     // 3. save receipts
@@ -254,11 +262,11 @@ export const Sync = {
           data: [
             {
               hash: Hash.asBuffer(txHash),
-              receipt: receipt,
+              receipt,
             },
           ],
           skipDuplicates: true,
-        })
+        }),
       );
     }
     // 4. save logs for every contract
@@ -273,7 +281,7 @@ export const Sync = {
             },
           ],
           skipDuplicates: true,
-        })
+        }),
       );
     }
     // 5. update syncing status
@@ -284,7 +292,7 @@ export const Sync = {
           updatedAt: new Date().toISOString(),
           downloaded: b.block.number,
         },
-      })
+      }),
     );
 
     await prisma.$transaction(tx);
@@ -330,7 +338,7 @@ export const Sync = {
       orderBy: { height: "asc" },
       take: 1,
     });
-    if (blocks.length) {
+    if (blocks.length > 0) {
       const block = blocks[0];
       return BlockLoader.fromDatabase(block, verboseBlock);
     }
@@ -359,7 +367,7 @@ export const Filters = {
     minBlock: number,
     batchSize: number,
     last: number,
-    head: number
+    head: number,
   ): Array<Map<string, Filter>> => {
     const filter: any = {};
     if (last) filter.fromBlock = last;
@@ -424,19 +432,22 @@ export const Events = {
       }),
     ]);
   },
+  // eslint-disable-next-line sort-keys
   resetAll: async () => {
     await Events.resetState();
     await Sync.reset();
   },
+  // eslint-disable-next-line sort-keys
   ABI: new ethers.utils.Interface(
+    // eslint-disable-next-line unicorn/prefer-spread
     [].concat(
-      JSON.parse(fs.readFileSync("./abi/api3pool.json", "utf-8")),
-      JSON.parse(fs.readFileSync("./abi/api3timelock.json", "utf-8")),
-      JSON.parse(fs.readFileSync("./abi/api3voting.json", "utf-8"))
-    )
+      JSON.parse(fs.readFileSync("./abi/api3pool.json", "utf8")),
+      JSON.parse(fs.readFileSync("./abi/api3timelock.json", "utf8")),
+      JSON.parse(fs.readFileSync("./abi/api3voting.json", "utf8")),
+    ),
   ),
   ConvenienceABI: new ethers.utils.Interface(
-    fs.readFileSync("./abi/api3convenience.json", "utf-8")
+    fs.readFileSync("./abi/api3convenience.json", "utf8"),
   ),
   IGNORED: new Map<string, number>([
     ["0x9dcff9d94fbfdb4622d11edb383005f95e78efb446c72d92f8e615c6025c4703", 1],
@@ -449,63 +460,86 @@ export const Events = {
 
   votings: (signature: string, args: any): Array<number> => {
     switch (signature) {
-      case "StartVote(uint256,address,string)":
+      case "StartVote(uint256,address,string)": {
         return [args[0]];
-      case "CastVote(uint256,address,bool,uint256)":
+      }
+      case "CastVote(uint256,address,bool,uint256)": {
         return [args[0]];
-      case "ExecuteVote(uint256)":
+      }
+      case "ExecuteVote(uint256)": {
         return [args[0]];
+      }
     }
     return [];
   },
 
   addresses: (signature: string, args: any, sender: string): Array<string> => {
     switch (signature) {
-      case "Deposited(address,uint256,uint256)":
+      case "Deposited(address,uint256,uint256)": {
         return [args[0]];
-      case "Staked(address,uint256,uint256,uint256,uint256,uint256,uint256)":
+      }
+      case "Staked(address,uint256,uint256,uint256,uint256,uint256,uint256)": {
         return [args[0]];
-      case "Delegated(address,address,uint256,uint256)":
+      }
+      case "Delegated(address,address,uint256,uint256)": {
         return uniqueArray([args[0], args[1]]);
-      case "UpdatedDelegation(address,address,bool,uint256,uint256)":
+      }
+      case "UpdatedDelegation(address,address,bool,uint256,uint256)": {
         return uniqueArray([args[0], args[1]]);
-      case "Undelegated(address,address,uint256,uint256)":
+      }
+      case "Undelegated(address,address,uint256,uint256)": {
         return uniqueArray([args[0], args[1]]);
-      case "Unstaked(address,uint256,uint256,uint256,uint256)":
+      }
+      case "Unstaked(address,uint256,uint256,uint256,uint256)": {
         return [args[0]];
-      case "ScheduledUnstake(address,uint256,uint256,uint256,uint256)":
+      }
+      case "ScheduledUnstake(address,uint256,uint256,uint256,uint256)": {
         return [args[0]];
-      case "DepositedVesting(address,uint256,uint256,uint256,uint256,uint256)":
+      }
+      case "DepositedVesting(address,uint256,uint256,uint256,uint256,uint256)": {
         return [args[0]];
-      case "DepositedByTimelockManager(address,uint256,uint256)":
+      }
+      case "DepositedByTimelockManager(address,uint256,uint256)": {
         return [args[0]];
-      case "UpdatedLastProposalTimestamp(address,uint256,address)":
+      }
+      case "UpdatedLastProposalTimestamp(address,uint256,address)": {
         return uniqueArray([args[0], args[2]]);
+      }
       case "VestedTimeLock(address,uint256,uint256)":
-      case "VestedTimelock(address,uint256,uint256)":
+      case "VestedTimelock(address,uint256,uint256)": {
         return [args[0]];
-      case "Withdrawn(address,uint256)":
+      }
+      case "Withdrawn(address,uint256)": {
         return [args[0]];
-      case "Withdrawn(address,uint256,uint256)":
+      }
+      case "Withdrawn(address,uint256,uint256)": {
         return [args[0]];
-      case "WithdrawnToPool(address,address,address)":
+      }
+      case "WithdrawnToPool(address,address,address)": {
         return uniqueArray([args[0], args[1], args[2]]);
-      case "OwnershipTransferred(address,address)":
+      }
+      case "OwnershipTransferred(address,address)": {
         return uniqueArray([args[0], args[1]]);
-      case "TransferredAndLocked(address,address,uint256,uint256,uint256)":
+      }
+      case "TransferredAndLocked(address,address,uint256,uint256,uint256)": {
         return uniqueArray([args[0], args[1]]);
-      case "StartVote(uint256,address,string)":
+      }
+      case "StartVote(uint256,address,string)": {
         return [args[1]];
-      case "CastVote(uint256,address,bool,uint256)":
+      }
+      case "CastVote(uint256,address,bool,uint256)": {
         return [args[1]];
-      case "ExecuteVote(uint256)":
+      }
+      case "ExecuteVote(uint256)": {
         return [sender];
+      }
       // the actions below are not related to members
       case "SetVestingAddresses()":
       case "SetDaoApps(address,address,address,address)":
       case "Api3PoolUpdated(address)":
-      case "MintedReward(uint256,uint256,uint256,uint256)":
+      case "MintedReward(uint256,uint256,uint256,uint256)": {
         return [];
+      }
     }
     console.warn("Unknown signature", signature);
     return [];
@@ -517,9 +551,9 @@ export const Events = {
     blockInfo: BlockFullInfo,
     event: Log,
     tx: any,
-    useArchive: boolean
+    useArchive: boolean,
   ): Promise<boolean> => {
-    const start = new Date().getTime();
+    const start = Date.now();
     const { transactionIndex, transactionHash, logIndex } = event;
     const blockNumber = blockInfo.block.number;
 
@@ -536,10 +570,10 @@ export const Events = {
     const minted = amount;
 
     const totalShares = new Prisma.Decimal(
-      withDecimals(totalStake.toString(), 18)
+      withDecimals(totalStake.toString(), 18),
     );
     const mintedShares = new Prisma.Decimal(
-      withDecimals(amount.toString(), 18)
+      withDecimals(amount.toString(), 18),
     );
 
     const currentEpoch = await prisma.epoch.findMany({
@@ -548,10 +582,10 @@ export const Events = {
     });
 
     const oldApr = currentEpoch.length > 0 ? currentEpoch[0].newApr : 38.75;
-    const oldAprPct = parseFloat(oldApr + "") * 0.01;
+    const oldAprPct = Number.parseFloat(oldApr + "") * 0.01;
 
-    const newAprPct = parseFloat(
-      new Prisma.Decimal(withDecimals(newApr.toString(), 18)).toString()
+    const newAprPct = Number.parseFloat(
+      new Prisma.Decimal(withDecimals(newApr.toString(), 18)).toString(),
     );
 
     let totalDeposits = new Prisma.Decimal(0);
@@ -565,16 +599,15 @@ export const Events = {
     }
     const allMembers = await Wallets.fetchAll();
     for (const m of allMembers) {
-      const addrIndex = m.address.replace("0x", "").toLowerCase();
-      const userShare = m.userShare;
+      const { userShare } = m;
       const userSharePct = userShare.mul(100).div(totalShares);
       const userMintedShares = mintedShares.mul(userSharePct).div(100); // rewards are proportional
 
       // save mintedEvent for each member
       const member: IWallet = m;
       const hasRewardsRecord =
-        (userShare && userShare != new Prisma.Decimal(0.0)) ||
-        (userMintedShares && userMintedShares > new Prisma.Decimal(0.0));
+        (userShare && userShare != new Prisma.Decimal(0)) ||
+        (userMintedShares && userMintedShares > new Prisma.Decimal(0));
       if (hasRewardsRecord) {
         const eventId =
           event.blockNumber.toString(16) +
@@ -595,24 +628,24 @@ export const Events = {
         tx.push(
           prisma.memberEvent.create({
             data: {
-              id: eventId,
-              createdAt: blockDt,
               address: Address.asBuffer(m.address),
-              chainId: 0,
-              txHash,
               blockNumber,
-              txIndex: transactionIndex,
-              logIndex: logIndex,
-              eventName: "Rewards",
+              chainId: 0,
+              createdAt: blockDt,
               data: args,
+              eventName: "Rewards",
+              fee: BigInt(0),
+              feeUsd: "0",
               // we do not want the gas price to be included in totals
               // because of this event
               gasPrice: BigNumber.from(0).toNumber(),
               gasUsed: BigNumber.from(0).toNumber(),
-              fee: BigInt(0),
-              feeUsd: "0",
+              id: eventId,
+              logIndex,
+              txHash,
+              txIndex: transactionIndex,
             },
-          })
+          }),
         );
       }
 
@@ -626,7 +659,7 @@ export const Events = {
           endpoint,
           pool,
           member.address,
-          blockNumber
+          blockNumber,
         );
         const unstaked = withDecimals(data.user[2], 18);
         member.userLockedReward = new Prisma.Decimal(data.locked);
@@ -641,40 +674,40 @@ export const Events = {
     tx.push(
       prisma.epoch.create({
         data: {
-          epoch: parseInt(epochIndex.toString()),
+          apr: oldApr,
           blockNumber,
           chainId: 0,
-          txHash,
+          createdAt: blockDt,
+          epoch: Number.parseInt(epochIndex.toString()),
+          isCurrent: 0,
+          members: totalMembers,
+          mintedShares: new Prisma.Decimal(
+            noDecimals(withDecimals(minted.toString(), 18)),
+          ),
           newApr: new Prisma.Decimal(withDecimals(newApr.toString(), 16)),
           newRewardsPct: rewardsPct(newAprPct),
-          apr: oldApr,
-          rewardsPct: rewardsPct(oldAprPct),
-          members: totalMembers,
-          totalStake: new Prisma.Decimal(
-            noDecimals(withDecimals(total.toString(), 18))
-          ),
-          totalShares: 0,
-          mintedShares: new Prisma.Decimal(
-            noDecimals(withDecimals(minted.toString(), 18))
-          ),
           releaseDate: releaseDt,
-          createdAt: blockDt,
-          isCurrent: 0,
+          rewardsPct: rewardsPct(oldAprPct),
           stakedRewards: 0,
           totalDeposits,
-          totalWithdrawals,
-          totalUnlocked,
           totalLocked,
+          totalShares: 0,
+          totalStake: new Prisma.Decimal(
+            noDecimals(withDecimals(total.toString(), 18)),
+          ),
+          totalUnlocked,
+          totalWithdrawals,
+          txHash,
         },
-      })
+      }),
     );
 
-    const expireDt = new Date(blockInfo.block.timestamp * 1000 - 12096e5); // minus 2 weeks
+    const expireDt = new Date(blockInfo.block.timestamp * 1000 - 12_096e5); // minus 2 weeks
     tx.push(
       prisma.voting.updateMany({
         where: { status: "pending", createdAt: { lt: expireDt.toISOString() } },
         data: { status: "rejected" },
-      })
+      }),
     );
     console.log("Processing Epoch", "took " + elapsed(start));
     return true;
@@ -688,10 +721,10 @@ export const Events = {
     endpoint: string,
     verboseVote: boolean,
     verboseMember: string,
-    tx: any
+    tx: any,
   ): Promise<boolean> => {
-    const start = new Date().getTime();
-    const transactionHash = event.transactionHash;
+    const start = Date.now();
+    const { transactionHash } = event;
     const { voteId, metadata } = args;
     // const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
@@ -699,14 +732,14 @@ export const Events = {
     const voteInternalId = voteId * 2 + (isPrimary ? 1 : 0);
 
     const convenience = config.contracts?.find(
-      (p: any) => p.name.toLowerCase() === "convenience"
+      (p: any) => p.name.toLowerCase() === "convenience",
     );
     if (!convenience) {
       throw "api3 convenience contract is not configured";
     }
     const txSender: string = blockInfo.receipts.get(transactionHash).from;
 
-    let scriptData = {
+    const scriptData = {
       amount: new Prisma.Decimal(0),
       token: "",
       address: Buffer.from([]),
@@ -722,7 +755,7 @@ export const Events = {
       const conv = new ethers.Contract(
         convenience.address,
         Events.ConvenienceABI,
-        jsonRpc
+        jsonRpc,
       );
       const cached = await prisma.cacheVoting.findMany({
         where: {
@@ -734,11 +767,11 @@ export const Events = {
       let scriptData: any = {};
       let votingPower: any = "";
 
-      if (cached.length == 0) {
+      if (cached.length === 0) {
         const result = await conv.getStaticVoteData(
           isPrimary ? 0 : 1,
           txSender,
-          [voteId.toString()]
+          [voteId.toString()],
         );
         await prisma.cacheVoting.create({
           data: {
@@ -746,8 +779,7 @@ export const Events = {
             data: result as any,
           },
         });
-        script = result.script;
-        votingPower = result.votingPower;
+        ({ script, votingPower } = result);
       } else {
         script = (cached[0].data as any)[4];
         votingPower = ethers.BigNumber.from((cached[0].data as any)[3][0]);
@@ -755,23 +787,24 @@ export const Events = {
       scriptData = VotingReader.parseScript(script[0]); // there might be something tricky here
 
       totalStaked = new Prisma.Decimal(
-        withDecimals(votingPower.toString(), 18)
+        withDecimals(votingPower.toString(), 18),
       );
       if (scriptData.address) {
         const addr =
           "0x" + Buffer.from(scriptData.address).toString("hex").toLowerCase();
         const matchMember: boolean =
-          addr.replace("0x", "").toLowerCase() == verboseMember;
+          addr.replace("0x", "").toLowerCase() === verboseMember;
         await Batch.ensureExists(addr, blockDt, "grant", matchMember);
       }
 
       // multiply totalStaked by supportRequired. can round up wildly
       const pctRequired = isPrimary ? 0.5 : 0.15;
       const absRequired =
-        parseFloat(noDecimals(withDecimals(votingPower.toString(), 18))) *
-        pctRequired;
+        Number.parseFloat(
+          noDecimals(withDecimals(votingPower.toString(), 18)),
+        ) * pctRequired;
       totalRequired = new Prisma.Decimal(absRequired);
-      if (script.scriptType == "invalid") status = "invalid";
+      if (script.scriptType === "invalid") status = "invalid";
     }
 
     const meta = VotingReader.parseMetadata(metadata) || {
@@ -780,29 +813,29 @@ export const Events = {
       targetSignature: "",
     };
     // console.log( blockDt, voteInternalId, isPrimary ? "PRIMARY" : "SECONDARY", "META.TITLE", meta.title);
-    if (meta.targetSignature.indexOf(" ") > -1) {
+    if (meta.targetSignature.includes(" ")) {
       // Typical error in the signature is putting space
       status = "invalid";
     }
     tx.push(
       prisma.voting.create({
         data: {
-          id: voteInternalId + "",
-          vt: isPrimary ? "PRIMARY" : "SECONDARY",
           createdAt: blockDt.toISOString(),
+          id: voteInternalId + "",
           name: meta.title, // we also have
           status,
-          transferValue: scriptData.amount,
-          transferToken: scriptData.token,
-          transferAddress: scriptData.address,
-          totalGasUsed: BigInt(0),
-          totalUsd: new Prisma.Decimal("0.0"),
-          totalFor: new Prisma.Decimal("0.0"),
           totalAgainst: new Prisma.Decimal("0.0"),
-          totalStaked,
+          totalFor: new Prisma.Decimal("0.0"),
+          totalGasUsed: BigInt(0),
           totalRequired,
+          totalStaked,
+          totalUsd: new Prisma.Decimal("0.0"),
+          transferAddress: scriptData.address,
+          transferToken: scriptData.token,
+          transferValue: scriptData.amount,
+          vt: isPrimary ? "PRIMARY" : "SECONDARY",
         },
-      })
+      }),
     );
     if (verboseVote) {
       console.log("New Voting", "took " + elapsed(start));
@@ -817,7 +850,7 @@ export const Events = {
     config: IWebConfig,
     verboseVote: boolean,
     _verboseMember: string,
-    tx: any
+    tx: any,
   ) => {
     const { voteId, supports, stake } = args;
 
@@ -826,10 +859,10 @@ export const Events = {
     const supported: boolean = supports === "true" || supports === true;
 
     let totalFor = new Prisma.Decimal(
-      supported ? withDecimals(stake.toString(), 18) : 0
+      supported ? withDecimals(stake.toString(), 18) : 0,
     );
     let totalAgainst = new Prisma.Decimal(
-      !supported ? withDecimals(stake.toString(), 18) : 0
+      supported ? 0 : withDecimals(stake.toString(), 18),
     );
     const foundVote = await prisma.voting.findMany({
       where: { id: voteInternalId + "" },
@@ -850,14 +883,14 @@ export const Events = {
         "FOR",
         totalFor,
         "AGAINST",
-        totalAgainst
+        totalAgainst,
       );
     }
     tx.push(
       prisma.voting.updateMany({
         where: { id: voteInternalId + "" },
         data: { totalFor, totalAgainst },
-      })
+      }),
     );
   },
 
@@ -868,7 +901,7 @@ export const Events = {
     config: IWebConfig,
     verboseVote: boolean,
     _verboseMember: string,
-    tx: any
+    tx: any,
   ) => {
     const { voteId } = args;
     const isPrimary = VotingReader.isPrimary(config, event.address);
@@ -881,7 +914,7 @@ export const Events = {
         blockInfo.block.number,
         blockDt,
         voteInternalId,
-        "EXECUTED"
+        "EXECUTED",
       );
     }
     tx.push(
@@ -893,7 +926,7 @@ export const Events = {
           status: "executed",
           // TODO: gas used
         },
-      })
+      }),
     );
   },
 
@@ -903,21 +936,21 @@ export const Events = {
     endpoint: string,
     verbose: SyncVerbosity,
     termination: SyncTermination,
-    useArchive: boolean
+    useArchive: boolean,
   ): Promise<SyncBlockResult> => {
-    const start = new Date().getTime();
+    const start = Date.now();
     VoteGas.reset(); // gas accumulator for the block
     Batch.reset();
 
     const pool: string = (
       config.contracts?.find(
-        ({ name }) => name.toLowerCase() === "api3pool"
+        ({ name }) => name.toLowerCase() === "api3pool",
       ) || { address: "" }
     ).address;
 
     const blockNumber = blockInfo.block.number;
     const blockDt = new Date(blockInfo.block.timestamp * 1000);
-    const tx = new Array();
+    const tx = [];
     let shouldTerminate: boolean = false;
     let included: boolean = true;
     const vm: string = verbose.member.replace("0x", "").toLowerCase();
@@ -926,18 +959,19 @@ export const Events = {
         const { transactionHash, transactionIndex, logIndex } = event;
         const txHash = Buffer.from(transactionHash.replace("0x", ""), "hex");
         const { from, gasUsed } = blockInfo.receipts.get(transactionHash);
-        const matchFrom = from.replace("0x", "").toLowerCase() == vm;
+        const matchFrom = from.replace("0x", "").toLowerCase() === vm;
         const { gasPrice } = blockInfo.txs.get(transactionHash);
         const fee = BigNumber.from(gasUsed).mul(BigNumber.from(gasPrice));
         const priceDec = new Prisma.Decimal(blockInfo.price).mul(
-          new Prisma.Decimal(withDecimals(fee.toString(), 18))
+          new Prisma.Decimal(withDecimals(fee.toString(), 18)),
         );
-        const feeUsd = parseFloat(priceDec.toString());
+        const feeUsd = Number.parseFloat(priceDec.toString());
         // console.log( txHash.toString("hex"), "gasUsed", BigNumber.from(gasUsed).toString(), "gasPrice", BigNumber.from(gasPrice).toString(), "ethPrice", new Prisma.Decimal(blockInfo.price), "fee", new Prisma.Decimal(withDecimals(fee.toString(), 18)), "feeUsd", feeUsd);
         // if( feeUsd > 0 ) process.exit(1);
 
         const topicHash: string = event.topics[0];
         if (Events.IGNORED.get(topicHash) === 1) continue;
+        // eslint-disable-next-line functional/no-try-statements
         try {
           const decoded = Events.ABI.parseLog(event);
           // console.log( "Event ", blockDt, "@", blockNumber, transactionHash, decoded.signature, JSON.stringify(decoded.args));
@@ -945,18 +979,19 @@ export const Events = {
           const addresses = Events.addresses(
             decoded.signature,
             decoded.args,
-            from
+            from,
           );
 
           // loop 1 ensures all wallets are created and event is recorded for every member
           for (const addr of addresses) {
             const matchMember: boolean =
-              addr.toString().replace("0x", "").toLowerCase() == vm;
+              addr.toString().replace("0x", "").toLowerCase() === vm;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const wallet = await Batch.ensureExists(
               addr,
               blockDt,
               null,
-              matchMember
+              matchMember,
             );
             const eventId =
               event.blockNumber.toString(16) +
@@ -972,40 +1007,40 @@ export const Events = {
                 addr,
                 decoded.name,
                 decoded.signature,
-                JSON.stringify(decoded.args)
+                JSON.stringify(decoded.args),
               );
             }
             tx.push(
               prisma.memberEvent.create({
                 data: {
-                  id: eventId,
-                  createdAt: blockDt,
                   address: Address.asBuffer(addr),
-                  chainId: 0,
-                  txHash,
                   blockNumber,
-                  txIndex: transactionIndex,
-                  logIndex: logIndex,
-                  eventName: decoded.name,
+                  chainId: 0,
+                  createdAt: blockDt,
                   data: decoded.args,
-                  gasPrice: BigNumber.from(gasPrice).toNumber(),
-                  gasUsed: BigNumber.from(gasUsed).toNumber(),
+                  eventName: decoded.name,
                   fee: BigInt(fee.toString()),
                   feeUsd: feeUsd.toString(),
+                  gasPrice: BigNumber.from(gasPrice).toNumber(),
+                  gasUsed: BigNumber.from(gasUsed).toNumber(),
+                  id: eventId,
+                  logIndex,
+                  txHash,
+                  txIndex: transactionIndex,
                 },
-              })
+              }),
             );
           }
 
           // loop 2 processes event for each member
           for (const addr of addresses) {
             const matchMember: boolean =
-              addr.toString().replace("0x", "").toLowerCase() == vm;
+              addr.toString().replace("0x", "").toLowerCase() === vm;
             const wallet = await Batch.ensureExists(
               addr,
               blockDt,
               null,
-              matchMember
+              matchMember,
             );
             if (wallet) {
               await Batch.processEvent(
@@ -1013,12 +1048,12 @@ export const Events = {
                 blockDt,
                 decoded.signature,
                 decoded.args,
-                matchMember
+                matchMember,
               );
             }
           }
 
-          if (decoded.signature == "StartVote(uint256,address,string)") {
+          if (decoded.signature === "StartVote(uint256,address,string)") {
             await Batch.ensureExists(from, blockDt, "proposer", matchFrom);
             if (
               await Events.processVote(
@@ -1029,14 +1064,14 @@ export const Events = {
                 endpoint,
                 verbose.votings,
                 verbose.member,
-                tx
+                tx,
               )
             ) {
               shouldTerminate = true;
               included = false;
             }
           } else if (
-            decoded.signature == "CastVote(uint256,address,bool,uint256)"
+            decoded.signature === "CastVote(uint256,address,bool,uint256)"
           ) {
             await Batch.ensureExists(from, blockDt, "voter", matchFrom);
             await Events.castVote(
@@ -1046,9 +1081,9 @@ export const Events = {
               config,
               verbose.votings,
               verbose.member,
-              tx
+              tx,
             );
-          } else if (decoded.signature == "ExecuteVote(uint256)") {
+          } else if (decoded.signature === "ExecuteVote(uint256)") {
             await Batch.ensureExists(from, blockDt, "voter", matchFrom);
             await Events.execVote(
               blockInfo,
@@ -1057,7 +1092,7 @@ export const Events = {
               config,
               verbose.votings,
               verbose.member,
-              tx
+              tx,
             );
           }
 
@@ -1076,76 +1111,73 @@ export const Events = {
               voteInternalId,
               txHash.toString("hex"),
               BigNumber.from(gasUsed),
-              feeUsd
+              feeUsd,
             );
             tx.push(
               prisma.votingEvent.create({
                 data: {
-                  id: eventId,
-                  createdAt: blockDt,
-                  chainId: 0,
-                  txHash,
+                  address: Address.asBuffer(from),
                   blockNumber,
-                  txIndex: transactionIndex,
-                  logIndex: logIndex,
-                  eventName: decoded.name,
+                  chainId: 0,
+                  createdAt: blockDt,
                   data: decoded.args,
-                  gasPrice: ethers.BigNumber.from(gasPrice).toNumber(),
-                  gasUsed: ethers.BigNumber.from(gasUsed).toNumber(),
+                  eventName: decoded.name,
                   fee: BigInt(fee.toString()),
                   feeUsd: feeUsd.toString(),
-                  address: Address.asBuffer(from),
+                  gasPrice: ethers.BigNumber.from(gasPrice).toNumber(),
+                  gasUsed: ethers.BigNumber.from(gasUsed).toNumber(),
+                  id: eventId,
+                  logIndex,
                   supports: -1,
-                  userShare: new Prisma.Decimal(0.0),
-                  userVotingPower: new Prisma.Decimal(0.0),
+                  txHash,
+                  txIndex: transactionIndex,
+                  userShare: new Prisma.Decimal(0),
+                  userVotingPower: new Prisma.Decimal(0),
                   votingId: voteInternalId + "",
                 },
-              })
+              }),
             );
           }
 
           if (
-            decoded.signature == "MintedReward(uint256,uint256,uint256,uint256)"
+            decoded.signature ===
+              "MintedReward(uint256,uint256,uint256,uint256)" &&
+            (await Events.processEpoch(
+              endpoint,
+              pool,
+              blockInfo,
+              event,
+              tx,
+              useArchive,
+            )) &&
+            termination.epoch
           ) {
-            if (
-              await Events.processEpoch(
-                endpoint,
-                pool,
-                blockInfo,
-                event,
-                tx,
-                useArchive
-              )
-            ) {
-              if (termination.epoch) {
-                shouldTerminate = true;
-                included = true;
-              }
-            }
+            shouldTerminate = true;
+            included = true;
           }
-        } catch (e) {
+        } catch (error) {
           console.error(
             "Event @",
             blockNumber,
             transactionHash,
             transactionIndex,
-            e
+            error,
           );
-          throw e;
+          throw error;
         }
       }
     }
 
-    let verboseBatch = false; // Batch.hasMember(vm);
+    const verboseBatch = false; // Batch.hasMember(vm);
     for (const data of Batch.getInserts(verboseBatch)) {
       const matchMember =
-        data.address.toString("hex").replace("0x", "").toLowerCase() == vm;
+        data.address.toString("hex").replace("0x", "").toLowerCase() === vm;
       if (matchMember) {
         console.log(
           "MEMBER.CREATE",
           blockNumber,
           blockDt,
-          JSON.stringify(data)
+          JSON.stringify(data),
         );
       }
       tx.push(prisma.member.create({ data }));
@@ -1153,49 +1185,49 @@ export const Events = {
 
     for (const data of Batch.getDelegationInserts(verboseBatch)) {
       const matchMember =
-        data.from.toString("hex").toLowerCase() == vm ||
-        data.to.toString("hex").toLowerCase() == vm;
+        data.from.toString("hex").toLowerCase() === vm ||
+        data.to.toString("hex").toLowerCase() === vm;
       if (matchMember) {
         console.log(
           "MEMBER.DELEGATION.CREATE",
           blockNumber,
           blockDt,
-          JSON.stringify(data)
+          JSON.stringify(data),
         );
       }
       tx.push(prisma.memberDelegation.create({ data }));
     }
 
     for (const [addr, data] of Batch.getUpdates(verboseBatch)) {
-      const matchMember = vm && addr.indexOf(vm) > -1;
+      const matchMember = vm && addr.includes(vm);
       if (matchMember) {
         console.log(
           "MEMBER.UPDATE",
           blockNumber,
           blockDt,
           addr,
-          JSON.stringify(data)
+          JSON.stringify(data),
         );
       }
       tx.push(
         prisma.member.update({
           where: { address: Address.asBuffer(addr) },
           data,
-        })
+        }),
       );
     }
     for (const [key, data] of Batch.getDelegationUpdates(verboseBatch)) {
       const from = Address.asBuffer(key);
       if (data.to) {
         const matchMember =
-          key == vm || data.to.toString("hex").toLowerCase() == vm;
+          key === vm || data.to.toString("hex").toLowerCase() === vm;
         if (matchMember) {
           console.log(
             "MEMBER.DELEGATION.UPDATE",
             blockNumber,
             blockDt,
             key,
-            JSON.stringify(data)
+            JSON.stringify(data),
           );
         }
         tx.push(prisma.memberDelegation.update({ where: { from }, data }));
@@ -1210,7 +1242,7 @@ export const Events = {
             totalGasUsed: usage.gasUsed.toNumber(),
             totalUsd: usage.feeUsd.toString(),
           },
-        })
+        }),
       );
     }
 
@@ -1221,7 +1253,7 @@ export const Events = {
           updatedAt: new Date().toISOString(),
           processed: blockNumber,
         },
-      })
+      }),
     );
     if (
       !termination.epoch &&
@@ -1235,12 +1267,12 @@ export const Events = {
 
     if (included) {
       await prisma.$transaction(tx);
-      if (new Date().getTime() - start > 1000) {
+      if (Date.now() - start > 1000) {
         console.log(
           "..DB Block",
           blockNumber,
           blockDt,
-          "took " + elapsed(start)
+          "took " + elapsed(start),
         );
       }
     }
@@ -1251,7 +1283,7 @@ export const Events = {
     endpoint: string,
     verbose: SyncVerbosity,
     terminate: SyncTermination,
-    useArchive: boolean
+    useArchive: boolean,
   ) => {
     let total = 0;
     const webconfig = fetchWebconfig();
@@ -1264,7 +1296,7 @@ export const Events = {
           endpoint,
           verbose,
           terminate,
-          useArchive
+          useArchive,
         );
         if (result.shouldTerminate) {
           return result.included ? ++total : total;
@@ -1273,14 +1305,14 @@ export const Events = {
         return total;
       }
       total++;
-    } while (total < 100000);
+    } while (total < 100_000);
     return total;
   },
 
   download: async (endpoint: string, priceReader: IPriceReader) => {
     const webconfig = fetchWebconfig();
     const poolContract = webconfig.contracts?.find(
-      ({ name }) => name.toLowerCase() === "api3pool"
+      ({ name }) => name.toLowerCase() === "api3pool",
     );
     if (!poolContract) {
       console.error("api3 pool contract is not configured");
@@ -1308,7 +1340,7 @@ export const Events = {
       "Head Block",
       headBlockNumber,
       "Last block in DB",
-      lastDownloadedBlock
+      lastDownloadedBlock,
     );
     const total = 0;
     const batches = Filters.prepare(
@@ -1316,14 +1348,14 @@ export const Events = {
       minBlock,
       batchSize,
       lastDownloadedBlock,
-      headBlockNumber
+      headBlockNumber,
     );
     console.log(
       "Expecting",
       batches.length,
       "batches",
       "Batch size",
-      batchSize
+      batchSize,
     );
     for (const cMap of batches) {
       const blockMap = new Map<number, Array<Log>>();
@@ -1333,7 +1365,7 @@ export const Events = {
           filter.fromBlock,
           "..",
           filter.toBlock,
-          filter.address
+          filter.address,
         );
         const events: Array<Log> = await jsonRpc.getLogs(filter);
         for (const txEvent of events) {

@@ -1,11 +1,12 @@
-import yargs from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
+import yargs from "yargs/yargs";
+
+import { ENS } from "./services/ens";
 import { EthereumPrice } from "./services/price";
+import { Shares } from "./services/shares";
+import { Supply } from "./services/supply";
 import { Events } from "./services/sync";
 import { Treasuries } from "./services/treasuries";
-import { Supply } from "./services/supply";
-import { Shares } from "./services/shares";
-import { ENS } from "./services/ens";
 
 yargs(hideBin(process.argv))
   .env("API3TRACKER")
@@ -26,13 +27,13 @@ yargs(hideBin(process.argv))
       });
     },
     handler: async ({ endpoint, sub }) => {
-      if (sub == "reset") {
+      if (sub === "reset") {
         await ENS.resetAll();
         console.log("ENS cache was deleted");
-      } else if (sub == "import") {
+      } else if (sub === "import") {
         const total = await ENS.importLocal("./.cache");
         console.log(`saved ${total} new ENS records`);
-      } else if (sub == "download") {
+      } else if (sub === "download") {
         const total = await ENS.download(endpoint);
         console.log(`saved ${total} new ENS records`);
       } else {
@@ -52,7 +53,8 @@ yargs(hideBin(process.argv))
           describe: `logs subcommand - reset or download new`,
         })
         .option("coingecko_host", {
-          default: process.env.API3TRACKER_COINGECKO_HOST || "api.coingecko.com",
+          default:
+            process.env.API3TRACKER_COINGECKO_HOST || "api.coingecko.com",
           type: "string",
           description: "Host to use for CoinGecko API",
         })
@@ -62,11 +64,12 @@ yargs(hideBin(process.argv))
           description: "API KEY to be used for CoinGecko-compatible API",
         });
     },
+    // eslint-disable-next-line camelcase
     handler: async ({ endpoint, sub, coingecko_host, coingecko_api_key }) => {
-      if (sub == "reset") {
+      if (sub === "reset") {
         await Events.resetAll();
         console.log("events were deleted");
-      } else if (sub == "download") {
+      } else if (sub === "download") {
         const priceReader = EthereumPrice(coingecko_host, coingecko_api_key);
         const total = await Events.download(endpoint, priceReader);
         console.log(`downloaded ${total} new events`);
@@ -103,21 +106,21 @@ yargs(hideBin(process.argv))
         });
     },
     handler: async ({ endpoint, sub, member, tag, rpsLimit }) => {
-      if (sub == "reset") {
+      if (sub === "reset") {
         await Shares.resetAll();
         console.log("shares cache records were deleted");
-      } else if (sub == "votings") {
-        const total = await Shares.downloadVotings(endpoint);
+      } else if (sub === "votings") {
+        const total = await Shares.downloadVotings();
         console.log(`updated ${total} new records`);
-      } else if (sub == "totals") {
+      } else if (sub === "totals") {
         await Shares.recalculateTotals();
-      } else if (sub == "download") {
-        if (!tag) {
-          const total = await Shares.download(endpoint, member, rpsLimit);
-          console.log(`downloaded ${total} new records`);
-        } else {
+      } else if (sub === "download") {
+        if (tag) {
           const total = await Shares.downloadMembers(endpoint, tag, rpsLimit);
           console.log(`scanned ${total} members`);
+        } else {
+          const total = await Shares.download(endpoint, member, rpsLimit);
+          console.log(`downloaded ${total} new records`);
         }
       } else {
         console.error("ERROR: Unknown sub-command");
@@ -176,10 +179,10 @@ yargs(hideBin(process.argv))
       stopBlock,
       useArchive,
     }) => {
-      if (sub == "reset") {
+      if (sub === "reset") {
         await Events.resetState();
         console.log("Events state was reset");
-      } else if (sub == "next") {
+      } else if (sub === "next") {
         const verbose = {
           blocks: verboseBlocks || false,
           epochs: verboseEpochs || false,
@@ -194,10 +197,10 @@ yargs(hideBin(process.argv))
           endpoint,
           verbose,
           termination,
-          useArchive
+          useArchive,
         );
         console.log(`${blocks} blocks were processed`);
-      } else if (sub == "update") {
+      } else if (sub === "update") {
         const verbose = {
           blocks: verboseBlocks || false,
           epochs: verboseEpochs || false,
@@ -212,7 +215,7 @@ yargs(hideBin(process.argv))
           endpoint,
           verbose,
           termination,
-          useArchive
+          useArchive,
         );
         console.log(`${blocks} blocks were processed`);
       } else {
@@ -232,10 +235,10 @@ yargs(hideBin(process.argv))
       });
     },
     handler: async ({ endpoint, sub }) => {
-      if (sub == "reset") {
+      if (sub === "reset") {
         await Supply.resetAll();
         console.log("Supply history was reset");
-      } else if (sub == "download") {
+      } else if (sub === "download") {
         await Supply.download(endpoint);
         console.log("Supply history was updated");
       } else {
@@ -255,10 +258,10 @@ yargs(hideBin(process.argv))
       });
     },
     handler: async ({ endpoint, sub }) => {
-      if (sub == "reset") {
+      if (sub === "reset") {
         await Treasuries.resetAll();
         console.log("Treasuries state was reset");
-      } else if (sub == "download") {
+      } else if (sub === "download") {
         const total = await Treasuries.download(endpoint);
         console.log(`downloaded state of ${total} balances`);
       } else {

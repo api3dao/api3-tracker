@@ -1,38 +1,42 @@
-import superjson from "superjson";
+import { isFunction, isNil, isNumber, isObject, isString } from "lodash";
+import { stringify } from "superjson";
 
 // NextJS requires only serializable properties
 // to be passed as server parameters
 // This way dates, bigint and decimals need to be handled manually after that
-export const serializable = (x: any): any =>
-  JSON.parse(superjson.stringify(x)).json;
+export const serializable = (x: any): any => JSON.parse(stringify(x)).json;
 
 export const shorten = (x: string, num: number): string => {
-  return x.substring(0, num + 2) + ".." + x.substring(x.length - num, x.length);
+  return (
+    x.slice(0, Math.max(0, num + 2)) +
+    ".." +
+    x.substring(x.length - num, x.length)
+  );
 };
 
 export const toCurrency = (x: any): string => {
-  if (typeof x === "undefined") return "";
+  if (x === undefined) return "";
   if (x === null) return "";
-  if (x.toString().indexOf("e-") > -1) return "0";
-  const val = x.toString().replace(/([a-zA-Z]|,)/g, "");
-  if (!isNaN(parseInt(val, 10))) {
-    return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  if (x.toString().includes("e-")) return "0";
+  const val = x.toString().replaceAll(/([A-Za-z]|,)/g, "");
+  if (!Number.isNaN(Number.parseInt(val, 10))) {
+    return val.toString().replaceAll(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   return val;
 };
 
 export const toBool = (x: any): boolean => {
-  if (typeof x === "number") {
-    return x == 1;
+  if (isNumber(x)) {
+    return x === 1;
   }
-  if (typeof x === "string") {
-    return x == "1" || x == "true";
+  if (isString(x)) {
+    return x === "1" || x === "true";
   }
   return false;
 };
 
 export const noDecimals = (x: string): string => {
-  return x.replace(/\..+$/g, "");
+  return x.replaceAll(/\..+$/g, "");
 };
 
 export const zerosLeft = (x: string, len: number): string => {
@@ -48,26 +52,26 @@ export const zerosRight = (x: string, len: number): string => {
 };
 
 export const justDecimals = (x: string, l: number): string => {
-  const w = x.replace(/^.+\./g, "");
-  return w.length > l ? w.substring(0, l) : zerosRight(w, l);
+  const w = x.replaceAll(/^.+\./g, "");
+  return w.length > l ? w.slice(0, Math.max(0, l)) : zerosRight(w, l);
 };
 
 export const toPct4 = (x: any): string => {
-  if (typeof x === "undefined" || toCurrency(x) === "") return "";
-  if (typeof x === "object" || typeof x === "string") {
-    if (x.toString().indexOf("e-") !== -1) return "0.0000%";
+  if (x === undefined || toCurrency(x) === "") return "";
+  if (isObject(x) || isString(x)) {
+    if (x.toString().includes("e-")) return "0.0000%";
     return noDecimals(x.toString()) + "." + justDecimals(x.toString(), 4) + "%";
   }
-  if (typeof x === "number" && x < 1) return x.toString() + "%";
-  if (x == 0.0) return x.toString() + "?";
-  return `${toCurrency(x).replace(/0*$/g, "").replace(/\.$/, "")}%`;
+  if (isNumber(x) && x < 1) return x.toString() + "%";
+  if (x === 0) return x.toString() + "?";
+  return `${toCurrency(x).replaceAll(/0*$/g, "").replace(/\.$/, "")}%`;
 };
 
 export const toPct = (x: any): string => {
-  if (typeof x === "undefined" || toCurrency(x) === "") return "";
-  if (typeof x === "object" || typeof x === "string") return x.toString() + "%";
-  if (typeof x === "number" && x < 1) return x.toString() + "%";
-  return `${toCurrency(x).replace(/0*$/g, "").replace(/\.$/, "")}%`;
+  if (x === undefined || toCurrency(x) === "") return "";
+  if (isObject(x) || isString(x)) return x.toString() + "%";
+  if (isNumber(x) && x < 1) return x.toString() + "%";
+  return `${toCurrency(x).replaceAll(/0*$/g, "").replace(/\.$/, "")}%`;
 };
 
 export const toHex = (x: any): string => {
@@ -106,23 +110,20 @@ export const pad2 = (x: number) => {
 };
 
 export const niceDate = (strIso: string): string => {
-  if (typeof strIso === "undefined" || strIso === null) {
+  if (isNil(strIso)) {
     return "";
   }
-  if (
-    typeof strIso === "object" &&
-    typeof (strIso as any).toISOString === "function"
-  ) {
+  if (isObject(strIso) && isFunction((strIso as any).toISOString)) {
     return niceDate((strIso as Date).toISOString());
   }
-  if (typeof strIso === "string") {
+  if (isString(strIso)) {
     const parts: Array<string> = strIso.replace(/T.+$/, "").split("-");
-    const _month = months[parseInt(parts[1])];
+    const _month = months[Number.parseInt(parts[1])];
     const _day = parts[2];
     // let out = "";
     // let diff = new Date().getTime() - new Date(strIso).getTime();
     // if (diff < 0 || diff > 1000 * 3600 * 24 * 365) {
-    let out = parts[0] + ", ";
+    const out = parts[0] + ", ";
     // }
     return out + _month + " " + _day;
   }
@@ -133,27 +134,23 @@ export const niceDate = (strIso: string): string => {
   // let out = "";
   // let diff = new Date().getTime() - new Date(strIso).getTime();
   // if (diff < 0 || diff > 1000 * 3600 * 24 * 365) {
-  let out = date.getUTCFullYear() + ", ";
+  const out = date.getUTCFullYear() + ", ";
   // }
   return out + _month + " " + pad2(_day);
 };
 
 export const niceDateTime = (strIso: string): string => {
-  if (typeof strIso === "undefined" || strIso === null) {
+  if (isNil(strIso)) {
     return "";
   }
-  if (
-    typeof strIso === "object" &&
-    typeof (strIso as any).toISOString === "function"
-  ) {
+  if (isObject(strIso) && isFunction((strIso as any).toISOString)) {
     return niceDate((strIso as Date).toISOString());
   }
-  const date =
-    typeof strIso === "number"
-      ? new Date(strIso)
-      : new Date(
-          strIso.replace(/\-/g, "/").replace("T", " ").replace(/\..+$/, "")
-        );
+  const date = isNumber(strIso)
+    ? new Date(strIso)
+    : new Date(
+        strIso.replaceAll("-", "/").replace("T", " ").replace(/\..+$/, ""),
+      );
   return (
     niceDate(strIso) +
     " " +
@@ -166,7 +163,7 @@ export const niceDateTime = (strIso: string): string => {
 export const withDecimals = (input: string, decimals: number): string => {
   if (input.length > decimals) {
     return (
-      input.substring(0, input.length - decimals) +
+      input.slice(0, Math.max(0, input.length - decimals)) +
       "." +
       input.substring(input.length - decimals, input.length)
     );
@@ -177,8 +174,8 @@ export const withDecimals = (input: string, decimals: number): string => {
 };
 
 // Parses single HEX string into array of big integers
-export const toBigIntArray = (hex: string): Array<BigInt> => {
-  const out = new Array<BigInt>();
+export const toBigIntArray = (hex: string): Array<bigint> => {
+  const out = new Array<bigint>();
   // split hex string into chunks of 32 bytes
   const chunks = hex.match(/.{1,64}/g) || [];
   chunks.forEach((chunk: string) => {

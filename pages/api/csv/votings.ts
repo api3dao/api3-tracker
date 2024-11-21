@@ -1,8 +1,9 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { IVoting } from "../../../services/types";
-import { niceDate, toHex } from "../../../services/format";
-import { Votings } from "../../../services/api";
 import { stringify } from "csv-stringify/sync";
+import type { NextApiRequest, NextApiResponse } from "next";
+
+import { Votings } from "../../../services/api";
+import { niceDate, toHex } from "../../../services/format";
+import { type IVoting } from "../../../services/types";
 
 const NAMES = [
   "ID",
@@ -54,7 +55,7 @@ const toArray = (src: IVoting) => [
 
 const rearrange = (
   columns: Array<number>,
-  full: Array<string>
+  full: Array<string>,
 ): Array<string> => {
   if (columns.length === 0) return full;
   return columns.map((ci: number) => full[ci]);
@@ -62,15 +63,15 @@ const rearrange = (
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<string>
+  res: NextApiResponse<string>,
 ) {
   const columns = [];
   if (req.query.columns) {
-    let cols = (req.query.columns as string).split(",");
-    for (let ci = 0; ci < cols.length; ci++) {
-      let found = NAMES.indexOf(cols[ci].toUpperCase());
+    const cols = (req.query.columns as string).split(",");
+    for (const col of cols) {
+      const found = NAMES.indexOf(col.toUpperCase());
       if (found === -1) {
-        res.status(400).send("ERROR: invalid column " + cols[ci]);
+        res.status(400).send("ERROR: invalid column " + col);
         return;
       }
       columns.push(found);
@@ -79,13 +80,13 @@ export default async function handler(
 
   const out = [rearrange(columns, NAMES)];
   const list: Array<IVoting> = await Votings.fetchAll();
-  for (let index = 0; index < list.length; index++) {
-    out.push(rearrange(columns, toArray(list[index])));
+  for (const element of list) {
+    out.push(rearrange(columns, toArray(element)));
   }
   if (req.query.filename) {
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename=${req.query.filename}.csv`
+      `attachment; filename=${req.query.filename}.csv`,
     );
   }
   res.status(200).send(stringify(out));

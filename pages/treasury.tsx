@@ -1,12 +1,13 @@
 import type { NextPage } from "next";
 import { useState } from "react";
-import { VoteGas } from "../services/gas";
+
 import { Footer, Header, Meta } from "../components/";
-import { fetchWebconfig } from "../services/webconfig";
-import { IBlockNumber, ITreasury } from "../services/types";
 import { Treasury } from "../components/Treasury";
-import { ITreasuryType, Treasuries, Blocks } from "../services/api";
+import { type ITreasuryType, Treasuries, Blocks } from "../services/api";
 import { toHex, serializable } from "../services/format";
+import { VoteGas } from "../services/gas";
+import { type IBlockNumber, type ITreasury } from "../services/types";
+import { fetchWebconfig } from "../services/webconfig";
 
 export async function getServerSideProps() {
   const webconfig = fetchWebconfig();

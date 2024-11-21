@@ -1,4 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+/* eslint-disable no-var */
+import { type PrismaClient } from "@prisma/client";
 
 declare global {
   module globalThis {

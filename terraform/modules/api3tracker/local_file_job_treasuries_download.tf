@@ -3,7 +3,7 @@ resource "local_file" "job_treasuries_download" {
 #!/usr/bin/env bash
 set -x
 docker exec -e TS_NODE_PROJECT=./tsconfig.cli.json \
-   -i ${local.hostname} yarn ts-node cli.ts treasuries download $@
+   -i ${local.hostname} yarn ts-node -T cli.ts treasuries download $@
 EOF
 
    filename = "./bin/job_treasuries_download.sh"

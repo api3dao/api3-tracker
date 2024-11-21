@@ -1,9 +1,10 @@
-import prisma from "./db";
-import { ITreasuryType } from "./api";
-import { ethers } from "ethers";
-import { fetchWebconfig } from "./webconfig";
 import { TreasuryType } from ".prisma/client";
+import { ethers } from "ethers";
+
+import { type ITreasuryType } from "./api";
+import prisma from "./db";
 import { withDecimals } from "./format";
+import { fetchWebconfig } from "./webconfig";
 
 export const Address = {
   asBuffer: (addr: string): Buffer => {
@@ -33,8 +34,8 @@ export const Treasuries = {
     const usdc = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
     const api3: string = (
       webconfig.contracts?.find(
-        ({ name }) => name.toLowerCase() === "api3token"
-      ) || { address: "" }
+        ({ name }) => name.toLowerCase() === "api3token",
+      ) ?? { address: "" }
     ).address;
 
     const mapTokens = new Map<string, ITokenContract>();
@@ -44,13 +45,13 @@ export const Treasuries = {
 
     // known contracts to check
     const v1 = webconfig.contracts?.find(
-      ({ name }) => name.toLowerCase() === "v1treasury"
+      ({ name }) => name.toLowerCase() === "v1treasury",
     )?.address;
     const primary = webconfig.contracts?.find(
-      ({ name }) => name.toLowerCase() === "primaryagent"
+      ({ name }) => name.toLowerCase() === "primaryagent",
     )?.address;
     const secondary = webconfig.contracts?.find(
-      ({ name }) => name.toLowerCase() === "secondaryagent"
+      ({ name }) => name.toLowerCase() === "secondaryagent",
     )?.address;
 
     const mapAddresses = new Map<string, ITreasuryType>();
@@ -61,14 +62,14 @@ export const Treasuries = {
     let updated = 0;
     for (const [tokenSymbol, token] of mapTokens.entries()) {
       // console.log("Reading token", token);
-      const tokenContract = (token.address == "0x0") ? null : new ethers.Contract(
-        token.address,
-        abiERC20,
-        jsonRpc
-      );
+      const tokenContract =
+        token.address === "0x0"
+          ? null
+          : new ethers.Contract(token.address, abiERC20, jsonRpc);
       for (const [contractAddress, contractType] of mapAddresses.entries()) {
-        const tokenBalance = (tokenContract) ? await tokenContract.balanceOf(contractAddress) :
-            await jsonRpc.getBalance(contractAddress);
+        const tokenBalance = tokenContract
+          ? await tokenContract.balanceOf(contractAddress)
+          : await jsonRpc.getBalance(contractAddress);
 
         const value = withDecimals(tokenBalance.toString(), token.decimals);
         console.log(contractType, tokenSymbol, value);

@@ -1,5 +1,7 @@
 import React from "react";
-import { IContract } from "../services/types";
+
+import { type IContract } from "../services/types";
+
 import { BorderedPanel } from "./BorderedPanel";
 import { Address } from "./Ethscan";
 
