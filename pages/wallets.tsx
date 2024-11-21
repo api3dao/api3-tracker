@@ -1,17 +1,18 @@
+import { isUndefined, isNumber, isString } from "lodash";
 import type { NextPage } from "next";
-import { useState } from "react";
-import { VoteGas } from "../services/gas";
-import React from "react";
 import { useRouter } from "next/router";
+import React, { useState } from "react";
 import InfiniteScroll from "react-infinite-scroller";
+
 import { Footer, Header, Meta } from "../components/";
-import { fetchWebconfig } from "../services/webconfig";
-import { CacheTotals, Wallets, Blocks } from "../services/api";
-import { IWallet, IBlockNumber } from "../services/types";
-import { WalletsSearch } from "../components/WalletsSearch";
 import { WalletsList } from "../components/WalletsList";
-import { serializable } from "../services/format";
+import { WalletsSearch } from "../components/WalletsSearch";
+import { CacheTotals, Wallets, Blocks } from "../services/api";
 import { Debounced } from "../services/debounced";
+import { serializable } from "../services/format";
+import { VoteGas } from "../services/gas";
+import { type IWallet, type IBlockNumber } from "../services/types";
+import { fetchWebconfig } from "../services/webconfig";
 
 // const fetcher = (...args) => fetch(...args).then((res) => res.json());
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
@@ -19,8 +20,8 @@ const fetcher = (url: string) => fetch(url).then((r) => r.json());
 export async function getServerSideProps(context: any) {
   const q = context.query.q || "";
   const cursor = {
-    take: parseInt(context.query.take) || 100,
-    skip: parseInt(context.query.skip) || 0,
+    take: Number.parseInt(context.query.take, 10) || 100,
+    skip: Number.parseInt(context.query.skip, 10) || 0,
   };
   const results = await Promise.all([
     Wallets.fetchList(q, cursor),
@@ -28,7 +29,7 @@ export async function getServerSideProps(context: any) {
     CacheTotals.fetch(),
     Wallets.totalActive(),
   ]);
-  const list: Array<IWallet> = results[0].list;
+  const {list} = results[0];
   const total = results[3];
   const lastBlock: IBlockNumber = results[1];
   const totalShares: any = results[2];
@@ -49,7 +50,7 @@ export async function getServerSideProps(context: any) {
 }
 
 interface WalletsPageState {
-  q: String;
+  q: string;
   list: Array<IWallet>;
   total: number;
   hasMore: boolean;
@@ -57,9 +58,9 @@ interface WalletsPageState {
 }
 
 const stringQuery = (input: any, defaultValue: string): string => {
-  if (typeof input === "undefined") return defaultValue;
-  if (typeof input === "number") return defaultValue + "";
-  if (typeof input === "string") return input;
+  if (isUndefined(input)) return defaultValue;
+  if (isNumber(input)) return defaultValue + "";
+  if (isString(input)) return input;
   return input[0];
 };
 
@@ -73,7 +74,7 @@ const WalletsPage: NextPage = (props: any) => {
   const [isLoadingMore, setLoadingMore] = React.useState(false);
   const [state, setState] = React.useState<WalletsPageState>({
     q,
-    list: props.list || new Array(),
+    list: props.list || [],
     take: props.cursor.take,
     total: props.total || 0,
     hasMore: props.total > props.list.length,
@@ -88,7 +89,7 @@ const WalletsPage: NextPage = (props: any) => {
     });
   };
   const appendData = (response: any) => {
-    const list = state.list.slice();
+    const list = [...state.list];
     for (const item of response.list) {
       list.push(item);
     }

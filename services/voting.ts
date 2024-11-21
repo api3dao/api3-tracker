@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
+
 import { withDecimals } from "./format";
-import { IWebConfig } from "./types";
+import { type IWebConfig } from "./types";
 
 interface IVotingScriptDetails {
   scriptType: string; // "transfer" | "invalid" | "unknown";
@@ -31,6 +32,7 @@ export type ProposalType = "primary" | "secondary";
  * We version metadata schemes to allow simpler updates to the scheme in the future (e.g. if we decide to support
  * multiple EVM proposal calls).
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const METADATA_SCHEME_VERSION = "1";
 /**
  * The metadata scheme simply takes multiple values and inserts a non printable character used to separate words between
@@ -45,13 +47,13 @@ export const METADATA_DELIMETER = String.fromCharCode(31);
 export const VotingReader = {
   isPrimary: (config: IWebConfig, address: string): boolean => {
     const primary = config.contracts?.find(
-      (p: any) => p.name.toLowerCase() === "primaryvoting"
+      (p: any) => p.name.toLowerCase() === "primaryvoting",
     );
     if (!primary) {
       throw "api3 primary voting contract is not configured";
     }
     const secondary = config.contracts?.find(
-      (p: any) => p.name.toLowerCase() === "secondaryvoting"
+      (p: any) => p.name.toLowerCase() === "secondaryvoting",
     );
     if (!secondary) {
       throw "api3 secondary voting contract is not configured";
@@ -60,14 +62,18 @@ export const VotingReader = {
     const isSecondary =
       address.toLowerCase() === secondary.address.toLowerCase();
     if (!isPrimary && !isSecondary) {
-      throw "expected primary or secondary voting contract, got " + address + " instead";
+      throw (
+        "expected primary or secondary voting contract, got " +
+        address +
+        " instead"
+      );
     }
     return isPrimary;
   },
 
   parseScript: (data: string): IVotingScriptDetails => {
     const buf = Buffer.from(data.replace("0x", ""), "hex");
-    const bufSignature = buf.slice(160, 160+ 4);
+    const bufSignature = buf.subarray(160, 160 + 4);
     const signature = bufSignature.toString("hex").toLowerCase();
     let scriptType = "unknown";
     if (signature === "a9059cbb") {
@@ -75,20 +81,22 @@ export const VotingReader = {
     } else if (signature === "9d61d234") {
       scriptType = "invalid";
     }
-    const bufToken = buf.slice( 32 + 12, 32+12 + 20);
+    const bufToken = buf.subarray(32 + 12, 32 + 12 + 20);
     const tokenAddress = bufToken.toString("hex").toLowerCase();
     let tokenName = "";
     const decimals = 6;
-    if (tokenAddress == "a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48") {
+    if (tokenAddress === "a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48") {
       tokenName = "USDC";
     }
     const offset = 32 + 32 + 32 + 32 + 32 + 4 + 12;
-    const bufTo = buf.slice(offset, offset + 20);
+    const bufTo = buf.subarray(offset, offset + 20);
 
-    let offsetAmt = offset + 20 + 16;
-    const bufAmt = buf.slice( offsetAmt, offsetAmt + 16);
+    const offsetAmt = offset + 20 + 16;
+    const bufAmt = buf.subarray(offsetAmt, offsetAmt + 16);
     const sanitisedBufAmt = "0x" + bufAmt.toString("hex");
-    const amt = BigInt(sanitisedBufAmt.length < 3 ? '0x0' : sanitisedBufAmt).toString(10);
+    const amt = BigInt(
+      sanitisedBufAmt.length < 3 ? "0x0" : sanitisedBufAmt,
+    ).toString(10);
 
     return {
       scriptType,

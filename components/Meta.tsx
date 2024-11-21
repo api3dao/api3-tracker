@@ -1,6 +1,7 @@
-import React from "react";
 import Head from "next/head";
-import { IWebConfig, IWebPage } from "../services/types";
+import React from "react";
+
+import { type IWebConfig } from "../services/types";
 
 export interface IMetaProps {
   webconfig: IWebConfig;

@@ -1,5 +1,7 @@
-import React from "react";
+import { isFunction, isString } from "lodash";
 import Link from "next/link";
+import React from "react";
+
 import { toCurrency } from "./../services/format";
 
 interface IEthscanProps {
@@ -59,9 +61,9 @@ c3.617-3.616,5.424-7.898,5.424-12.847V54.818C511.626,49.866,509.813,45.586,506.1
 );
 
 export const addressHex = (a: Buffer | string | undefined): string => {
-  if (typeof a === "undefined") return "";
-  if (typeof a === "string") return a;
-  if (typeof a.toString === "function") return "0x" + a.toString("hex");
+  if (a === undefined) return "";
+  if (isString(a)) return a;
+  if (isFunction(a.toString)) return "0x" + a.toString("hex");
   return "";
 };
 

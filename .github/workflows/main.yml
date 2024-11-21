@@ -1,0 +1,54 @@
+name: Continuous Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Lint
+        run: yarn lint
+
+  only_build:
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag api3tracker:latest
+
+  build_deploy:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_REMOTE_PATH: /home/ubuntu/src/github.com/api3dao/api3-tracker/terraform/workspaces/api3tracker-prod
+    steps:
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: /dev/null
+      - uses: actions/checkout@v4
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag api3tracker:latest
+      - name: Push main Docker image
+        run: docker save api3tracker:latest | bzip2 | ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST 'bunzip2 -d | docker load'
+      - name: Apply Terraform plan
+        run: |
+          echo "::add-mask::$TF_VAR_API3TRACKER_ENDPOINT"
+          echo "::add-mask::$TF_VAR_API3TRACKER_ARCHIVE_ENDPOINT"
+          export REMOTE_CMD="cd $SSH_REMOTE_PATH && terraform init && terraform apply -auto-approve && docker system prune -af"
+          ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST bash -c '"'$REMOTE_CMD'"'

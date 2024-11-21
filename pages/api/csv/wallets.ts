@@ -1,11 +1,12 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { IWallet } from "../../../services/types";
-import { niceDate, toHex } from "../../../services/format";
-import { Wallets } from "../../../services/api";
 import { stringify } from "csv-stringify/sync";
+import type { NextApiRequest, NextApiResponse } from "next";
+
+import { Wallets } from "../../../services/api";
+import { niceDate, toHex } from "../../../services/format";
+import { type IWallet } from "../../../services/types";
 
 const numericQuery = (input: any, defaultValue: number): number => {
-  if (typeof input === "undefined") return defaultValue;
+  if (input === undefined) return defaultValue;
   return input as number;
 };
 
@@ -41,7 +42,7 @@ const toArray = (src: IWallet) => [
 
 const rearrange = (
   columns: Array<number>,
-  full: Array<string>
+  full: Array<string>,
 ): Array<string> => {
   if (columns.length === 0) return full;
   return columns.map((ci: number) => full[ci]);
@@ -49,15 +50,15 @@ const rearrange = (
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<string>
+  res: NextApiResponse<string>,
 ) {
   const columns = [];
   if (req.query.columns) {
-    let cols = (req.query.columns as string).split(",");
-    for (let ci = 0; ci < cols.length; ci++) {
-      let found = NAMES.indexOf(cols[ci].toUpperCase());
+    const cols = (req.query.columns as string).split(",");
+    for (const col of cols) {
+      const found = NAMES.indexOf(col.toUpperCase());
       if (found === -1) {
-        res.status(400).send("ERROR: invalid column " + cols[ci]);
+        res.status(400).send("ERROR: invalid column " + col);
         return;
       }
       columns.push(found);
@@ -76,7 +77,7 @@ export default async function handler(
   if (req.query.filename) {
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename=${req.query.filename}.csv`
+      `attachment; filename=${req.query.filename}.csv`,
     );
   }
   res.status(200).send(stringify(out));
