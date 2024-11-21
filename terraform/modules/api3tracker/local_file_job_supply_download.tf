@@ -3,7 +3,7 @@ resource "local_file" "job_supply_download" {
 #!/usr/bin/env bash
 set -x
 docker exec -e TS_NODE_PROJECT=./tsconfig.cli.json \
-   -i ${local.hostname} yarn ts-node cli.ts supply download $@
+   -i ${local.hostname} yarn ts-node -T cli.ts supply download $@
 EOF
 
    filename = "./bin/job_supply_download.sh"

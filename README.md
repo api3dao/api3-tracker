@@ -94,11 +94,11 @@ DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disab
 Cron jobs (unwrapped versions of cronjobs):
 
 ```bash
-DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts logs download
-DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts supply download
-DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts treasuries download
-DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts shares download
-DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" API3TRACKER_ENDPOINT="ARCHIVE RPC URL" TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node cli.ts state update --rps-limit
+DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node -T cli.ts logs download
+DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node -T cli.ts supply download
+DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node -T cli.ts treasuries download
+DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node -T cli.ts shares download
+DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" API3TRACKER_ENDPOINT="ARCHIVE RPC URL" TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node -T cli.ts state update --rps-limit
 ```
 
 Keep in mind that the Postgres DB in the docker-compose file is not configured with a volume by default, so changes will be lost on service restart.
