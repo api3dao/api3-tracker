@@ -44,7 +44,7 @@ const badges = [
   {
     name: "unstaking",
     className: "bg-color-panel-title text-color-body",
-    title: "Member is unstaking his shares",
+    title: "Member is unstaking their shares",
   },
   /* {
     name: "deposited",

@@ -81,7 +81,7 @@ export const WalletDelegation = (props: IWalletDelegationProps) => {
       {to.length > 0 ? (
         <div className="text-color-panel-title">
           <h2 className="text-sm lg:text-xl font-bold text-center">
-            This member is delegated{" "}
+            This member is delegated to{" "}
             {" by "}
             {toNZ.length} members
           </h2>
