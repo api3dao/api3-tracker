@@ -50,5 +50,5 @@ jobs:
         run: |
           echo "::add-mask::$TF_VAR_API3TRACKER_ENDPOINT"
           echo "::add-mask::$TF_VAR_API3TRACKER_ARCHIVE_ENDPOINT"
-          export REMOTE_CMD="cd $SSH_REMOTE_PATH && terraform init && terraform apply -auto-approve && docker system prune -af"
+          export REMOTE_CMD="cd $SSH_REMOTE_PATH && git pull && terraform init && terraform apply -auto-approve && docker system prune -af"
           ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null $SSH_HOST bash -c '"'$REMOTE_CMD'"'
