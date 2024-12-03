@@ -12,7 +12,8 @@ import { fetchWebconfig } from "../services/webconfig";
 export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
   const results = await Promise.all([
-    Treasuries.fetchList(),
+    // V1 no longer used
+    Treasuries.fetchList().then(list => list.filter(type => type !== 'V1')),
     Blocks.fetchLast(),
   ]);
   const names = results[0];
