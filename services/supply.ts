@@ -95,10 +95,8 @@ export const Supply = {
       18,
     );
     console.log("Locked Rewards", lockedRewards);
-    const timeLocked = withDecimals(
-      (await supplyContract.getTimelocked()).toString(),
-      18,
-    );
+    // There are no longer any time-locked tokens
+    const timeLocked = withDecimals("0", 18);
     console.log("Time locked", timeLocked);
 
     await prisma.api3Supply.create({
