@@ -67,9 +67,15 @@ export const Treasuries = {
           ? null
           : new ethers.Contract(token.address, abiERC20, jsonRpc);
       for (const [contractAddress, contractType] of mapAddresses.entries()) {
-        const tokenBalance = tokenContract
-          ? await tokenContract.balanceOf(contractAddress)
-          : await jsonRpc.getBalance(contractAddress);
+        let tokenBalance;
+        // The V1 treasury no longer holds any tokens
+        if (contractType === TreasuryType.V1) {
+          tokenBalance = 0;
+        } else {
+          tokenBalance = tokenContract
+            ? await tokenContract.balanceOf(contractAddress)
+            : await jsonRpc.getBalance(contractAddress);
+        }
 
         const value = withDecimals(tokenBalance.toString(), token.decimals);
         console.log(contractType, tokenSymbol, value);
