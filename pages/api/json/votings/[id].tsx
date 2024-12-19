@@ -1,4 +1,4 @@
-import {uniq} from "lodash";
+import { uniq } from "lodash";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { stringify } from "superjson";
 
@@ -12,9 +12,9 @@ const uniqueArray = (arr: Array<any>): Array<any> => {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<string>
+  res: NextApiResponse<string>,
 ) {
-  const id = req.query.id as string || "";
+  const id = (req.query.id as string) || "";
   const results = await Promise.all([
     Votings.fetch(id),
     VotingEvents.fetchList(id),
@@ -24,11 +24,10 @@ export default async function handler(
   const addresses = uniqueArray(events.map((x: any) => x.address));
   const members = await Wallets.fetchByAddresses(addresses);
   const out = {
-      id,
-      voting: serializable(voting),
-      events: serializable(events),
-      members: serializable(members),
+    id,
+    voting: serializable(voting),
+    events: serializable(events),
+    members: serializable(members),
   };
   res.status(200).json(JSON.parse(stringify(out)).json);
 }
-

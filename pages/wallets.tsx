@@ -29,7 +29,7 @@ export async function getServerSideProps(context: any) {
     CacheTotals.fetch(),
     Wallets.totalActive(),
   ]);
-  const {list} = results[0];
+  const { list } = results[0];
   const total = results[3];
   const lastBlock: IBlockNumber = results[1];
   const totalShares: any = results[2];
@@ -115,7 +115,7 @@ const WalletsPage: NextPage = (props: any) => {
           .then(() => setLoading(false))
           .catch((_: any) => setLoading(false));
       },
-      300
+      300,
     );
   };
 
@@ -129,7 +129,7 @@ const WalletsPage: NextPage = (props: any) => {
         "&take=" +
         state.take +
         "&skip=" +
-        state.list.length
+        state.list.length,
     )
       .then(appendData)
       .then(() => setLoadingMore(false))

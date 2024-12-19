@@ -11,7 +11,11 @@ import { TokenSupply } from "../components/TokenSupply";
 import { Epochs, Supply, Votings, Wallets, Blocks } from "../services/api";
 import { serializable } from "../services/format";
 import { VoteGas } from "../services/gas";
-import { type IBlockNumber, type ISupply, type IEpoch } from "../services/types";
+import {
+  type IBlockNumber,
+  type ISupply,
+  type IEpoch,
+} from "../services/types";
 import { fetchWebconfig } from "../services/webconfig";
 
 export async function getServerSideProps() {
@@ -19,7 +23,7 @@ export async function getServerSideProps() {
     Epochs.fetchLatest(2, true),
     Supply.fetch(),
     Wallets.totalActive(),
-    Votings.totalByStatus('executed'),
+    Votings.totalByStatus("executed"),
     Blocks.fetchLast(),
   ]);
   const latest: Array<IEpoch> = results[0];
@@ -28,7 +32,7 @@ export async function getServerSideProps() {
   const totalExecutedVotings: number = results[3];
   const lastBlock: IBlockNumber = results[4];
   const current: IEpoch = latest[0];
-  const values = new Map<string,string>(); // values
+  const values = new Map<string, string>(); // values
   return {
     props: {
       webconfig: fetchWebconfig(),
@@ -71,10 +75,12 @@ const HomePage: NextPage = (props: any) => {
           ) : (
             <div>
               <p className="mx-4 mb-8 text-center">
-                API3 DAO has {" "}
-                <a href="./wallets">{totalCurrentWallets} current members</a> and {" "}
+                API3 DAO has{" "}
+                <a href="./wallets">{totalCurrentWallets} current members</a>{" "}
+                and{" "}
                 <a href="./votings">
-                  {totalExecutedVotings} completed proposal{totalExecutedVotings === 1 ? "" : "s"}
+                  {totalExecutedVotings} completed proposal
+                  {totalExecutedVotings === 1 ? "" : "s"}
                 </a>
               </p>
               <h2 className="mt-4 mb-0 font-bold text-center text-2xl uppercase">

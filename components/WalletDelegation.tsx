@@ -26,7 +26,7 @@ export const WalletDelegationThead = () => (
 
 export const WalletDelegationTr = (props: any) => {
   const { index } = props;
-  const {row} = props;
+  const { row } = props;
   return (
     <tr>
       <td className="text-center">{(index || 0) + 1}.</td>
@@ -44,7 +44,7 @@ export const WalletDelegationTr = (props: any) => {
 
 export const WalletDelegationRow = (props: any) => {
   const { index } = props;
-  const {row} = props;
+  const { row } = props;
   return (
     <li className="border-b border-color-grey py-2">
       <div className="flex mr-5 ml-5">
@@ -81,8 +81,7 @@ export const WalletDelegation = (props: IWalletDelegationProps) => {
       {to.length > 0 ? (
         <div className="text-color-panel-title">
           <h2 className="text-sm lg:text-xl font-bold text-center">
-            This member is delegated to{" "}
-            {" by "}
+            This member is delegated to {" by "}
             {toNZ.length} members
           </h2>
           <div className="block sm:hidden">

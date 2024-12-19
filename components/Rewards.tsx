@@ -7,7 +7,6 @@ import { StakingTrend } from "../components/StakingTrend";
 import { noDecimals, niceDate, toCurrency, toPct } from "./../services/format";
 import { type IEpoch, type ISupply } from "./../services/types";
 
-
 export interface IRewardsSummaryProps {
   supply: ISupply;
   latest: IEpoch;
@@ -59,7 +58,9 @@ export const RewardsListSmScreen = (epoch: IEpoch) => (
           {toCurrency(epoch.blockNumber)}
         </a>
       </div>
-      <div className="mb-3 text-center text-xs darken">{niceDate(epoch.createdAt)}</div>
+      <div className="mb-3 text-center text-xs darken">
+        {niceDate(epoch.createdAt)}
+      </div>
       <div className="mb-2 text-center darken">
         APR:{" "}
         <span className="text-bold text-2xl text-color-panel-title">
@@ -92,9 +93,7 @@ export const RewardsListSmScreen = (epoch: IEpoch) => (
       </div>
       <div className="text-center text-xs darken my-5">
         Release Date:{" "}
-        <span className="text-bold darken">
-          {niceDate(epoch.releaseDate)}
-        </span>
+        <span className="text-bold darken">{niceDate(epoch.releaseDate)}</span>
       </div>
     </BorderedPanel>
   </div>

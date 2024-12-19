@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
@@ -61,7 +61,10 @@ export const Header = (props: IHeader) => {
       <header className="fixed bg-color-body w-full z-10 top-0 left-0 lg:pb-1 border-b border-1px border-solid">
         <div className="hidden lg:flex items-center mx-auto max-w-screen-lg">
           <div className="flex flex-col py-2">
-            <Link href='/' className="text-color-menu-active text-5xl py-2 text-center font-bold">
+            <Link
+              href="/"
+              className="text-color-menu-active text-5xl py-2 text-center font-bold"
+            >
               API3 DAO Tracker
             </Link>
             <span className="text-color-accent text-sm text-left">
@@ -74,10 +77,19 @@ export const Header = (props: IHeader) => {
         <div className="lg:hidden flex p-3">
           <div className="flex-1">
             <Link href="/" onClick={hide} className="block w-8 h-8">
-              <Image src="/API3x32-white-iso.png" width={32} height={32} alt="API3 DAO Tracker" />
+              <Image
+                src="/API3x32-white-iso.png"
+                width={32}
+                height={32}
+                alt="API3 DAO Tracker"
+              />
             </Link>
           </div>
-          <button name="toggle-mobile-menu" aria-label="Toggle Mobile Menu" onClick={toggle}>
+          <button
+            name="toggle-mobile-menu"
+            aria-label="Toggle Mobile Menu"
+            onClick={toggle}
+          >
             {state.mobileOpen ? iconClose : iconMenu}
           </button>
         </div>

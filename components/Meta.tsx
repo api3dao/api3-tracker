@@ -9,11 +9,11 @@ export interface IMetaProps {
   values?: Map<string, string>;
 }
 
-const withValues = (txt: string, values: Map<string, string>|undefined) => {
+const withValues = (txt: string, values: Map<string, string> | undefined) => {
   if (!values) return txt;
   let out = txt;
   for (const [_, [k, v]] of values.entries()) {
-    out = out.replaceAll('['+ k + ']', v);
+    out = out.replaceAll("[" + k + "]", v);
   }
   return out;
 };
@@ -26,15 +26,15 @@ export const Meta = (props: IMetaProps) => {
   const title = withValues(pg.title || opengraph.title, props.values);
   const description = withValues(
     pg.description || opengraph.description,
-    props.values
+    props.values,
   );
   const ogTitle = withValues(
     pg.ogTitle || opengraph.ogTitle || title,
-    props.values
+    props.values,
   );
   const ogDescription = withValues(
     pg.ogDescription || opengraph.ogDescription || description,
-    props.values
+    props.values,
   );
 
   const siteName = pg.siteName || opengraph.siteName;

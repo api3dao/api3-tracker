@@ -26,31 +26,36 @@ export const Epoch = (props: IEpoch) => {
             {props.isCurrent ? props.epoch + 1 : props.epoch}
           </div>
           <div className="text-3xl uppercase m-0">
-            APR: <strong className="font-bold">{toPct(props.isCurrent ? props.newApr : props.apr)}</strong>
+            APR:{" "}
+            <strong className="font-bold">
+              {toPct(props.isCurrent ? props.newApr : props.apr)}
+            </strong>
           </div>
           <div className="mb-3">
             <span className={darkenTitle}>Epoch Rewards: </span>
-            <strong className="accent">{toPct(props.isCurrent ? props.newRewardsPct : props.rewardsPct)}</strong>
+            <strong className="accent">
+              {toPct(props.isCurrent ? props.newRewardsPct : props.rewardsPct)}
+            </strong>
           </div>
-            {props.isCurrent ? (
-<div className="mb-10">&nbsp;</div>
-            ) : (
-          <div className="my-0">
+          {props.isCurrent ? (
+            <div className="mb-10">&nbsp;</div>
+          ) : (
+            <div className="my-0">
               <span className={darkenTitle}>Staked at the end of epoch: </span>
               <strong>{noDecimals(toCurrency(props.totalStake))}</strong>
-</div>
-            )}
+            </div>
+          )}
           <div className="pt-8">
-            {props.isCurrent ? (
-null
-            ) : (
+            {props.isCurrent ? null : (
               <div className={classTitle}>
                 <strong> {noDecimals(toCurrency(props.mintedShares))}</strong>
                 <span className={darkenTitle}> API3 tokens minted </span>
               </div>
             )}
             <div className="mb-4">
-              <div className={darkenTitle}>{niceDateTime(epochDt.toISOString())}</div>
+              <div className={darkenTitle}>
+                {niceDateTime(epochDt.toISOString())}
+              </div>
             </div>
           </div>
         </div>

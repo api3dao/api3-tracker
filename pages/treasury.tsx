@@ -13,7 +13,7 @@ export async function getServerSideProps() {
   const webconfig = fetchWebconfig();
   const results = await Promise.all([
     // V1 no longer used
-    Treasuries.fetchList().then(list => list.filter(type => type !== 'V1')),
+    Treasuries.fetchList().then((list) => list.filter((type) => type !== "V1")),
     Blocks.fetchLast(),
   ]);
   const names = results[0];
@@ -40,7 +40,7 @@ export async function getServerSideProps() {
         valueUSDC,
         valueETH,
       };
-    })
+    }),
   );
   const values = new Map<string, string>();
   return {

@@ -27,7 +27,12 @@ export const Footer = (props: IFooterProps) => {
           ) : null}
           {terms ? (
             <span className="text-center block leading-6 md:inline md:text-left">
-              <a className="xs:py-4 sm:py-0 xs:text-xl sm:text-sm" target="_blank" rel="noreferrer noopener" href={terms}>
+              <a
+                className="xs:py-4 sm:py-0 xs:text-xl sm:text-sm"
+                target="_blank"
+                rel="noreferrer noopener"
+                href={terms}
+              >
                 Terms
               </a>
             </span>
@@ -37,7 +42,12 @@ export const Footer = (props: IFooterProps) => {
           ) : null}
           {github ? (
             <span className="text-center block leading-6 md:inline md:text-left">
-              <a className="xs:py-4 sm:py-0 xs:text-xl sm:text-sm" target="_blank" rel="noreferrer noopener" href={github}>
+              <a
+                className="xs:py-4 sm:py-0 xs:text-xl sm:text-sm"
+                target="_blank"
+                rel="noreferrer noopener"
+                href={github}
+              >
                 Github Source
               </a>
             </span>

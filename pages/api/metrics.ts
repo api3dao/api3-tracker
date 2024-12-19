@@ -46,6 +46,7 @@ export default async function handler(
     out.push("processed_block_number " + status[0].processed);
   }
 
+  // Multiple queries below are commented as they slow down the response of this endpoint, and we don't every use the outputs.
   // 2. treasuries balances
   // const names = await Treasuries.fetchList();
   // if (names.length > 0) out.push("");

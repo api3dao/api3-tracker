@@ -25,7 +25,7 @@ import {
 import { fetchWebconfig } from "../../services/webconfig";
 
 export async function getServerSideProps(context: any) {
-  const {id} = context.params;
+  const { id } = context.params;
   const address = Buffer.from(id.replace(/0x/, ""), "hex");
   const results = await Promise.all([
     Wallets.fetch(address),
@@ -44,15 +44,15 @@ export async function getServerSideProps(context: any) {
   const delegationsFrom: Array<IDelegation> = results[5];
   const delegationsTo: Array<IDelegation> = results[6];
   const values = new Map<string, string>();
-  let memberName = '';
-  let memberPower = '';
+  let memberName = "";
+  let memberPower = "";
   if (wallet) {
-    memberName = '0x' + wallet.address.toString();
-    if (wallet.ensName) memberName = wallet.ensName + ' (' + memberName + ')';
-    memberPower = wallet.userVotingPower.toString() + ' shares';
+    memberName = "0x" + wallet.address.toString();
+    if (wallet.ensName) memberName = wallet.ensName + " (" + memberName + ")";
+    memberPower = wallet.userVotingPower.toString() + " shares";
   }
-  values.set('MEMBER_NAME', memberName);
-  values.set('MEMBER_POWER', memberPower);
+  values.set("MEMBER_NAME", memberName);
+  values.set("MEMBER_POWER", memberPower);
   return {
     props: {
       delegationsFrom: serializable(delegationsFrom),
@@ -70,7 +70,8 @@ export async function getServerSideProps(context: any) {
 }
 
 const WalletDetailsPage: NextPage = (props: any) => {
-  const { lastBlock, wallet, events, totalShares, votings, webconfig, values } = props;
+  const { lastBlock, wallet, events, totalShares, votings, webconfig, values } =
+    props;
   const { delegationsFrom, delegationsTo } = props;
   const total = totalShares;
   const [gas, setGas] = useState<boolean>(VoteGas.appearance);

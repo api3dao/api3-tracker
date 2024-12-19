@@ -10,14 +10,9 @@ const FourOhFour: NextPage = () => {
     <div>
       <Header active="/" />
       <h1>404 - Page Not Found</h1>
-      <Footer
-        showGas={gas}
-        changeGas={setGas}
-        github={''}
-        blockNumber={0}
-      />
+      <Footer showGas={gas} changeGas={setGas} github={""} blockNumber={0} />
     </div>
   );
-}
+};
 
 export default FourOhFour;
