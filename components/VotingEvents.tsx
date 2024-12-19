@@ -50,7 +50,7 @@ const EventDetails = (props: IEventDetails) => {
   if (props.eventName === "CastVote") {
     const supports = props.data[2];
     const votes = noDecimals(
-      withDecimals(ethers.BigNumber.from(props.data[3]).toString(), 18)
+      withDecimals(ethers.BigNumber.from(props.data[3]).toString(), 18),
     );
     return (
       <div className="text-xs darken mt-1 leading-4">
@@ -87,15 +87,15 @@ const votePower = (row: IVotingEvent) => {
     supports = supported ? "Supports" : "Against";
     votes = noDecimals(
       toCurrency(
-        withDecimals(ethers.BigNumber.from(row.data[3]).toString(), 18)
-      )
+        withDecimals(ethers.BigNumber.from(row.data[3]).toString(), 18),
+      ),
     );
     if (row.totalStake) {
       const total = Number.parseInt(noDecimals(row.totalStake.toString()));
       const abs = Number.parseFloat(
         noDecimals(
-          withDecimals(ethers.BigNumber.from(row.data[3]).toString(), 18)
-        )
+          withDecimals(ethers.BigNumber.from(row.data[3]).toString(), 18),
+        ),
       );
       const pct = ((abs * 100) / total).toFixed(2) + "%";
       return [supports, votes, pct];
@@ -214,7 +214,7 @@ export const VotingEventsList = (props: IVotingEventsListProps) => {
         <ol className="border-t border-color-grey">
           {props.list.map((row, index) => {
             const member = props.members.find(
-              (x: any) => toHex(row.address) === toHex(x.address)
+              (x: any) => toHex(row.address) === toHex(x.address),
             );
             return (
               <VotingEventsListRow
@@ -235,7 +235,7 @@ export const VotingEventsList = (props: IVotingEventsListProps) => {
           <tbody>
             {props.list.map((row, index) => {
               const member = props.members.find(
-                (x: any) => toHex(row.address) === toHex(x.address)
+                (x: any) => toHex(row.address) === toHex(x.address),
               );
               return (
                 <VotingEventsListTr

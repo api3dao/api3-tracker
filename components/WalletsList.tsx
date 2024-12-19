@@ -22,12 +22,36 @@ export const WalletsListThead = () => (
   <thead>
     <tr>
       <th className="text-center">#</th>
-      <th className="text-center" title="Date of the first on-chain event related to this member">Joined</th>
-      <th className="text-center" title="Date of the latest on-chain event related to this member">Updated</th>
-      <th className="text-left" title="Member address, ENS name and classification">Wallet</th>
-      <th className="text-right" title="Owned by this member">Owns</th>
-      <th className="text-right" title="% of the voting power">%</th>
-      <th className="text-right" title="Voting power is owned shares plus delegated">Voting Power</th>
+      <th
+        className="text-center"
+        title="Date of the first on-chain event related to this member"
+      >
+        Joined
+      </th>
+      <th
+        className="text-center"
+        title="Date of the latest on-chain event related to this member"
+      >
+        Updated
+      </th>
+      <th
+        className="text-left"
+        title="Member address, ENS name and classification"
+      >
+        Wallet
+      </th>
+      <th className="text-right" title="Owned by this member">
+        Owns
+      </th>
+      <th className="text-right" title="% of the voting power">
+        %
+      </th>
+      <th
+        className="text-right"
+        title="Voting power is owned shares plus delegated"
+      >
+        Voting Power
+      </th>
     </tr>
   </thead>
 );
@@ -39,7 +63,7 @@ interface IWalletsListRow {
 }
 
 export const WalletsListTr = (props: IWalletsListRow) => {
-  const {row} = props;
+  const { row } = props;
   const userVotingPower = new Prisma.Decimal(row.userVotingPower)
     .mul(100)
     .div(props.totalVotingPower);
@@ -55,13 +79,12 @@ export const WalletsListTr = (props: IWalletsListRow) => {
         {niceDateTime(row.updatedAt)}
       </td>
       <td className="text-left">
-        <Link
-          href={`/wallets/${toHex(row.address)}`}
-          className="text-bold"
-        >
+        <Link href={`/wallets/${toHex(row.address)}`} className="text-bold">
           {row.ensName ? (
             <div className="">
-              <div className="text-color-panel-title leading-1 font-bold">{row.ensName}</div>
+              <div className="text-color-panel-title leading-1 font-bold">
+                {row.ensName}
+              </div>
               <div
                 className="leading-1 accent"
                 style={{ fontFamily: "monospace", cursor: "pointer" }}
@@ -96,7 +119,7 @@ export const WalletsListTr = (props: IWalletsListRow) => {
 };
 
 export const WalletsListRow = (props: IWalletsListRow) => {
-  const {row} = props;
+  const { row } = props;
   const userVotingPower = new Prisma.Decimal(row.userVotingPower)
     .mul(100)
     .div(props.totalVotingPower);

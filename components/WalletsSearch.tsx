@@ -16,7 +16,7 @@ export const WalletsSearch = (props: IWalletsSearchProps) => {
       () => {
         props.onChange(e.target.value);
       },
-      300
+      300,
     );
   };
   return (

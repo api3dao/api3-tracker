@@ -18,7 +18,7 @@ export const WalletSummary = (props: IWalletSummaryProps) => {
   const classValue = "text-2xl mb-10 text-color-panel-title font-bold";
   const { wallet } = props;
   const userDelegated = new Prisma.Decimal(wallet.userVotingPower).sub(
-    wallet.userShare
+    wallet.userShare,
   );
   const userVotingPower = new Prisma.Decimal(wallet.userVotingPower)
     .mul(100)

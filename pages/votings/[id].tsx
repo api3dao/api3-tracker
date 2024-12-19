@@ -1,4 +1,4 @@
-import {uniq } from "lodash";
+import { uniq } from "lodash";
 import type { NextPage } from "next";
 import { useState } from "react";
 
@@ -8,7 +8,11 @@ import { VotingSummary } from "../../components/VotingSummary";
 import { Wallets, Votings, VotingEvents, Blocks } from "../../services/api";
 import { serializable } from "../../services/format";
 import { VoteGas } from "../../services/gas";
-import { type IBlockNumber, type IVoting, type IVotingEvent } from "../../services/types";
+import {
+  type IBlockNumber,
+  type IVoting,
+  type IVotingEvent,
+} from "../../services/types";
 import { fetchWebconfig } from "../../services/webconfig";
 
 const uniqueArray = (arr: Array<any>): Array<any> => {
@@ -16,7 +20,7 @@ const uniqueArray = (arr: Array<any>): Array<any> => {
 };
 
 export async function getServerSideProps(context: any) {
-  const {id} = context.params;
+  const { id } = context.params;
   const results = await Promise.all([
     Votings.fetch(id),
     VotingEvents.fetchList(id),

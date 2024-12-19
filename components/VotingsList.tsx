@@ -187,7 +187,7 @@ export const VotingsListRow = (props: IVotingItem) => {
               Against:{" "}
               {item.totalStaked.toNumber() > 0
                 ? toPct(
-                    item.totalAgainst.mul(100).div(item.totalStaked).toFixed(2)
+                    item.totalAgainst.mul(100).div(item.totalStaked).toFixed(2),
                   )
                 : null}
             </div>

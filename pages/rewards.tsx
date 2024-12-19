@@ -7,7 +7,11 @@ import { RewardsList, RewardsSummary } from "../components/Rewards";
 import { Epochs, Supply, Blocks } from "../services/api";
 import { serializable } from "../services/format";
 import { VoteGas } from "../services/gas";
-import { type IBlockNumber, type IEpoch, type ISupply } from "../services/types";
+import {
+  type IBlockNumber,
+  type IEpoch,
+  type ISupply,
+} from "../services/types";
 import { fetchWebconfig } from "../services/webconfig";
 
 export async function getServerSideProps() {
@@ -46,13 +50,17 @@ const RewardsPage: NextPage = (props: any) => {
       <main>
         <h1 className="uppercase">API3 DAO Rewards</h1>
         {isEmpty ? (
-          <div className="text-color-grey text-center">No epochs data yet. Please import database.</div>
-        ) : <RewardsSummary
-          totalMinted={props.totalMinted}
-          latest={latest[0]}
-          supply={supply}
-        />}
-        {(isEmpty) ? null: <RewardsList list={latest} />}
+          <div className="text-color-grey text-center">
+            No epochs data yet. Please import database.
+          </div>
+        ) : (
+          <RewardsSummary
+            totalMinted={props.totalMinted}
+            latest={latest[0]}
+            supply={supply}
+          />
+        )}
+        {isEmpty ? null : <RewardsList list={latest} />}
         <div className="pb-20">&nbsp;</div>
       </main>
 
