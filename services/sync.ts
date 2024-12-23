@@ -6,7 +6,7 @@ import {
   type Log,
   type Provider,
 } from "@ethersproject/abstract-provider";
-import { Prisma } from "@prisma/client";
+import { Prisma, type PrismaPromise } from "@prisma/client";
 import { BigNumber, ethers } from "ethers";
 import { uniq } from "lodash";
 
@@ -25,6 +25,8 @@ import {
 import { VotingReader } from "./../services/voting";
 import prisma from "./db";
 import { fetchWebconfig } from "./webconfig";
+
+import BatchPayload = Prisma.BatchPayload;
 
 const rewardsPct = (newApr: number): number => {
   const epochLength = 604_800;
@@ -223,9 +225,8 @@ export const Sync = {
     });
     return status.length > 0;
   },
-  saveBlock: async (b: BlockFullInfo) => {
+  saveBlock: async (b: BlockFullInfo, tx: PrismaPromise<BatchPayload>[]) => {
     const blockHash = Hash.asBuffer(b.block.hash);
-    const tx = [];
     // 1. save block
     tx.push(
       prisma.cacheBlock.createMany({
@@ -284,18 +285,6 @@ export const Sync = {
         }),
       );
     }
-    // 5. update syncing status
-    tx.push(
-      prisma.syncStatus.updateMany({
-        where: { id: 1 },
-        data: {
-          updatedAt: new Date().toISOString(),
-          downloaded: b.block.number,
-        },
-      }),
-    );
-
-    await prisma.$transaction(tx);
   },
   updateProcessed: async (blockNumber: number) => {
     // update block number
@@ -1333,12 +1322,12 @@ export const Events = {
     const jsonRpc = new ethers.providers.JsonRpcProvider(endpoint);
     // get the head block
     const block = await jsonRpc.getBlock("latest");
-    const headBlockNumber = block.number;
+
     console.log(
       "Contracts",
       addresses,
       "Head Block",
-      headBlockNumber,
+      block.number,
       "Last block in DB",
       lastDownloadedBlock,
     );
@@ -1348,7 +1337,7 @@ export const Events = {
       minBlock,
       batchSize,
       lastDownloadedBlock,
-      headBlockNumber,
+      block.number,
     );
     console.log(
       "Expecting",
@@ -1357,6 +1346,19 @@ export const Events = {
       "Batch size",
       batchSize,
     );
+
+    // If the DB transaction fails, this will roll back, so it can be at the start of the tx
+    const tx: PrismaPromise<BatchPayload>[] = [
+      // Update syncing status
+      prisma.syncStatus.updateMany({
+        where: { id: 1 },
+        data: {
+          updatedAt: new Date().toISOString(),
+          downloaded: block.number,
+        },
+      }),
+    ];
+
     for (const cMap of batches) {
       const blockMap = new Map<number, Array<Log>>();
       for (const [_address, filter] of cMap.entries()) {
@@ -1383,10 +1385,15 @@ export const Events = {
             logs,
             priceReader,
           );
-          Sync.saveBlock(fullInfo);
+          // Updates are accumulated in `tx`
+          await Sync.saveBlock(fullInfo, tx);
         }
       }
     }
+
+    // Finally, execute pending updates
+    await prisma.$transaction(tx);
+
     return total;
   },
 };
