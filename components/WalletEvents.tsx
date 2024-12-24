@@ -129,17 +129,9 @@ const SharesOfUser = (props: ISharesOfUserProps) => {
       )}
       {unstakeAmount == "0" ? null : (
         <span>
-          Unstake Amount:{" "}
+          Unstaking:{" "}
           <span className="text-color-panel-title">
             {toCurrency(unstakeAmount)}
-          </span>{" "}
-        </span>
-      )}
-      {unstakeShares == "0" ? null : (
-        <span>
-          Unstaked:{" "}
-          <span className="text-color-panel-title">
-            {toCurrency(unstakeShares)}
           </span>{" "}
         </span>
       )}

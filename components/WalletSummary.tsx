@@ -91,7 +91,7 @@ export const WalletSummary = (props: IWalletSummaryProps) => {
                 </div>
               </div>
               <div className="flex-1">
-                <div className={classTitle}>Unstake</div>
+                <div className={classTitle}>Unstaking</div>
                 <div className={classValue}>
                   {noDecimals(toCurrency(wallet.userUnstake))}
                 </div>
