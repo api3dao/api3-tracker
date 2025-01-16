@@ -2,7 +2,6 @@ import type { NextPage } from "next";
 import { useState } from "react";
 
 import { Footer, Header, Meta } from "../components/";
-import { ContractsList } from "../components/ContractsList";
 import { Epoch } from "../components/Overview";
 import { StakingTrend } from "../components/StakingTrend";
 import { TokenCirculating } from "../components/TokenCirculating";
@@ -102,15 +101,14 @@ const HomePage: NextPage = (props: any) => {
           ) : (
             <div>
               <h2 className="mt-4 mb-0 font-bold text-center text-2xl uppercase">
-                API3 Token Supply
+                API3 Token Stats
               </h2>
-              <TokenSupply {...supply} />
               <div className="lg:flex mx-auto">
                 <div className="lg:flex-1">
-                  <ContractsList contracts={webconfig.contracts} />
+                  <TokenCirculating {...supply} />
+                  <TokenSupply {...supply} />
                 </div>
                 <div className="lg:flex-1">
-                  <TokenCirculating {...supply} />
                   <TokenStaking {...supply} />
                   <StakingTrend
                     apr={current ? current.apr : 25.75}
