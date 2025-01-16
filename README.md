@@ -45,10 +45,10 @@ Developers can run some or all services locally using Docker Swarm, or even bare
 One combination is running just postgres locally using Docker, eg:
 
 ```bash
-docker run --rm -ti -p 5432:5432 postgres:15
+docker run --rm -ti -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres:15
 ```
 
-and then running the FE and BE services directly (refer to Cron jobs below and `yarn next dev` in `package.json`).
+and then running the FE and BE services directly (refer to Cron jobs below and `yarn dev` in `package.json`).
 
 Alternatively, one can run services using Docker Swarm, but this lacks hot-reloading.
 
