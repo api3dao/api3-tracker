@@ -30,7 +30,7 @@
     "ens:download": "API3TRACKER_ENDPOINT=${API3TRACKER_ENDPOINT:-`chainstate --endpoints -t alchemy,mainnet`} TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node -T cli.ts ens download",
     "lint:eslint": "eslint --report-unused-disable-directives --ext .ts,.tsx --max-warnings 0 .",
     "lint:next": "next lint",
-    "lint:prettier": "prettier --check \"./**/*.{ts,js,md,json}\"",
+    "lint:prettier": "prettier --check \"./**/*.{ts,tsx,js,md,json}\"",
     "lint:tsc": "tsc --build .",
     "lint": "yarn run lint:eslint && yarn run lint:next && yarn run lint:prettier && yarn run lint:tsc",
     "logs:reset": "TS_NODE_PROJECT=./tsconfig.cli.json yarn ts-node -T cli.ts logs reset",
