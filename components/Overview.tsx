@@ -11,7 +11,7 @@ import { type IEpoch } from "./../services/types";
 import { BorderedPanel } from "./BorderedPanel";
 
 export const Epoch = (props: IEpoch) => {
-  const title = props.isCurrent ? "Current Epoch" : "Previous Epoch";
+  const title = props.isCurrent ? "Current Epoch" : "Past Epoch";
   const nextDt = new Date(props.createdAt);
   nextDt.setDate(nextDt.getDate() + 7);
   const epochDt = props.isCurrent ? nextDt : new Date(props.createdAt);

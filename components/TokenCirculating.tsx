@@ -6,16 +6,20 @@ import { type ISupply } from "../services/types";
 
 export const TokenCirculating = (props: ISupply) => {
   return (
-    <BorderedPanel big={true} title="Circulating Supply">
+    <BorderedPanel big={true} title="Total Supply">
       <div className="text-center mb-4">
         <div className="font-bold mb-8 text-3xl">
-          {noDecimals(toCurrency(props.circulatingSupply))}
+          {noDecimals(
+            toCurrency(
+              Number(props.circulatingSupply) + Number(props.totalLocked),
+            ),
+          )}
         </div>
         <div className="text-sm text-center leading-8 text-color-cell-title uppercase">
-          Total Locked
+          Circulating Supply
         </div>
         <div className="font-bold">
-          {noDecimals(toCurrency(props.totalLocked))}
+          {noDecimals(toCurrency(props.circulatingSupply))}
         </div>
       </div>
     </BorderedPanel>
