@@ -12,7 +12,7 @@ export const StakingTrend = (props: IStakingTrendProps) => {
     new Prisma.Decimal(props.totalStaked) <
     new Prisma.Decimal(props.stakingTarget);
 
-  let dir = "text-center p-3 text-sm ";
+  let dir = "text-center p-2 text-sm ";
   if (isMin || !stakedLessThanTarget) {
     dir += "text-color-error";
   } else if (isMax) {
@@ -36,10 +36,5 @@ export const StakingTrend = (props: IStakingTrendProps) => {
       : "decrease by 1% for the next epochs until APR reaches 2.5%";
   }
 
-  const debugMsg = `apr=${props.apr} staked=${props.totalStaked} target=${props.stakingTarget}`;
-  return (
-    <div className={dir} title={debugMsg}>
-      {note}
-    </div>
-  );
+  return <div className={dir}>{note}</div>;
 };

@@ -5,19 +5,21 @@ import { noDecimals, toCurrency } from "../services/format";
 import { type ISupply } from "../services/types";
 
 export const TokenCirculating = (props: ISupply) => {
-  const classTitle =
-    "text-sm text-center leading-8 text-color-cell-title uppercase";
-  const classValue = "font-bold";
   return (
-    <BorderedPanel big={true} title="API3 Circulating Supply">
+    <BorderedPanel big={true} title="Total Supply">
       <div className="text-center mb-4">
         <div className="font-bold mb-8 text-3xl">
-          {noDecimals(toCurrency(props.circulatingSupply))}
+          {noDecimals(
+            toCurrency(
+              Number(props.circulatingSupply) + Number(props.totalLocked),
+            ),
+          )}
         </div>
-        <div className={classTitle}>Total Locked</div>
-        <div className={classValue}>
-          {noDecimals(toCurrency(props.totalLocked))}
-          <span className="md"> tokens</span>
+        <div className="text-sm text-center leading-8 text-color-cell-title uppercase">
+          Circulating Supply
+        </div>
+        <div className="font-bold">
+          {noDecimals(toCurrency(props.circulatingSupply))}
         </div>
       </div>
     </BorderedPanel>

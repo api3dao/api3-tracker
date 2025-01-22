@@ -1,30 +1,23 @@
 import React from "react";
 
+import { BorderedPanel } from "../components/BorderedPanel";
 import { noDecimals, toCurrency } from "../services/format";
 import { type ISupply } from "../services/types";
 
 export const TokenStaking = (props: ISupply) => {
-  const classTitle =
-    "text-sm text-center mt-4 pb-2 text-color-cell-title uppercase";
-  const classCell =
-    "text-sm text-center py-4 lg:min-h-96px border-t border-solid border-color-cell-border";
-  const classValue = "font-bold";
   return (
-    <div className="sm:grid grid-cols-2">
-      <div className={classCell}>
-        <div className={classTitle}>Total Staked</div>
-        <span className={classValue}>
+    <BorderedPanel big={true} title="Total Staked">
+      <div className="text-center mb-4">
+        <div className="font-bold mb-8 text-3xl">
           {noDecimals(toCurrency(props.totalStaked))}
-          <span className="md"> tokens</span>
-        </span>
-      </div>
-      <div className={classCell}>
-        <div className={classTitle}>Staking Target</div>
-        <span className={classValue}>
+        </div>
+        <div className="text-sm text-center leading-8 text-color-cell-title uppercase">
+          Staking Target
+        </div>
+        <div className="font-bold">
           {noDecimals(toCurrency(props.stakingTarget))}
-          <span className="md"> tokens</span>
-        </span>
+        </div>
       </div>
-    </div>
+    </BorderedPanel>
   );
 };
