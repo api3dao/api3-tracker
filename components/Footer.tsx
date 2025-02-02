@@ -52,6 +52,17 @@ export const Footer = (props: IFooterProps) => {
               </a>
             </span>
           ) : null}
+          <span className="hidden md:inline">&nbsp; | &nbsp;</span>
+          <span className="text-center block leading-6 md:inline md:text-left">
+            <a
+              className="xs:py-4 sm:py-0 xs:text-xl sm:text-sm"
+              target="_blank"
+              rel="noreferrer noopener"
+              href="https://dao-docs.api3.org/"
+            >
+              DAO Docs
+            </a>
+          </span>
           {blockNumber ? (
             <span className="hidden md:inline">&nbsp; | &nbsp;</span>
           ) : null}
