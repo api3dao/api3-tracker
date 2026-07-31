@@ -29,10 +29,19 @@ export async function getServerSideProps() {
         tokens
           .filter((x: any) => x.token === "USDC")
           .map((x: any) => x.value)[0] || 0;
-      const valueETH =
-        tokens
-          .filter((x: any) => x.token === "ETH")
-          .map((x: any) => x.value)[0] || 0;
+      // WETH is counted as ETH, so the displayed ETH balance
+      // is the sum of the native ETH and WETH balances
+      const nativeETH = tokens
+        .filter((x: any) => x.token === "ETH")
+        .map((x: any) => x.value)[0];
+      const valueWETH = tokens
+        .filter((x: any) => x.token === "WETH")
+        .map((x: any) => x.value)[0];
+      const valueETH = nativeETH
+        ? valueWETH
+          ? nativeETH.add(valueWETH)
+          : nativeETH
+        : valueWETH || 0;
       return {
         title: ttype.charAt(0).toUpperCase() + ttype.slice(1).toLowerCase(),
         address: toHex(tokens[0].address),
