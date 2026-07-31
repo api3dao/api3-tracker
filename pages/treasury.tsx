@@ -37,11 +37,10 @@ export async function getServerSideProps() {
       const valueWETH = tokens
         .filter((x: any) => x.token === "WETH")
         .map((x: any) => x.value)[0];
-      const valueETH = nativeETH
-        ? valueWETH
-          ? nativeETH.add(valueWETH)
-          : nativeETH
-        : valueWETH || 0;
+      let valueETH = nativeETH || valueWETH || 0;
+      if (nativeETH && valueWETH) {
+        valueETH = nativeETH.add(valueWETH);
+      }
       return {
         title: ttype.charAt(0).toUpperCase() + ttype.slice(1).toLowerCase(),
         address: toHex(tokens[0].address),
