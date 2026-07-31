@@ -32,6 +32,8 @@ export const Treasuries = {
     const webconfig = fetchWebconfig();
     // known tokens
     const usdc = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
+    // WETH is counted as ETH (the DAO holds WETH in preparation for WETH vaults)
+    const weth = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
     const api3: string = (
       webconfig.contracts?.find(
         ({ name }) => name.toLowerCase() === "api3token",
@@ -42,6 +44,7 @@ export const Treasuries = {
     mapTokens.set("USDC", { address: usdc, decimals: 6 });
     mapTokens.set("API3", { address: api3, decimals: 18 });
     mapTokens.set("ETH", { address: "0x0", decimals: 18 });
+    mapTokens.set("WETH", { address: weth, decimals: 18 });
 
     // known contracts to check
     const v1 = webconfig.contracts?.find(
